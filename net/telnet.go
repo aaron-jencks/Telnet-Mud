@@ -67,8 +67,8 @@ func TelnetHandler(conn net.Conn) {
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
 
-	logger.Info("Sending %v", []byte("Hello Again!\n\r\033[3J\033[;HHello World!\n\r"))
-	conn.Write([]byte("Hello Again!\n\r\033[3J\033[;mHello World!\n\r"))
+	logger.Info("Sending %v", []byte("Hello Again!\n\r\033[2J\033[;HHello World!\n\r"))
+	conn.Write([]byte("Hello Again!\n\r\033[2J\033[;HHello World!\n\r"))
 
 	for {
 		// Read the incoming connection into the buffer.
