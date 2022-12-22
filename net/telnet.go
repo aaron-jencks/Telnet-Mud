@@ -67,7 +67,7 @@ func TelnetHandler(conn net.Conn) {
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
 
-	conn.Write([]byte("Hello World!\n"))
+	conn.Write([]byte("Hello World!\n\r"))
 
 	for {
 		// Read the incoming connection into the buffer.
