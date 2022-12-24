@@ -1,9 +1,2 @@
-7
+0
 Id,Source,Target,Command,CommandArgs
-0,0,1,"pickup","bucket"
-1,1,2,"do","bail"
-2,2,3,"do","bail"
-3,3,4,"goto","below\sdecks"
-4,4,5,"do","bail"
-5,5,5,"do","bail"
-6,3,3,"do","bail"

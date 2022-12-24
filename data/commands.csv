@@ -1,5 +1,2 @@
-3
+0
 Name,ArgCount,ArgRegex
-"pickup",1,"\w+"
-"do",1,"\w+"
-"goto",1,".*"

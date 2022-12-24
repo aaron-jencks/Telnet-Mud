@@ -14,26 +14,10 @@ telnet.o: ./net/telnet.go logger.o telnet_options.o
 telnet_options.o: ./net/options.go
 	$(CC) -o $@ -c $<
 
-all: mud roomCreator .
+all: mud .
 
 mud: main.o $(GOBJECTS)
 	$(CC) main.o $(GOBJECTS) -o $@
-
-roomCreator: ${GOBJECTS}
-	$(CC) -o rcreator.o -c rcreator.go
-	$(CC) rcreator.o $(GOBJECTS) -o $@
-
-tester: testRunner.o $(TEST_OBJECTS) $(GOBJECTS)
-	$(CC) testRunner.o $(TEST_OBJECTS) $(GOBJECTS) -o $@
-
-testRunner.o: testRunner.go logger.o $(TEST_OBJECTS)
-	$(CC) -o $@ -c $<
-
-test_defs.o: ./tests/test_defs.go logger.o
-	$(CC) -o $@ -c $<
-
-assert.o: ./tests/assert.go logger.o
-	$(CC) -o $@ -c $<
 
 main.o: main.go room_service.o entities.o player_controller.o server_utils.o room_controller.o game_controller.o command_controller.o transition_controller.o item_controller.o inventory_controller.o
 	$(CC) -o $@ -c $<

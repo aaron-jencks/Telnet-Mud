@@ -1,1 +1,1 @@
-{"ColumnTypes":["integer","string","integer","integer","integer","integer","integer","integer","integer"],"PrimaryKey":1,"UniquePrimary":true,"PrimaryIndex":{},"Indices":{}}
+{"ColumnTypes":["integer","string","string","integer","integer","integer","integer","integer","integer","integer"],"PrimaryKey":1,"UniquePrimary":true,"PrimaryIndex":{},"Indices":{}}

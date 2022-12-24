@@ -1,0 +1,100 @@
+@startuml
+class controllers.Game {
+    + New(username, password) string
+    + Interact(command string) string
+}
+
+class controllers.Chat {
+    + Parse(...args) ChatResponse
+}
+
+controllers.Game --> utils.Command : "Uses"
+
+class utils.Command {
+    + Keyword
+    + Validate(...args) (bool, string)
+    + Parse(...args) string
+}
+
+package services {
+    package parsing {
+        class ChatResponse {
+            + Person
+            + Other 
+            + Global 
+            + Targeted
+        }
+    }
+}
+
+Telnet "1" --> "1..*" ChatResponse : "Uses for transmission"
+controllers.Chat "1" --> "1..*" ChatResponse : "Returns"
+
+utils.Command --> entity : "Uses"
+
+package services {
+    package parsing {
+        class Parser {
+            + StartCode '/'
+            - CommandMap map[string]func(args ...) ChatResponse
+            ---
+            + IsCommand(body) bool
+            + ParseAndHandle(body) ChatResponse
+        }
+    }
+
+    package entity {
+        class PlayerService {
+            + Login(name, password) bool
+            + IsLoggedIn(name) bool
+            + Register(name, password) bool
+            + PlayerExists(name) bool
+        }
+
+        class RoomService
+        class ItemService
+        class InventoryService
+        class TransitionService
+    }
+}
+
+Telnet --> Parser : "Uses for parsing"
+controllers --> Parser : "Registers with"
+Parser --> controllers : "Invokes"
+controllers.Chat --> PlayerService : "Interacts with"
+
+
+utils.CRUD <|-- entity
+entity --> entities : "Interacts with"
+
+package entities {
+    class Player {
+        + Name
+        + Password
+    }
+
+    class Room {
+        + Name
+        + Description
+    }
+
+    class Item {
+        + Name
+        + Description
+    }
+
+    class Transition {
+        + Source
+        + Target 
+        + Command
+    }
+
+    class Inventory {
+        + Player 
+        + Item 
+        + Quantity
+    }
+}
+
+entities.Transition "0..*" --> "1" utils.Command : "Contains"
+@enduml
