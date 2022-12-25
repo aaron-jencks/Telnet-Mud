@@ -3,6 +3,7 @@ package telnet
 import (
 	"mud/services/parsing"
 	mnet "mud/utils/net"
+	"mud/utils/strings"
 	"mud/utils/ui/logger"
 	"net"
 	"sync"
@@ -103,6 +104,7 @@ func TelnetHandler(conn net.Conn) {
 
 		if reqLen > 0 {
 			var text []byte
+			var headerResponse []byte
 			line := buf[:reqLen]
 			for li := 0; li < len(line); li++ {
 				datum := line[li]
@@ -114,15 +116,15 @@ func TelnetHandler(conn net.Conn) {
 						if DoesOption(line[li+2]) {
 							can = WILL
 						}
-						text = append(text, []byte{IAC, can, line[li+2]}...)
+						headerResponse = append(headerResponse, []byte{IAC, can, line[li+2]}...)
 						skipLength = 2
 					case DO:
 						if DoesOption(line[li+2]) {
 							doResp, argCount := DoOption(line[li+2], conn, line[li+3:])
-							text = append(text, doResp...)
+							headerResponse = append(headerResponse, doResp...)
 							skipLength = 2 + argCount
 						} else {
-							text = append(text, []byte{IAC, DONT, line[li+2]}...)
+							headerResponse = append(headerResponse, []byte{IAC, DONT, line[li+2]}...)
 							skipLength = 2
 						}
 					default:
@@ -135,15 +137,21 @@ func TelnetHandler(conn net.Conn) {
 				li += skipLength
 			}
 
-			response := parsing.HandlePacket(text)
-			if len(response.Global) > 0 {
-				SendGlobal([]byte(response.Global))
+			if len(headerResponse) > 0 {
+				SendTarget(headerResponse, conn)
 			}
-			if len(response.Others) > 0 {
-				SendOthers([]byte(response.Others), conn)
-			}
-			if len(response.Person) > 0 {
-				SendTarget([]byte(response.Person), conn)
+
+			if len(text) > 0 && strings.IsNonEmpty(text) {
+				response := parsing.HandlePacket(text)
+				if len(response.Global) > 0 {
+					SendGlobal([]byte(response.Global))
+				}
+				if len(response.Others) > 0 {
+					SendOthers([]byte(response.Others), conn)
+				}
+				if len(response.Person) > 0 {
+					SendTarget([]byte(response.Person), conn)
+				}
 			}
 		} else {
 			logger.Info("Waiting for input...")

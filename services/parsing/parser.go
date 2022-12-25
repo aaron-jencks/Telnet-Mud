@@ -19,6 +19,8 @@ type CommandHandler func([]string) CommandResponse
 var CommandMap map[string]CommandHandler = map[string]CommandHandler{}
 
 func HandlePacket(data []byte) CommandResponse {
+	logger.Info("Parsing: %v", data)
+
 	var bits []string = strings.Split(string(data), " ")
 
 	if len(bits) == 0 {

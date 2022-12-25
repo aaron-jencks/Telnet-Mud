@@ -2,15 +2,12 @@ package gui
 
 import (
 	"fmt"
+	"mud/utils/ui"
 	"strings"
 )
 
-func escapeCode(args string) string {
-	return fmt.Sprintf("\033[%s", args)
-}
-
 func Clearscreen() {
-	fmt.Print(escapeCode("2J") + escapeCode(";H"))
+	fmt.Print(ui.CSI("2", "J") + ui.CSI(";H"))
 }
 
 func CenterAlignText(text string, length int) string {
@@ -100,9 +97,9 @@ func SizedBoxText(text string, h, w int) string {
 func AnsiOffsetText(x, y int, text string) string {
 	lines := strings.Split(text, "\n")
 
-	result := escapeCode(fmt.Sprintf("%d;%dH", y+1, x+1))
+	result := ui.CSI(fmt.Sprint(y+1), fmt.Sprint(x+1), "H")
 
-	sep := escapeCode("B") + escapeCode(fmt.Sprintf("%dG", x))
+	sep := ui.CSI("B") + ui.CSI(fmt.Sprint(x), "G")
 
 	result += strings.Join(lines, sep) + sep
 
