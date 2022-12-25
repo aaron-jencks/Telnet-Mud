@@ -6,9 +6,8 @@ import (
 )
 
 type CommandResponse struct {
-	Person   string
-	Others   string
-	Global   string
+	Person   bool
+	Global   bool
 	Specific map[string]string
 }
 
