@@ -1,6 +1,7 @@
 package chat
 
 import (
+	"mud/utils"
 	"mud/utils/ui"
 	"mud/utils/ui/pages/chat"
 	"net"
@@ -22,15 +23,19 @@ func SendMentionMessage(conn net.Conn, sender, receiver, message string) {
 			ui.BoldText(receiver)+ui.StripIllegalChars(message)))
 }
 
-func SendDirectMessage(conn net.Conn, user, message string) {
+func SendDirectMessage(conn net.Conn, sender, message string) {
 	MessageLogMap[conn] = append(MessageLogMap[conn],
-		chat.FormatChatEntry(user,
+		chat.FormatChatEntry(sender,
 			ui.StripIllegalChars(message)))
 }
 
-func SendGlobalMessage(user, message string) {
+func SendSystemMessage(conn net.Conn, message string) {
+	SendDirectMessage(conn, utils.SYSTEM_NAME, message)
+}
+
+func SendGlobalMessage(sender, message string) {
 	for userConn := range MessageLogMap {
-		SendDirectMessage(userConn, user, message)
+		SendDirectMessage(userConn, sender, message)
 	}
 }
 

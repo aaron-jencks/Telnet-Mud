@@ -10,8 +10,11 @@ import (
 func main() {
 	entities.SetupTables()
 
-	parsing.RegisterHandler("chat", handlers.HandleChat)
-	parsing.RegisterHandler("global", handlers.HandleGlobal)
+	parsing.RegisterHandler("login", handlers.HandleLogin)
+	parsing.RegisterHandler("logout", handlers.HandleLogout)
+	parsing.RegisterHandler("register", handlers.HandleRegister)
+	// parsing.RegisterHandler("chat", handlers.HandleChat)
+	// parsing.RegisterHandler("global", handlers.HandleGlobal)
 
 	telnet.TelnetListenAndServe()
 }

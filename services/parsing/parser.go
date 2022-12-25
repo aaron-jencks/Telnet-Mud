@@ -1,23 +1,25 @@
 package parsing
 
 import (
+	"mud/services/chat"
 	"mud/utils/ui/logger"
+	"net"
 	"strings"
 )
 
 type CommandResponse struct {
 	Person   bool
 	Global   bool
-	Specific map[string]string
+	Specific []string
 }
 
 type DirectMessageMap map[string]string
 
-type CommandHandler func([]string) CommandResponse
+type CommandHandler func(net.Conn, []string) CommandResponse
 
 var CommandMap map[string]CommandHandler = map[string]CommandHandler{}
 
-func HandlePacket(data []byte) CommandResponse {
+func HandlePacket(conn net.Conn, data []byte) CommandResponse {
 	logger.Info("Parsing: %v", data)
 
 	var bits []string = strings.Split(string(data), " ")
@@ -29,10 +31,11 @@ func HandlePacket(data []byte) CommandResponse {
 	handler, ok := CommandMap[bits[0]]
 
 	if ok {
-		return handler(bits[1:])
+		return handler(conn, bits[1:])
 	} else {
+		chat.SendSystemMessage(conn, "Unknown command, please check your spelling or try again...")
 		return CommandResponse{
-			Person: "Unknown Command, please check your spelling or try again",
+			Person: true,
 		}
 	}
 }

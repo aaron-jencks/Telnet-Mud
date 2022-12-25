@@ -1,10 +1,9 @@
-package player_service
+package player
 
 import (
 	"mud/entities"
 	"mud/utils/crud"
 	"mud/utils/io/db"
-	"mud/utils/ui/logger"
 	"net"
 )
 
@@ -24,7 +23,6 @@ func playerToArr(ps map[string]interface{}) []interface{} {
 }
 
 func playerFromArr(data []interface{}) interface{} {
-	logger.Info(data)
 	return entities.Player{
 		Id:       data[1].(int),
 		Name:     data[2].(string),
@@ -84,13 +82,15 @@ func PlayerExists(name string) bool {
 	return len(result) > 0
 }
 
-var LoggedInPlayerMap map[string]net.Conn
+var LoggedInPlayerMap map[string]net.Conn = make(map[string]net.Conn)
+var PlayerConnectionMap map[net.Conn]string = make(map[net.Conn]string)
 
 func LoginPlayer(name string, password string, conn net.Conn) bool {
 	if PlayerExists(name) && CRUD.Retrieve(name).(entities.Player).Password == password {
 		_, ok := LoggedInPlayerMap[name]
 		if !ok {
 			LoggedInPlayerMap[name] = conn
+			PlayerConnectionMap[conn] = name
 			return true
 		}
 	}
@@ -98,9 +98,10 @@ func LoginPlayer(name string, password string, conn net.Conn) bool {
 }
 
 func LogoutPlayer(name string) bool {
-	_, ok := LoggedInPlayerMap[name]
+	conn, ok := LoggedInPlayerMap[name]
 	if ok {
 		delete(LoggedInPlayerMap, name)
+		delete(PlayerConnectionMap, conn)
 		return true
 	}
 	return false
@@ -111,9 +112,10 @@ func PlayerLoggedIn(name string) bool {
 	return ok
 }
 
-func RegisterPlayer(name string, password string) entities.Player {
+func RegisterPlayer(name string, password string) bool {
 	if !PlayerExists(name) {
-		return CRUD.Create([]interface{}{name, password}).(entities.Player)
+		CRUD.Create([]interface{}{name, password})
+		return true
 	}
-	return entities.Player{}
+	return false
 }
