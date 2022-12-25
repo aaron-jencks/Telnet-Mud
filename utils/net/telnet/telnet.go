@@ -2,14 +2,16 @@ package telnet
 
 import (
 	"mud/services/parsing"
+	mnet "mud/utils/net"
 	"mud/utils/ui/logger"
 	"net"
 	"sync"
 	"time"
 )
 
+var CONN_HOST string = mnet.GetOutboundIP().String()
+
 const (
-	CONN_HOST string = "192.168.0.222"
 	CONN_PORT string = "23"
 	CONN_TYPE string = "tcp"
 	IAC       byte   = 255
