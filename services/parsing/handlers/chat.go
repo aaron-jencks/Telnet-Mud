@@ -25,6 +25,8 @@ func HandleChat(conn net.Conn, body []string) parsing.CommandResponse {
 		chatService.SendDirectMessage(player.LoggedInPlayerMap[body[0][1:]],
 			player.PlayerConnectionMap[conn],
 			strings.Join(body[1:], " "))
+
+		result.Specific = append(result.Specific, body[0][1:])
 	} else {
 		// Local chat
 		chatService.SendGlobalMessage("Anonymous", strings.Join(body, " "))
