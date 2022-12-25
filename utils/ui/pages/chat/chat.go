@@ -1,20 +1,12 @@
 package chat
 
 import (
-	"fmt"
-	"mud/utils/ui"
+	"mud/services/chat"
+	"mud/utils"
 	"mud/utils/ui/gui"
+	"net"
 	"strings"
 )
-
-const (
-	CHAT_H = 20
-	CHAT_W = 80
-)
-
-func FormatChatEntry(player string, entry string) string {
-	return ui.AddTime(fmt.Sprintf(" %s: %s", player, entry))
-}
 
 func DisplayChat(entries []string) string {
 	var logLines []string
@@ -26,15 +18,15 @@ func DisplayChat(entries []string) string {
 		// Create paragraph
 		var lines []string
 		buffer := entries[ei]
-		for len(buffer) > CHAT_W-2 {
-			lines = append(lines, buffer[:CHAT_W-1])
-			buffer = buffer[CHAT_W-1:]
+		for len(buffer) > utils.CHAT_W-2 {
+			lines = append(lines, buffer[:utils.CHAT_W-1])
+			buffer = buffer[utils.CHAT_W-1:]
 		}
 		lines = append(lines, buffer)
 
-		if len(lines) > CHAT_H-2 {
+		if len(lines) > utils.CHAT_H-2 {
 			// Truncate down to target length
-			lines = lines[len(lines)-(CHAT_H-2):]
+			lines = lines[len(lines)-(utils.CHAT_H-2):]
 			logLines = lines
 			break
 		}
@@ -43,14 +35,18 @@ func DisplayChat(entries []string) string {
 
 		logLines = append(logLines, lines...)
 
-		if len(logLines) >= CHAT_H-2 {
+		if len(logLines) >= utils.CHAT_H-2 {
 			break
 		}
 	}
 
-	if len(logLines) > CHAT_H-2 {
-		logLines = logLines[len(logLines)-(CHAT_H-2):]
+	if len(logLines) > utils.CHAT_H-2 {
+		logLines = logLines[len(logLines)-(utils.CHAT_H-2):]
 	}
 
-	return gui.SizedBoxText(strings.Join(logLines, "\n"), CHAT_H, CHAT_W)
+	return gui.SizedBoxText(strings.Join(logLines, "\n"), utils.CHAT_H, utils.CHAT_W)
+}
+
+func GetConnChatWindow(conn net.Conn) string {
+	return DisplayChat(chat.MessageLogMap[conn])
 }

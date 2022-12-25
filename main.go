@@ -13,8 +13,7 @@ func main() {
 	parsing.RegisterHandler("login", handlers.HandleLogin)
 	parsing.RegisterHandler("logout", handlers.HandleLogout)
 	parsing.RegisterHandler("register", handlers.HandleRegister)
-	// parsing.RegisterHandler("chat", handlers.HandleChat)
-	// parsing.RegisterHandler("global", handlers.HandleGlobal)
+	parsing.RegisterHandler("chat", handlers.HandleChat)
 
 	telnet.TelnetListenAndServe()
 }

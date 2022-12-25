@@ -3,7 +3,7 @@ package chat
 import (
 	"mud/utils"
 	"mud/utils/ui"
-	"mud/utils/ui/pages/chat"
+	"mud/utils/ui/gui"
 	"net"
 )
 
@@ -19,13 +19,13 @@ func UnregisterConnection(conn net.Conn) {
 
 func SendMentionMessage(conn net.Conn, sender, receiver, message string) {
 	MessageLogMap[conn] = append(MessageLogMap[conn],
-		chat.FormatChatEntry(sender,
+		gui.FormatChatEntry(sender,
 			ui.BoldText(receiver)+ui.StripIllegalChars(message)))
 }
 
 func SendDirectMessage(conn net.Conn, sender, message string) {
 	MessageLogMap[conn] = append(MessageLogMap[conn],
-		chat.FormatChatEntry(sender,
+		gui.FormatChatEntry(sender,
 			ui.StripIllegalChars(message)))
 }
 

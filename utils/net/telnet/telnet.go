@@ -2,7 +2,7 @@ package telnet
 
 import (
 	"mud/services/parsing"
-	mnet "mud/utils/net"
+	"mud/utils"
 	"mud/utils/strings"
 	"mud/utils/ui/logger"
 	"net"
@@ -10,27 +10,23 @@ import (
 	"time"
 )
 
-var CONN_HOST string = mnet.GetOutboundIP().String()
-
 const (
-	CONN_PORT string = "23"
-	CONN_TYPE string = "tcp"
-	IAC       byte   = 255
-	SE        byte   = 240
-	NOP       byte   = 241
-	DM        byte   = 242
-	BRK       byte   = 243
-	IP        byte   = 244
-	AO        byte   = 245
-	AYT       byte   = 246
-	EC        byte   = 247
-	EL        byte   = 248
-	GA        byte   = 249
-	SB        byte   = 250
-	WILL      byte   = 251
-	WONT      byte   = 252
-	DO        byte   = 253
-	DONT      byte   = 254
+	IAC  byte = 255
+	SE   byte = 240
+	NOP  byte = 241
+	DM   byte = 242
+	BRK  byte = 243
+	IP   byte = 244
+	AO   byte = 245
+	AYT  byte = 246
+	EC   byte = 247
+	EL   byte = 248
+	GA   byte = 249
+	SB   byte = 250
+	WILL byte = 251
+	WONT byte = 252
+	DO   byte = 253
+	DONT byte = 254
 )
 
 var Clients []net.Conn
@@ -38,14 +34,14 @@ var ClientLock sync.Mutex = sync.Mutex{}
 
 func ListenAndServe(handler func(net.Conn)) {
 	// Listen for incoming connections.
-	l, err := net.Listen(CONN_TYPE, CONN_HOST+":"+CONN_PORT)
+	l, err := net.Listen(utils.CONN_TYPE, utils.CONN_HOST+":"+utils.CONN_PORT)
 	if err != nil {
 		logger.Error("Error listening: %v", err.Error())
 		panic(err)
 	}
 	// Close the listener when the application closes.
 	defer l.Close()
-	logger.Info("Telnet listening on " + CONN_HOST + ":" + CONN_PORT)
+	logger.Info("Telnet listening on " + utils.CONN_HOST + ":" + utils.CONN_PORT)
 	for {
 		// Listen for an incoming connection.
 		conn, err := l.Accept()
@@ -142,15 +138,16 @@ func TelnetHandler(conn net.Conn) {
 			}
 
 			if len(text) > 0 && strings.IsNonEmpty(text) {
-				response := parsing.HandlePacket(text)
-				if len(response.Global) > 0 {
-					SendGlobal([]byte(response.Global))
-				}
-				if len(response.Others) > 0 {
-					SendOthers([]byte(response.Others), conn)
-				}
-				if len(response.Person) > 0 {
-					SendTarget([]byte(response.Person), conn)
+				response := parsing.HandlePacket(conn, text)
+				if response.Global {
+
+				} else {
+					if response.Person {
+
+					}
+					if len(response.Specific) > 0 {
+
+					}
 				}
 			}
 		} else {
