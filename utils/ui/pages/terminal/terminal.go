@@ -19,11 +19,11 @@ func DisplayTerminal(ts *terminal.Terminal) string {
 
 		lines := ui.CreateTextParagraph(
 			fmt.Sprintf("%d: %s", ein+1, ts.Buffer[ei]),
-			utils.CHAT_W-2)
+			utils.TERMINAL_W-2)
 
-		if len(lines) > utils.CHAT_H-2 {
+		if len(lines) > utils.TERMINAL_H-2 {
 			// Truncate down to target length
-			lines = lines[len(lines)-(utils.CHAT_H-2):]
+			lines = lines[len(lines)-(utils.TERMINAL_H-2):]
 			logLines = lines
 			break
 		}
@@ -37,15 +37,15 @@ func DisplayTerminal(ts *terminal.Terminal) string {
 		// Append new text history lines
 		logLines = append(logLines, reversedLines...)
 
-		if len(logLines) >= utils.CHAT_H-2 {
+		if len(logLines) >= utils.TERMINAL_H-2 {
 			break
 		}
 	}
 
-	if len(logLines) > utils.CHAT_H-2 {
-		logLines = logLines[len(logLines)-(utils.CHAT_H-2):]
-	} else if len(logLines) < utils.CHAT_H-2 {
-		for len(logLines) < utils.CHAT_H-2 {
+	if len(logLines) > utils.TERMINAL_H-2 {
+		logLines = logLines[len(logLines)-(utils.TERMINAL_H-2):]
+	} else if len(logLines) < utils.TERMINAL_H-2 {
+		for len(logLines) < utils.TERMINAL_H-2 {
 			logLines = append(logLines, fmt.Sprintf("%d: ", len(logLines)))
 		}
 	}
@@ -56,7 +56,7 @@ func DisplayTerminal(ts *terminal.Terminal) string {
 		newLogBuff[len(logLines)-li-1] = lentry
 	}
 
-	return gui.SizedBoxText(strings.Join(newLogBuff, "\n"), utils.CHAT_H, utils.CHAT_W)
+	return gui.SizedBoxText(strings.Join(newLogBuff, "\n"), utils.TERMINAL_H, utils.TERMINAL_W)
 }
 
 func GetConnTerminal(conn net.Conn) string {
