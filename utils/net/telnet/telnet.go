@@ -5,6 +5,7 @@ import (
 	"mud/services/chat"
 	"mud/services/parsing"
 	"mud/services/player"
+	"mud/services/terminal"
 	"mud/utils"
 	"mud/utils/strings"
 	"mud/utils/ui/gui"
@@ -85,6 +86,7 @@ func TelnetHandler(conn net.Conn) {
 	ClientLock.Lock()
 	Clients = append(Clients, conn)
 	chat.RegisterConnection(conn)
+	terminal.RegisterConnection(conn)
 	cid := len(Clients) - 1
 	ClientLock.Unlock()
 	defer removeClient(cid)
@@ -177,6 +179,7 @@ func TelnetListenAndServe() {
 func removeClient(conn int) {
 	ClientLock.Lock()
 	chat.UnregisterConnection(Clients[conn])
+	terminal.RegisterConnection(Clients[conn])
 	Clients = append(Clients[:conn], Clients[conn:]...)
 	ClientLock.Unlock()
 }

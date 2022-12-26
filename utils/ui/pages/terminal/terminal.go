@@ -1,7 +1,8 @@
-package chat
+package terminal
 
 import (
-	"mud/services/chat"
+	"fmt"
+	"mud/services/terminal"
 	"mud/utils"
 	"mud/utils/ui"
 	"mud/utils/ui/gui"
@@ -9,14 +10,16 @@ import (
 	"strings"
 )
 
-func DisplayChat(entries []string) string {
+func DisplayTerminal(ts *terminal.Terminal) string {
 	var logLines []string
 
-	// Traverse through entries backward
-	for ein := range entries {
-		ei := len(entries) - ein - 1
+	// Traverse through ts.Buffer backward
+	for ein := range ts.Buffer {
+		ei := len(ts.Buffer) - ein - 1
 
-		lines := ui.CreateTextParagraph(entries[ei], utils.CHAT_W-2)
+		lines := ui.CreateTextParagraph(
+			fmt.Sprintf("%d: %s", ein+1, ts.Buffer[ei]),
+			utils.CHAT_W-2)
 
 		if len(lines) > utils.CHAT_H-2 {
 			// Truncate down to target length
@@ -41,6 +44,10 @@ func DisplayChat(entries []string) string {
 
 	if len(logLines) > utils.CHAT_H-2 {
 		logLines = logLines[len(logLines)-(utils.CHAT_H-2):]
+	} else if len(logLines) < utils.CHAT_H-2 {
+		for len(logLines) < utils.CHAT_H-2 {
+			logLines = append(logLines, fmt.Sprintf("%d: ", len(logLines)))
+		}
 	}
 
 	// Reverse Log Lines
@@ -52,6 +59,6 @@ func DisplayChat(entries []string) string {
 	return gui.SizedBoxText(strings.Join(newLogBuff, "\n"), utils.CHAT_H, utils.CHAT_W)
 }
 
-func GetConnChatWindow(conn net.Conn) string {
-	return DisplayChat(chat.MessageLogMap[conn])
+func GetConnTerminal(conn net.Conn) string {
+	return DisplayTerminal(terminal.TerminalMap[conn])
 }

@@ -6,6 +6,7 @@ import (
 	"mud/utils/ui"
 	"mud/utils/ui/gui"
 	"mud/utils/ui/pages/chat"
+	"mud/utils/ui/pages/terminal"
 	"net"
 	"strings"
 )
@@ -26,6 +27,7 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 	}
 
 	result += gui.AnsiOffsetText(40, yStart, chat.GetConnChatWindow(conn))
+	result += gui.AnsiOffsetText(0, yStart, terminal.GetConnTerminal(conn))
 
 	if saveCursor {
 		result = ui.SaveAndResetCursor(result)
