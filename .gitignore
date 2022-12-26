@@ -21,5 +21,4 @@
 go.work
 
 # data file
-/data/
-data/players.csv
+data/
