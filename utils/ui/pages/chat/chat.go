@@ -19,8 +19,8 @@ func DisplayChat(entries []string) string {
 		var lines []string
 		buffer := entries[ei]
 		for len(buffer) > utils.CHAT_W-2 {
-			lines = append(lines, buffer[:utils.CHAT_W-1])
-			buffer = buffer[utils.CHAT_W-1:]
+			lines = append(lines, buffer[:utils.CHAT_W-2])
+			buffer = buffer[utils.CHAT_W-2:]
 		}
 		lines = append(lines, buffer)
 
@@ -31,9 +31,14 @@ func DisplayChat(entries []string) string {
 			break
 		}
 
-		// Append new text history lines
+		// Reverse lines
+		var reversedLines []string = make([]string, len(lines))
+		for li, lentry := range lines {
+			reversedLines[len(lines)-li-1] = lentry
+		}
 
-		logLines = append(logLines, lines...)
+		// Append new text history lines
+		logLines = append(logLines, reversedLines...)
 
 		if len(logLines) >= utils.CHAT_H-2 {
 			break
@@ -44,7 +49,13 @@ func DisplayChat(entries []string) string {
 		logLines = logLines[len(logLines)-(utils.CHAT_H-2):]
 	}
 
-	return gui.SizedBoxText(strings.Join(logLines, "\n"), utils.CHAT_H, utils.CHAT_W) + "\n> "
+	// Reverse Log Lines
+	var newLogBuff []string = make([]string, len(logLines))
+	for li, lentry := range logLines {
+		newLogBuff[len(logLines)-li-1] = lentry
+	}
+
+	return gui.SizedBoxText(strings.Join(newLogBuff, "\n"), utils.CHAT_H, utils.CHAT_W) + "\n> "
 }
 
 func GetConnChatWindow(conn net.Conn) string {

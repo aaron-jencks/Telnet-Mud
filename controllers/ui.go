@@ -9,8 +9,14 @@ import (
 	"strings"
 )
 
-func GetDisplayForConn(conn net.Conn, saveCursor bool) string {
-	var result string = gui.ResetCursorPosition()
+func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
+	var result string
+
+	if clearScreen {
+		result += gui.Clearscreen()
+	} else {
+		result += gui.ResetCursorPosition()
+	}
 
 	if !player.ConnLoggedIn(conn) {
 		result += MOTD()

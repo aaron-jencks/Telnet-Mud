@@ -146,19 +146,19 @@ func TelnetHandler(conn net.Conn) {
 				response := parsing.HandlePacket(conn, text)
 				if response.Global {
 					for _, client := range Clients {
-						SendTarget([]byte(controllers.GetDisplayForConn(client, true)), client)
+						SendTarget([]byte(controllers.GetDisplayForConn(client, true, false)), client)
 					}
 				} else {
 					if len(response.Specific) > 0 {
 						for _, user := range response.Specific {
 							client := player.LoggedInPlayerMap[user]
-							SendTarget([]byte(controllers.GetDisplayForConn(client, true)), client)
+							SendTarget([]byte(controllers.GetDisplayForConn(client, true, false)), client)
 						}
 					}
 				}
 			}
 
-			SendTarget([]byte(controllers.GetDisplayForConn(conn, false)), conn)
+			SendTarget([]byte(controllers.GetDisplayForConn(conn, false, true)), conn)
 		} else {
 			logger.Info("Waiting for input...")
 			time.Sleep(2 * time.Second)

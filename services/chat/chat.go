@@ -20,7 +20,7 @@ func UnregisterConnection(conn net.Conn) {
 func SendMentionMessage(conn net.Conn, sender, receiver, message string) {
 	MessageLogMap[conn] = append(MessageLogMap[conn],
 		gui.FormatChatEntry(sender,
-			ui.BoldText(receiver)+ui.StripIllegalChars(message)))
+			ui.BoldText(receiver)+" "+ui.StripIllegalChars(message)))
 }
 
 func SendDirectMessage(conn net.Conn, sender, message string) {
