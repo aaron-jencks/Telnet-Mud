@@ -2,6 +2,7 @@ package telnet
 
 import (
 	"mud/controllers"
+	"mud/services/chat"
 	"mud/services/parsing"
 	"mud/services/player"
 	"mud/utils"
@@ -83,10 +84,13 @@ func SendTarget(body []byte, target net.Conn) {
 func TelnetHandler(conn net.Conn) {
 	ClientLock.Lock()
 	Clients = append(Clients, conn)
+	chat.RegisterConnection(conn)
 	cid := len(Clients) - 1
 	ClientLock.Unlock()
 	defer removeClient(cid)
 	defer conn.Close()
+
+	logger.Info("New Connection from %s", conn.RemoteAddr().String())
 
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
@@ -97,7 +101,6 @@ func TelnetHandler(conn net.Conn) {
 		// Read the incoming connection into the buffer.
 		reqLen, err := conn.Read(buf)
 		logger.Info("Read in %d bytes with error: %v", reqLen, err)
-		logger.Info(buf[:reqLen])
 		if err != nil {
 			logger.Error("Error reading: %v", err.Error())
 			return
@@ -173,6 +176,7 @@ func TelnetListenAndServe() {
 
 func removeClient(conn int) {
 	ClientLock.Lock()
+	chat.UnregisterConnection(Clients[conn])
 	Clients = append(Clients[:conn], Clients[conn:]...)
 	ClientLock.Unlock()
 }
