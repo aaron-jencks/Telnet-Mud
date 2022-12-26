@@ -34,3 +34,39 @@ func StripIllegalChars(data string) string {
 func BoldText(data string) string {
 	return CSI("1", "m") + data + CSI("2", "m")
 }
+
+// Finds the nearest word boundary,
+// starting from start and working backwards towards
+// the beginning of the string
+func FindNearestWordBoundaryR(body string, start int) int {
+	for i := start; i >= 0; i-- {
+		if body[i] == ' ' {
+			return i
+		}
+	}
+	return -1
+}
+
+// Takes a long line of text and breaks it into several lines,
+// using word boundaries if possible
+func CreateTextParagraph(body string, width int) []string {
+	// Create paragraph
+	var lines []string
+	for len(body) > width {
+		nearestWord := FindNearestWordBoundaryR(body, width-1)
+
+		var line string
+		if nearestWord <= 0 {
+			line = body[:width]
+			body = body[width:]
+		} else {
+			line = body[:nearestWord]
+			body = body[nearestWord+1:]
+		}
+
+		lines = append(lines, line)
+	}
+	lines = append(lines, body)
+
+	return lines
+}

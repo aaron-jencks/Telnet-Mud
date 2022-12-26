@@ -3,6 +3,7 @@ package chat
 import (
 	"mud/services/chat"
 	"mud/utils"
+	"mud/utils/ui"
 	"mud/utils/ui/gui"
 	"net"
 	"strings"
@@ -15,14 +16,7 @@ func DisplayChat(entries []string) string {
 	for ein := range entries {
 		ei := len(entries) - ein - 1
 
-		// Create paragraph
-		var lines []string
-		buffer := entries[ei]
-		for len(buffer) > utils.CHAT_W-2 {
-			lines = append(lines, buffer[:utils.CHAT_W-2])
-			buffer = buffer[utils.CHAT_W-2:]
-		}
-		lines = append(lines, buffer)
+		lines := ui.CreateTextParagraph(entries[ei], utils.CHAT_W-2)
 
 		if len(lines) > utils.CHAT_H-2 {
 			// Truncate down to target length
