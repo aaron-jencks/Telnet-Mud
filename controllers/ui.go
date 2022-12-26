@@ -20,14 +20,13 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 		result += gui.ResetCursorPosition()
 	}
 
-	yStart := 0
 	if !player.ConnLoggedIn(conn) {
 		result += MOTD()
-		yStart = 2
+		result += chat.GetConnChatWindow(conn) + "\n"
+	} else {
+		result += gui.AnsiOffsetText(40, 0, chat.GetConnChatWindow(conn))
+		result += gui.AnsiOffsetText(0, 0, terminal.GetConnTerminal(conn))
 	}
-
-	result += gui.AnsiOffsetText(40, yStart, chat.GetConnChatWindow(conn))
-	result += gui.AnsiOffsetText(0, yStart, terminal.GetConnTerminal(conn))
 
 	result += "> "
 
