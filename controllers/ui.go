@@ -29,6 +29,8 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 	result += gui.AnsiOffsetText(40, yStart, chat.GetConnChatWindow(conn))
 	result += gui.AnsiOffsetText(0, yStart, terminal.GetConnTerminal(conn))
 
+	result += "> "
+
 	if saveCursor {
 		result = ui.SaveAndResetCursor(result)
 	}
