@@ -1,7 +1,9 @@
 package telnet
 
 import (
+	"mud/controllers"
 	"mud/services/parsing"
+	"mud/services/player"
 	"mud/utils"
 	"mud/utils/strings"
 	"mud/utils/ui/logger"
@@ -140,16 +142,20 @@ func TelnetHandler(conn net.Conn) {
 			if len(text) > 0 && strings.IsNonEmpty(text) {
 				response := parsing.HandlePacket(conn, text)
 				if response.Global {
-
-				} else {
-					if response.Person {
-
+					for _, client := range Clients {
+						SendTarget([]byte(controllers.GetDisplayForConn(client, true)), client)
 					}
+				} else {
 					if len(response.Specific) > 0 {
-
+						for _, user := range response.Specific {
+							client := player.LoggedInPlayerMap[user]
+							SendTarget([]byte(controllers.GetDisplayForConn(client, true)), client)
+						}
 					}
 				}
 			}
+
+			SendTarget([]byte(controllers.GetDisplayForConn(conn, false)), conn)
 		} else {
 			logger.Info("Waiting for input...")
 			time.Sleep(2 * time.Second)

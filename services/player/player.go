@@ -44,27 +44,28 @@ func playerCreateFunc(table *db.TableDefinition, args ...interface{}) []interfac
 			id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
 		}
 
-		result := make([]interface{}, 9)
+		result := make([]interface{}, 10)
 		result[0] = id
 		result[1] = args[0]
+		result[2] = args[1]
 
 		if len(args) >= 7 {
-			for i := 1; i < 7; i++ {
+			for i := 2; i < 8; i++ {
 				result[i+1] = args[i]
 			}
 			if len(args) > 7 {
-				result[8] = args[8]
+				result[9] = args[9]
 			} else {
-				result[8] = 0
+				result[9] = 0
 			}
 		} else {
-			for i := 2; i < 8; i++ {
+			for i := 3; i < 9; i++ {
 				result[i] = 5
 			}
-			if len(args) >= 2 {
-				result[8] = args[1]
+			if len(args) >= 3 {
+				result[9] = args[2]
 			} else {
-				result[8] = 0
+				result[9] = 0
 			}
 		}
 
@@ -114,8 +115,13 @@ func PlayerLoggedIn(name string) bool {
 
 func RegisterPlayer(name string, password string) bool {
 	if !PlayerExists(name) {
-		CRUD.Create([]interface{}{name, password})
+		CRUD.Create(name, password)
 		return true
 	}
 	return false
+}
+
+func ConnLoggedIn(conn net.Conn) bool {
+	_, ok := PlayerConnectionMap[conn]
+	return ok
 }

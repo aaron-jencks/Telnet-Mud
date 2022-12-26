@@ -44,7 +44,7 @@ func DisplayChat(entries []string) string {
 		logLines = logLines[len(logLines)-(utils.CHAT_H-2):]
 	}
 
-	return gui.SizedBoxText(strings.Join(logLines, "\n"), utils.CHAT_H, utils.CHAT_W)
+	return gui.SizedBoxText(strings.Join(logLines, "\n"), utils.CHAT_H, utils.CHAT_W) + "\n> "
 }
 
 func GetConnChatWindow(conn net.Conn) string {

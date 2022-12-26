@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-func Clearscreen() {
-	fmt.Print(ui.CSI("2", "J") + ui.CSI(";H"))
+func Clearscreen() string {
+	return ui.CSI("2", "J") + ui.CSI(";H")
 }
 
 func CenterAlignText(text string, length int) string {
@@ -76,7 +76,7 @@ func TruncateText(text string, length int) string {
 
 func SizedBoxText(text string, h, w int) string {
 	lines := strings.Split(text, "\n")
-	var formattedLines []string = make([]string, len(lines))
+	var formattedLines []string = make([]string, w-2)
 	for i, line := range lines {
 		if len(line) > w-2 {
 			formattedLines[i] = TruncateText(line, w-2)
@@ -84,6 +84,12 @@ func SizedBoxText(text string, h, w int) string {
 			formattedLines[i] = LeftAlignText(line, w-2)
 		} else {
 			formattedLines[i] = line
+		}
+	}
+
+	if len(lines) < w-2 {
+		for i := len(lines); i < w-2; i++ {
+			formattedLines[i] = strings.Repeat(" ", w-2)
 		}
 	}
 
