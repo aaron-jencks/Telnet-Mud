@@ -35,7 +35,7 @@ func CenterAlignText(text string, length int) string {
 }
 
 func LeftAlignText(text string, length int) string {
-	tlen := len(text)
+	tlen := ui.StringLength(text)
 
 	if tlen >= length {
 		return text
@@ -72,27 +72,27 @@ func BoxText(text string) string {
 }
 
 func TruncateText(text string, length int) string {
-	if len(text) > length {
-		return text[:length-1] + ">"
+	if ui.StringLength(text) > length {
+		return ui.FindFirstNCharacters(text, length-1) + ">"
 	}
 	return text
 }
 
 func SizedBoxText(text string, h, w int) string {
 	lines := strings.Split(text, "\n")
-	var formattedLines []string = make([]string, w-2)
+	var formattedLines []string = make([]string, h-2)
 	for i, line := range lines {
-		if len(line) > w-2 {
+		if ui.StringLength(line) > w-2 {
 			formattedLines[i] = TruncateText(line, w-2)
-		} else if len(line) < w-2 {
+		} else if ui.StringLength(line) < w-2 {
 			formattedLines[i] = LeftAlignText(line, w-2)
 		} else {
 			formattedLines[i] = line
 		}
 	}
 
-	if len(lines) < w-2 {
-		for i := len(lines); i < w-2; i++ {
+	if len(lines) < h-2 {
+		for i := len(lines); i < h-2; i++ {
 			formattedLines[i] = strings.Repeat(" ", w-2)
 		}
 	}

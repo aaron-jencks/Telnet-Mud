@@ -52,16 +52,16 @@ func FindNearestWordBoundaryR(body string, start int) int {
 func CreateTextParagraph(body string, width int) []string {
 	// Create paragraph
 	var lines []string
-	for len(body) > width {
+	for StringLength(body) > width {
 		nearestWord := FindNearestWordBoundaryR(body, width-1)
 
 		var line string
 		if nearestWord <= 0 {
-			line = body[:width]
-			body = body[width:]
+			line = FindFirstNCharacters(body, width)
+			body = body[len(line):]
 		} else {
-			line = body[:nearestWord]
-			body = body[nearestWord+1:]
+			line = FindFirstNCharacters(body, nearestWord)
+			body = body[len(line)+1:]
 		}
 
 		lines = append(lines, line)
@@ -69,4 +69,73 @@ func CreateTextParagraph(body string, width int) []string {
 	lines = append(lines, body)
 
 	return lines
+}
+
+// Determines if the string contains an Control Sequence
+// At the given location, and if so, returns the end index of it
+func IsCSI(s string, start int) (bool, int) {
+	if s[start] == '\033' {
+
+		// Check for control sequence
+		if start < len(s)-1 {
+			// There are more bytes left
+			current := start
+			if s[current+1] == '[' {
+				// It's an escape sequence
+				current += 2
+
+				// Find the rest of the sequence
+				for current < len(s) && (s[current] < 65 || s[current] > 122) {
+					current++
+				}
+
+				if current >= len(s) {
+					return false, -1
+				}
+
+				return true, current
+			}
+		}
+	}
+
+	return false, -1
+}
+
+// Returns the length of the string, barring any escape sequences
+func StringLength(s string) int {
+	count := 0
+	tlen := len(s)
+
+	for bi := 0; bi < tlen; bi++ {
+		csi, clen := IsCSI(s, bi)
+		if csi {
+			bi = clen
+			continue
+		}
+
+		count++
+	}
+
+	return count
+}
+
+// Returns the first n characters of the string,
+// barring any escape sequences
+func FindFirstNCharacters(s string, n int) string {
+	result := ""
+
+	count := 0
+	for bi := 0; bi < len(s) && count < n; bi++ {
+		csi, clen := IsCSI(s, bi)
+		if csi {
+			result += s[bi:clen]
+			bi = clen
+			continue
+		}
+
+		result += fmt.Sprintf("%c", s[bi])
+		count++
+	}
+
+	return result
 }

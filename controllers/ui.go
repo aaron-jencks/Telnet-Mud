@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"mud/services/player"
+	"mud/utils"
 	"mud/utils/ui"
 	"mud/utils/ui/gui"
 	"mud/utils/ui/pages/chat"
@@ -32,5 +33,9 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 }
 
 func MOTD() string {
-	return "Welcome! Please login using the 'login' command or\n\rcreate a new account using the 'register' command.\n\r"
+	return strings.Join(
+		ui.CreateTextParagraph(
+			"Welcome! Please login using the 'login' command or create a new account using the 'register' command.\n\r",
+			utils.CHAT_W),
+		"\n\r")
 }
