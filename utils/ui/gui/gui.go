@@ -51,7 +51,7 @@ func BoxText(text string) string {
 
 	var maxLength int = 0
 	for _, line := range lines {
-		lineLength := len(line)
+		lineLength := ui.StringLength(line)
 		if lineLength > maxLength {
 			maxLength = lineLength
 		}
@@ -82,9 +82,10 @@ func SizedBoxText(text string, h, w int) string {
 	lines := strings.Split(text, "\n")
 	var formattedLines []string = make([]string, h-2)
 	for i, line := range lines {
-		if ui.StringLength(line) > w-2 {
+		lineLength := ui.StringLength(line)
+		if lineLength > w-2 {
 			formattedLines[i] = TruncateText(line, w-2)
-		} else if ui.StringLength(line) < w-2 {
+		} else if lineLength < w-2 {
 			formattedLines[i] = LeftAlignText(line, w-2)
 		} else {
 			formattedLines[i] = line
@@ -109,7 +110,7 @@ func AnsiOffsetText(x, y int, text string) string {
 
 	result := ui.CSI(fmt.Sprint(y+1), fmt.Sprint(x+1), "H")
 
-	sep := ui.CSI("B") + ui.CSI(fmt.Sprint(x), "G")
+	sep := ui.CSI("B") + ui.CSI(fmt.Sprint(x+1), "G")
 
 	result += strings.Join(lines, sep) + sep
 

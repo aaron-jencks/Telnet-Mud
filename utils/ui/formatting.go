@@ -60,8 +60,8 @@ func CreateTextParagraph(body string, width int) []string {
 			line = FindFirstNCharacters(body, width)
 			body = body[len(line):]
 		} else {
-			line = FindFirstNCharacters(body, nearestWord)
-			body = body[len(line)+1:]
+			line = body[:nearestWord]
+			body = body[nearestWord+1:]
 		}
 
 		lines = append(lines, line)

@@ -19,11 +19,13 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 		result += gui.ResetCursorPosition()
 	}
 
+	yStart := 0
 	if !player.ConnLoggedIn(conn) {
 		result += MOTD()
+		yStart = 2
 	}
 
-	result += chat.GetConnChatWindow(conn)
+	result += gui.AnsiOffsetText(40, yStart, chat.GetConnChatWindow(conn))
 
 	if saveCursor {
 		result = ui.SaveAndResetCursor(result)
@@ -36,6 +38,6 @@ func MOTD() string {
 	return strings.Join(
 		ui.CreateTextParagraph(
 			"Welcome! Please login using the 'login' command or create a new account using the 'register' command.\n\r",
-			utils.CHAT_W),
+			utils.WINDOW_W),
 		"\n\r")
 }
