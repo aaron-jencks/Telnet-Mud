@@ -7,7 +7,11 @@ import (
 )
 
 func Clearscreen() string {
-	return ui.CSI("2", "J") + ui.CSI(";H")
+	return ui.CSI("2", "J") + ResetCursorPosition()
+}
+
+func ResetCursorPosition() string {
+	return ui.CSI(";H")
 }
 
 func CenterAlignText(text string, length int) string {

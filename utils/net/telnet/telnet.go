@@ -6,6 +6,7 @@ import (
 	"mud/services/player"
 	"mud/utils"
 	"mud/utils/strings"
+	"mud/utils/ui/gui"
 	"mud/utils/ui/logger"
 	"net"
 	"sync"
@@ -89,6 +90,8 @@ func TelnetHandler(conn net.Conn) {
 
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
+
+	SendTarget([]byte(gui.Clearscreen()), conn)
 
 	for {
 		// Read the incoming connection into the buffer.

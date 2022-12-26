@@ -25,11 +25,12 @@ func StripIllegalChars(data string) string {
 		if dc < 32 || dc > 126 {
 			continue
 		}
-		result += fmt.Sprint(dc)
+		result += fmt.Sprintf("%c", dc)
 	}
 	return result
 }
 
+// Enboldens selected text
 func BoldText(data string) string {
 	return CSI("1", "m") + data + CSI("2", "m")
 }

@@ -3,13 +3,14 @@ package controllers
 import (
 	"mud/services/player"
 	"mud/utils/ui"
+	"mud/utils/ui/gui"
 	"mud/utils/ui/pages/chat"
 	"net"
 	"strings"
 )
 
 func GetDisplayForConn(conn net.Conn, saveCursor bool) string {
-	var result string
+	var result string = gui.ResetCursorPosition()
 
 	if !player.ConnLoggedIn(conn) {
 		result += MOTD()
