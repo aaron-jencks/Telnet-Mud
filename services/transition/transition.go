@@ -45,7 +45,7 @@ func createTransitionFunc(table *db.TableDefinition, args ...interface{}) []inte
 		id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
 	}
 
-	return []interface{}{id, args[0], args[1], args[2], command.FormatRegexFromArr(args[3].([]string))}
+	return []interface{}{id, args[0], args[1], args[2], args[3]}
 }
 
 var CRUD crud.Crud = crud.CreateCrud("transitions", transitionToArr, transitionFromArr, createTransitionFunc)

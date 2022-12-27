@@ -25,7 +25,7 @@ func HandleLogin(conn net.Conn, args []string) parsing.CommandResponse {
 		chat.SendSystemMessage(conn, "Sorry, either that account doesn't exist or the password is incorrect")
 	} else {
 		terminal.LoadPlayer(conn, args[0])
-		chat.SendSystemMessage(conn, "Welcome! Please be respectful.")
+		chat.SendDirectMessage(conn, "SYSTEM", "Welcome! Please be respectful.")
 	}
 
 	return result
