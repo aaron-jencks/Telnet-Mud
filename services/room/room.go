@@ -1,4 +1,4 @@
-package room_service
+package room
 
 import (
 	"mud/entities"

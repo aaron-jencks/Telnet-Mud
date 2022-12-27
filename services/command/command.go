@@ -3,6 +3,8 @@ package command
 import (
 	"mud/utils/crud"
 	"mud/utils/io/db"
+	mstrings "mud/utils/strings"
+	"regexp"
 	"strings"
 )
 
@@ -39,6 +41,12 @@ func createCommandFunc(table *db.TableDefinition, args ...interface{}) []interfa
 
 var CRUD crud.Crud = crud.CreateCrud("commands", commandToArr, commandFromArr, createCommandFunc)
 
+func CommandExists(name string) bool {
+	table := CRUD.FetchTable()
+	result := table.Query(name, "Name")
+	return len(result) > 0
+}
+
 func FormatRegexFromArr(args []string) string {
 	formattedStrings := make([]string, len(args))
 	for ai, arg := range args {
@@ -70,4 +78,24 @@ func FormatRegexToArr(argString string) []string {
 	result = append(result, strings.ReplaceAll(argString[lastStart:], "\\,", ","))
 
 	return result
+}
+
+func MatchesCommand(data string, cmd string) bool {
+	bits := mstrings.SplitWithQuotes(data, ' ')
+	command := CRUD.Retrieve(cmd).(ExpandedCommand)
+
+	if len(bits) != len(command.Args) {
+		return false
+	} else {
+		// Check the regex
+		for i := 0; i < len(command.Args); i++ {
+			r := regexp.MustCompile(command.Args[i])
+			m := r.FindAllStringIndex(bits[i], 1)
+			if m == nil || m[0][0] > 0 {
+				return false
+			}
+		}
+
+		return true
+	}
 }
