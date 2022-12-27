@@ -20,12 +20,12 @@ type CrudUpdate struct {
 
 type Crud struct {
 	TableName      string
-	toArrFunc      func(map[string]interface{}) []interface{}
+	toArrFunc      func(interface{}) []interface{}
 	fromArrFunc    func([]interface{}) interface{}
 	createFunction func(*db.TableDefinition, ...interface{}) []interface{}
 }
 
-func CreateCrud(tableName string, toArrFunc func(map[string]interface{}) []interface{}, fromArrFunc func([]interface{}) interface{}, createFunc func(*db.TableDefinition, ...interface{}) []interface{}) Crud {
+func CreateCrud(tableName string, toArrFunc func(interface{}) []interface{}, fromArrFunc func([]interface{}) interface{}, createFunc func(*db.TableDefinition, ...interface{}) []interface{}) Crud {
 	return Crud{tableName, toArrFunc, fromArrFunc, createFunc}
 }
 
@@ -62,7 +62,7 @@ func (c Crud) Update(retrieveValue interface{}, newValue interface{}) interface{
 	oldRows := table.QueryPK(retrieveValue)
 	if len(oldRows) > 0 {
 		line := oldRows[0][0].(int)
-		table.ModifyRow(line, c.toArrFunc(newValue.(map[string]interface{})))
+		table.ModifyRow(line, c.toArrFunc(newValue))
 		return newValue
 	}
 	return nil

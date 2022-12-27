@@ -13,16 +13,12 @@ type ExpandedCommand struct {
 	Args []string
 }
 
-func commandToArr(rs map[string]interface{}) []interface{} {
-	argsArr := rs["Args"].([]interface{})
-	var sargs []string = make([]string, len(argsArr))
-	for ai, arg := range argsArr {
-		sargs[ai] = arg.(string)
-	}
+func commandToArr(rs interface{}) []interface{} {
+	rec := rs.(ExpandedCommand)
 	return []interface{}{
-		rs["Name"],
-		len(argsArr),
-		FormatRegexFromArr(sargs),
+		rec.Name,
+		len(rec.Args),
+		FormatRegexFromArr(rec.Args),
 	}
 }
 

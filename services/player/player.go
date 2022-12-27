@@ -7,18 +7,19 @@ import (
 	"net"
 )
 
-func playerToArr(ps map[string]interface{}) []interface{} {
+func playerToArr(ps interface{}) []interface{} {
+	pec := ps.(entities.Player)
 	return []interface{}{
-		int(ps["Id"].(float64)),
-		ps["Name"],
-		ps["Password"],
-		int(ps["Dex"].(float64)),
-		int(ps["Str"].(float64)),
-		int(ps["Int"].(float64)),
-		int(ps["Wis"].(float64)),
-		int(ps["Con"].(float64)),
-		int(ps["Chr"].(float64)),
-		int(ps["Room"].(float64)),
+		pec.Id,
+		pec.Name,
+		pec.Password,
+		pec.Dex,
+		pec.Str,
+		pec.Int,
+		pec.Wis,
+		pec.Con,
+		pec.Chr,
+		pec.Room,
 	}
 }
 

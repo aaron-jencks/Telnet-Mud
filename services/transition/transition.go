@@ -14,18 +14,14 @@ type ExpandedTransition struct {
 	CommandArgs []string
 }
 
-func transitionToArr(rs map[string]interface{}) []interface{} {
-	argsArr := rs["CommandArgs"].([]interface{})
-	var sargs []string = make([]string, len(argsArr))
-	for ai, arg := range argsArr {
-		sargs[ai] = arg.(string)
-	}
+func transitionToArr(rs interface{}) []interface{} {
+	rec := rs.(ExpandedTransition)
 	return []interface{}{
-		int(rs["Id"].(float64)),
-		int(rs["Source"].(float64)),
-		int(rs["Target"].(float64)),
-		rs["Command"],
-		command.FormatRegexFromArr(sargs),
+		rec.Id,
+		rec.Source,
+		rec.Target,
+		rec.Command,
+		command.FormatRegexFromArr(rec.CommandArgs),
 	}
 }
 

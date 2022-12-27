@@ -1,4 +1,4 @@
-package inventory_service
+package inventory
 
 import (
 	"mud/entities"
@@ -6,12 +6,13 @@ import (
 	"mud/utils/io/db"
 )
 
-func inventoryToArr(rs map[string]interface{}) []interface{} {
+func inventoryToArr(rs interface{}) []interface{} {
+	rec := rs.(entities.Inventory)
 	return []interface{}{
-		int(rs["Id"].(float64)),
-		int(rs["Player"].(float64)),
-		int(rs["Item"].(float64)),
-		int(rs["Quantity"].(float64)),
+		rec.Id,
+		rec.Player,
+		rec.Item,
+		rec.Quantity,
 	}
 }
 

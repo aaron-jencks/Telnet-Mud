@@ -6,11 +6,12 @@ import (
 	"mud/utils/io/db"
 )
 
-func roomToArr(rs map[string]interface{}) []interface{} {
+func roomToArr(rs interface{}) []interface{} {
+	re := rs.(entities.Room)
 	return []interface{}{
-		int(rs["Id"].(float64)),
-		rs["Name"],
-		rs["Description"],
+		re.Id,
+		re.Name,
+		re.Description,
 	}
 }
 
