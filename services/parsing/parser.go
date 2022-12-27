@@ -34,14 +34,14 @@ func HandlePacket(conn net.Conn, data []byte) CommandResponse {
 		return CommandResponse{}
 	}
 
-	if !command.CommandExists(bits[0]) {
+	handler, ok := CommandMap[bits[0]]
+
+	if !(ok || command.CommandExists(bits[0])) {
 		chat.SendSystemMessage(conn, "Unknown command, please check your spelling or try again...")
 		return CommandResponse{
 			Person: true,
 		}
 	}
-
-	handler, ok := CommandMap[bits[0]]
 
 	if ok {
 		return handler(conn, bits[1:])
