@@ -17,6 +17,7 @@ func main() {
 	parsing.RegisterHandler("room", handlers.HandleRoomCrud)
 	parsing.RegisterHandler("item", handlers.HandleItemCrud)
 	parsing.RegisterHandler("transition", handlers.HandleTransitionCrud)
+	parsing.RegisterHandler("command", handlers.HandleCommandCrud)
 
 	telnet.TelnetListenAndServe()
 }
