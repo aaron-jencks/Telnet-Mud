@@ -14,7 +14,8 @@ func DisplayTerminal(ts *terminal.Terminal) string {
 	var logLines []string
 
 	// Traverse through ts.Buffer backward
-	for ein := range ts.Buffer {
+	var ein int = 0
+	for ein = range ts.Buffer {
 		ei := len(ts.Buffer) - ein - 1
 
 		lines := ui.CreateTextParagraph(
@@ -45,8 +46,10 @@ func DisplayTerminal(ts *terminal.Terminal) string {
 	if len(logLines) > utils.TERMINAL_H-2 {
 		logLines = logLines[len(logLines)-(utils.TERMINAL_H-2):]
 	} else if len(logLines) < utils.TERMINAL_H-2 {
+		ein += 2
 		for len(logLines) < utils.TERMINAL_H-2 {
-			logLines = append(logLines, fmt.Sprintf("%d: ", len(logLines)))
+			logLines = append(logLines, fmt.Sprintf("%d: ", ein))
+			ein++
 		}
 	}
 
