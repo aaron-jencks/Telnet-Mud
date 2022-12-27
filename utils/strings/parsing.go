@@ -47,3 +47,19 @@ func SplitWithQuotes(s string, sep rune) []string {
 
 	return result
 }
+
+func StripQuotes(s string) string {
+	if len(s) >= 2 && s[0] == '"' && s[len(s)-1] == '"' {
+		return s[1 : len(s)-1]
+	}
+	return s
+}
+
+func StringContains(arr []string, target string) bool {
+	for _, sa := range arr {
+		if sa == target {
+			return true
+		}
+	}
+	return false
+}

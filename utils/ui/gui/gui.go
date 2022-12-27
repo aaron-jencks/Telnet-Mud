@@ -80,7 +80,13 @@ func TruncateText(text string, length int) string {
 
 func SizedBoxText(text string, h, w int) string {
 	lines := strings.Split(text, "\n")
-	var formattedLines []string = make([]string, h-2)
+
+	falloc := h - 2
+	if len(lines) > h-2 {
+		falloc = len(lines)
+	}
+
+	var formattedLines []string = make([]string, falloc)
 	for i, line := range lines {
 		lineLength := ui.StringLength(line)
 		if lineLength > w-2 {

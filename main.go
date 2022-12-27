@@ -14,6 +14,7 @@ func main() {
 	parsing.RegisterHandler("logout", handlers.HandleLogout)
 	parsing.RegisterHandler("register", handlers.HandleRegister)
 	parsing.RegisterHandler("chat", handlers.HandleChat)
+	parsing.RegisterHandler("room", handlers.HandleRoomCrud)
 
 	telnet.TelnetListenAndServe()
 }

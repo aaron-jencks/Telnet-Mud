@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -52,21 +53,24 @@ func FindNearestWordBoundaryR(body string, start int) int {
 func CreateTextParagraph(body string, width int) []string {
 	// Create paragraph
 	var lines []string
-	for StringLength(body) > width {
-		nearestWord := FindNearestWordBoundaryR(body, width-1)
+	bodyLines := strings.Split(body, "\n")
+	for _, bline := range bodyLines {
+		for StringLength(bline) > width {
+			nearestWord := FindNearestWordBoundaryR(bline, width-1)
 
-		var line string
-		if nearestWord <= 0 {
-			line = FindFirstNCharacters(body, width)
-			body = body[len(line):]
-		} else {
-			line = body[:nearestWord]
-			body = body[nearestWord+1:]
+			var line string
+			if nearestWord <= 0 {
+				line = FindFirstNCharacters(bline, width)
+				bline = bline[len(line):]
+			} else {
+				line = bline[:nearestWord]
+				bline = bline[nearestWord+1:]
+			}
+
+			lines = append(lines, line)
 		}
-
-		lines = append(lines, line)
+		lines = append(lines, bline)
 	}
-	lines = append(lines, body)
 
 	return lines
 }
