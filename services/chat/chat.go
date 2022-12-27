@@ -1,6 +1,8 @@
 package chat
 
 import (
+	"mud/services/player"
+	"mud/services/terminal"
 	"mud/utils"
 	"mud/utils/ui"
 	"mud/utils/ui/gui"
@@ -30,7 +32,11 @@ func SendDirectMessage(conn net.Conn, sender, message string) {
 }
 
 func SendSystemMessage(conn net.Conn, message string) {
-	SendDirectMessage(conn, utils.SYSTEM_NAME, message)
+	if player.ConnLoggedIn(conn) {
+		terminal.AppendGameMessage(conn, message)
+	} else {
+		SendDirectMessage(conn, utils.SYSTEM_NAME, message)
+	}
 }
 
 func SendGlobalMessage(sender, message string) {

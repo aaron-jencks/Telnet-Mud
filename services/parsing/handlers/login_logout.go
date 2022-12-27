@@ -4,6 +4,7 @@ import (
 	"mud/services/chat"
 	"mud/services/parsing"
 	"mud/services/player"
+	"mud/services/terminal"
 	"net"
 )
 
@@ -23,6 +24,7 @@ func HandleLogin(conn net.Conn, args []string) parsing.CommandResponse {
 	if !player.LoginPlayer(args[0], args[1], conn) {
 		chat.SendSystemMessage(conn, "Sorry, either that account doesn't exist or the password is incorrect")
 	} else {
+		terminal.LoadPlayer(conn, args[0])
 		chat.SendSystemMessage(conn, "Welcome! Please be respectful.")
 	}
 
