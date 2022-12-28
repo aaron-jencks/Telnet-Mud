@@ -55,3 +55,23 @@ func GetPlayerInventory(p entities.Player) []ExpandedInventory {
 
 	return result
 }
+
+func AddItemToInventory(p entities.Player, i entities.Item, qty int) int {
+	table := CRUD.FetchTable()
+	rows := table.Query(p.Id, "Player")
+
+	for _, row := range rows {
+		if row[3].(int) == i.Id {
+			// We already have some
+			invent := CRUD.Retrieve(row[1]).(entities.Inventory)
+			invent.Quantity += qty
+			CRUD.Update(invent.Id, invent)
+
+			return invent.Quantity
+		}
+	}
+
+	CRUD.Create(p.Id, i.Id, qty)
+
+	return qty
+}

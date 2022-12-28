@@ -6,6 +6,7 @@ import (
 	"mud/services/chat"
 	"mud/services/parsing"
 	"mud/services/room"
+	"mud/services/terminal"
 	"mud/utils/strings"
 	"net"
 )
@@ -87,4 +88,12 @@ func HandleRoomCrud(conn net.Conn, args []string) parsing.CommandResponse {
 	}
 
 	return result
+}
+
+func HandleInfo(conn net.Conn, args []string) parsing.CommandResponse {
+	t := terminal.TerminalMap[conn]
+	chat.SendSystemMessage(conn, fmt.Sprintf("%s:\n%s", t.Room.Name, t.Room.Description))
+	return parsing.CommandResponse{
+		Person: true,
+	}
 }

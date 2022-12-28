@@ -44,7 +44,7 @@ func DisplayTerminal(ts *terminal.Terminal) string {
 	}
 
 	if len(logLines) > utils.TERMINAL_H-2 {
-		logLines = logLines[len(logLines)-(utils.TERMINAL_H-2):]
+		logLines = logLines[:utils.TERMINAL_H-2]
 	} else if len(logLines) < utils.TERMINAL_H-2 {
 		ein += 2
 		for len(logLines) < utils.TERMINAL_H-2 {
