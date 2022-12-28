@@ -5,6 +5,14 @@ import (
 	"mud/utils/ui/logger"
 )
 
+type Detail struct {
+	Id         int
+	Room       int
+	Direction  string
+	Detail     string
+	Perception int
+}
+
 type Loot struct {
 	Id       int
 	Room     int
@@ -69,7 +77,25 @@ func SetupTables() {
 	var table db.TableDefinition
 	var index map[string][]int64
 
-	// Note
+	// Detail
+	logger.Info("Creating details table")
+	table = db.CreateTableIfNotExist("details", []string{
+		"Id",
+		"Room",
+		"Direction",
+		"Detail",
+		"Perception",
+	}, []string{
+		"integer",
+		"integer",
+		"string",
+		"string",
+		"integer",
+	}, 0, true)
+	index = db.CreateIndex(table.CSV, "Room")
+	table.Info.Indices["Room"] = index
+
+	// Loot
 	logger.Info("Creating loot table")
 	table = db.CreateTableIfNotExist("loot", []string{
 		"Id",
