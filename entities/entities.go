@@ -5,6 +5,12 @@ import (
 	"mud/utils/ui/logger"
 )
 
+type Tile struct {
+	Name     string
+	IconType string
+	Icon     string
+}
+
 type Detail struct {
 	Id         int
 	Room       int
@@ -76,6 +82,18 @@ type Transition struct {
 func SetupTables() {
 	var table db.TableDefinition
 	var index map[string][]int64
+
+	// Tile
+	logger.Info("Creating tiles table")
+	table = db.CreateTableIfNotExist("tiles", []string{
+		"Name",
+		"IconType",
+		"Icon",
+	}, []string{
+		"string",
+		"string",
+		"string",
+	}, 0, true)
 
 	// Detail
 	logger.Info("Creating details table")
