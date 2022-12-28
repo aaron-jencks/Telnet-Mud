@@ -2,6 +2,7 @@ package inventory
 
 import (
 	"mud/entities"
+	"mud/services/item"
 	"mud/utils/crud"
 	"mud/utils/io/db"
 )
@@ -35,3 +36,22 @@ func createInventoryFunc(table *db.TableDefinition, args ...interface{}) []inter
 }
 
 var CRUD crud.Crud = crud.CreateCrud("inventory", inventoryToArr, inventoryFromArr, createInventoryFunc)
+
+type ExpandedInventory struct {
+	Item     entities.Item
+	Quantity int
+}
+
+func GetPlayerInventory(p entities.Player) []ExpandedInventory {
+	table := CRUD.FetchTable()
+	rows := table.Query(p.Id, "Player")
+
+	var result []ExpandedInventory = make([]ExpandedInventory, len(rows))
+
+	for ri, row := range rows {
+		result[ri].Item = item.CRUD.Retrieve(row[3]).(entities.Item)
+		result[ri].Quantity = row[4].(int)
+	}
+
+	return result
+}

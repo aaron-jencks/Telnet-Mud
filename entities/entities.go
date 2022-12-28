@@ -5,6 +5,13 @@ import (
 	"mud/utils/ui/logger"
 )
 
+type Note struct {
+	Id       int
+	Player   int
+	Title    string
+	Contents string
+}
+
 type Command struct {
 	Name     string
 	ArgCount int
@@ -54,6 +61,20 @@ type Transition struct {
 func SetupTables() {
 	var table db.TableDefinition
 	var index map[string][]int64
+
+	// Note
+	logger.Info("Creating notes table")
+	db.CreateTableIfNotExist("notes", []string{
+		"Id",
+		"Player",
+		"Title",
+		"Contents",
+	}, []string{
+		"integer",
+		"integer",
+		"string",
+		"string",
+	}, 0, true)
 
 	// Command
 	logger.Info("Creating commands table")

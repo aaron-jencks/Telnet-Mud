@@ -18,6 +18,8 @@ func main() {
 	parsing.RegisterHandler("item", handlers.HandleItemCrud)
 	parsing.RegisterHandler("transition", handlers.HandleTransitionCrud)
 	parsing.RegisterHandler("command", handlers.HandleCommandCrud)
+	parsing.RegisterHandler("note", handlers.HandleNoteCrud)
+	parsing.RegisterHandler("inventory", handlers.ListInventoryHandler)
 
 	telnet.TelnetListenAndServe()
 }
