@@ -53,6 +53,8 @@ func HandlePacket(conn net.Conn, data []byte) CommandResponse {
 			if exists {
 				newRoom := room.CRUD.Retrieve(trans.Target).(entities.Room)
 				terminal.ChangeRoom(conn, newRoom)
+				p.Room = newRoom.Id
+				player.CRUD.Update(p.Name, p)
 			} else {
 				chat.SendSystemMessage(conn, "Nothing happened.")
 			}
