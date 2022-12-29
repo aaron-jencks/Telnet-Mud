@@ -11,10 +11,10 @@ type TileVariant struct {
 	Icon string
 }
 
-type VariantType struct {
-	Id          int
-	HandlerType string
-}
+// type VariantType struct {
+// 	Id          int
+// 	HandlerType string
+// }
 
 type Map struct {
 	Room int
@@ -116,15 +116,15 @@ func SetupTables() {
 		"integer",
 	}, 0, false)
 
-	// Variant Type
-	logger.Info("Creating variant types table")
-	table = db.CreateTableIfNotExist("variantTypes", []string{
-		"Id",
-		"HandlerType",
-	}, []string{
-		"integer",
-		"string",
-	}, 0, true)
+	// // Variant Type
+	// logger.Info("Creating variant types table")
+	// table = db.CreateTableIfNotExist("variantTypes", []string{
+	// 	"Id",
+	// 	"HandlerType",
+	// }, []string{
+	// 	"integer",
+	// 	"string",
+	// }, 0, true)
 
 	// Variant
 	logger.Info("Creating tile variants table")

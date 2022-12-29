@@ -81,7 +81,20 @@ func (c Crud) Update(retrieveValue interface{}, newValue interface{}) interface{
 	return nil
 }
 
-func (c Crud) Delete(key interface{}) {
+func (c Crud) Delete(keys ...interface{}) {
 	table := c.FetchTable()
-	table.DeleteDataByKey(key)
+
+	if len(keys) == 1 {
+		table.DeleteDataByKey(keys[0])
+	} else {
+		lines := table.MultiQuery(keys...)
+
+		var lineNumbers []int64 = make([]int64, len(lines))
+
+		for li, line := range lines {
+			lineNumbers[li] = int64(line[0].(int))
+		}
+
+		table.DeleteLines(lineNumbers)
+	}
 }

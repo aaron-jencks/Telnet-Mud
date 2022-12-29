@@ -101,11 +101,25 @@ func HandleMapCrud(conn net.Conn, args []string) parsing.CommandResponse {
 		chat.SendSystemMessage(conn, "Updating a tile is not currently supported, please delete and replace")
 
 	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: map delete \"name\"") {
+		usageString := "Usage: map delete room x y z"
+		if CheckMinArgs(conn, args, 5, usageString) {
 			return result
 		}
 
-		id := strings.StripQuotes(args[1])
+		idParsed, rid := ParseIntegerCheck(conn, args[1], usageString, "room")
+		if !idParsed {
+			return result
+		}
+
+		xParsed, x := ParseIntegerCheck(conn, args[2], usageString, "x")
+		if !xParsed {
+			return result
+		}
+
+		yParsed, y := ParseIntegerCheck(conn, args[3], usageString, "y")
+		if !yParsed {
+			return result
+		}
 
 		tmap.CRUD.Delete(id)
 		chat.SendSystemMessage(conn, fmt.Sprintf("Map %s deleted!", id))

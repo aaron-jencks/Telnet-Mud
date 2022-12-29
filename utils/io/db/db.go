@@ -312,19 +312,31 @@ func (td *TableDefinition) AddData(data [][]interface{}) int {
 }
 
 func (td *TableDefinition) DeleteLine(line int64) {
+	defer td.UpdateIndices()
+
 	td.CSV.DeleteLine(line)
 	td.Cache.DeleteEntry(line)
+}
 
-	td.UpdateIndices()
+func (td *TableDefinition) DeleteLines(lines []int64) {
+	defer td.UpdateIndices()
+
+	td.CSV.DeleteLines(lines)
+
+	for _, line := range lines {
+		td.Cache.DeleteEntry(line)
+	}
 }
 
 func (td *TableDefinition) DeleteDataByKey(key interface{}) {
 	qdata := td.Query(key, td.CSV.Columns[td.Info.PrimaryKey])
+
+	var lines []int64
 	for _, qline := range qdata {
-		td.CSV.DeleteLine(int64(qline[0].(int)))
+		lines = append(lines, int64(qline[0].(int)))
 	}
 
-	td.UpdateIndices()
+	td.DeleteLines(lines)
 }
 
 func (td TableDefinition) isIndexed(column string) (bool, bool) {
@@ -387,6 +399,38 @@ func (td *TableDefinition) Query(value interface{}, column string) [][]interface
 			if resultLine[cindex+1] == value {
 				results = append(results, resultLine)
 			}
+		}
+	}
+
+	return results
+}
+
+func (td *TableDefinition) MultiQuery(args ...interface{}) [][]interface{} {
+	var results [][]interface{}
+
+	var pbuffer [][]interface{}
+	var buffer [][]interface{}
+	for ai := 0; ai < len(args); ai += 2 {
+		buffer = td.Query(args[ai], args[ai+1].(string))
+		if pbuffer == nil {
+			pbuffer = buffer
+			continue
+		} else {
+			// refine results
+			results = nil
+			for _, brow := range buffer {
+				for _, prow := range pbuffer {
+					if brow[0] == prow[0] {
+						results = append(results, brow)
+					}
+				}
+			}
+			pbuffer = results
+		}
+
+		if len(pbuffer) == 0 {
+			// There are no results that satisfy all of the columns
+			return pbuffer
 		}
 	}
 

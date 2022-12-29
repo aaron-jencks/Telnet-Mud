@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"mud/utils/ui/logger"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 )
@@ -326,6 +327,17 @@ func (cf *CSVFile) DeleteLine(line int64) {
 
 	f.Close()
 	cf.syncLineCount()
+}
+
+func (cf *CSVFile) DeleteLines(lines []int64) {
+	// Sort in Descending order
+	sort.Slice(lines, func(i, j int) bool {
+		return lines[i] > lines[j]
+	})
+
+	for _, line := range lines {
+		cf.DeleteLine(line)
+	}
 }
 
 func (cf *CSVFile) AppendLine(data []string) int {
