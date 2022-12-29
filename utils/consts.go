@@ -16,4 +16,5 @@ const (
 	CONN_TYPE         = "tcp"
 	CHECK_DIE         = 20
 	LOOK_FAIL_MESSAGE = "You don't notice anything in particular"
+	CACHE_SIZE_LIMIT  = 1000
 )

@@ -42,9 +42,10 @@ type TableInfo struct {
 }
 
 type TableDefinition struct {
-	Name string
-	CSV  *csv.CSVFile
-	Info TableInfo
+	Name  string
+	CSV   *csv.CSVFile
+	Info  TableInfo
+	Cache *DataCache
 }
 
 func checkError(e interface{}) {
@@ -70,6 +71,10 @@ func FetchTableDefinition(tableName string) TableDefinition {
 		tableName,
 		&file,
 		jobj,
+		&DataCache{
+			make(map[int64][]interface{}),
+			make(map[int64]int64),
+		},
 	}
 }
 
@@ -157,6 +162,10 @@ func CreateTableIfNotExist(tableName string, columns []string,
 		tableName,
 		&file,
 		tableInfo,
+		&DataCache{
+			make(map[int64][]interface{}),
+			make(map[int64]int64),
+		},
 	}
 
 }
@@ -284,6 +293,7 @@ func (td *TableDefinition) AddData(data [][]interface{}) int {
 			}
 			td.Info.PrimaryIndex[pv] = append(td.Info.PrimaryIndex[pv], line)
 		}
+		td.Cache.InsertValue(line, dline)
 
 		for k := range td.Info.Indices {
 			cindex := stringColumnToInt(k, td.CSV.Columns)
@@ -303,6 +313,7 @@ func (td *TableDefinition) AddData(data [][]interface{}) int {
 
 func (td *TableDefinition) DeleteLine(line int64) {
 	td.CSV.DeleteLine(line)
+	td.Cache.DeleteEntry(line)
 
 	td.UpdateIndices()
 }
@@ -324,7 +335,11 @@ func (td TableDefinition) isIndexed(column string) (bool, bool) {
 	return nIndex, cindex >= 0 && cindex == td.Info.PrimaryKey
 }
 
-func (td TableDefinition) RetrieveLine(line int64) []interface{} {
+func (td *TableDefinition) RetrieveLine(line int64) []interface{} {
+	if td.Cache.Exists(line) {
+		return td.Cache.RetrieveEntry(line)
+	}
+
 	var result []interface{} = make([]interface{}, len(td.CSV.Columns)+1)
 	result[0] = int(line)
 
@@ -333,6 +348,8 @@ func (td TableDefinition) RetrieveLine(line int64) []interface{} {
 	for ci, cvalue := range values {
 		result[ci+1] = convertFromString(cvalue, td.Info.ColumnTypes[ci])
 	}
+
+	td.Cache.InsertValue(line, result)
 
 	return result
 }
@@ -388,6 +405,12 @@ func (td *TableDefinition) ModifyRow(line int, data []interface{}) {
 	}
 
 	td.CSV.ModifyLine(line, csvLine)
+
+	if !td.Cache.Exists(int64(line)) {
+		td.Cache.InsertValue(int64(line), data)
+	} else {
+		td.Cache.UpdateEntry(int64(line), data)
+	}
 
 	td.UpdateIndices()
 }
