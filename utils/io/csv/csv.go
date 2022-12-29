@@ -9,12 +9,13 @@ import (
 	"sync"
 )
 
+// Represents a csv file
 type CSVFile struct {
-	Columns       []string
-	LineLocations []int64
-	LineCount     int64
-	Filepath      string
-	lock          *sync.Mutex
+	Columns       []string    // The column headers of the csv file
+	LineLocations []int64     // Indicates the byte offsets of each line in the file
+	LineCount     int64       // The number of lines in the file
+	Filepath      string      // The path of the file
+	lock          *sync.Mutex // For concurrency
 }
 
 func checkError(e interface{}) {
@@ -24,6 +25,8 @@ func checkError(e interface{}) {
 	}
 }
 
+// Fetches the given number of bytes from the given file,
+// Returns the bytes and the number of actual bytes read.
 func fetchBytes(f *os.File, n int) ([]byte, int) {
 	var buff []byte = make([]byte, n)
 	nOut, err := f.Read(buff)
@@ -34,6 +37,7 @@ func fetchBytes(f *os.File, n int) ([]byte, int) {
 	return []byte{}, 0
 }
 
+// Parses a buffer of bytes and returns an array of string column data.
 func parseCSVLine(line []byte) []string {
 	var inQuote bool = false
 	var escaped bool = false
@@ -63,11 +67,18 @@ func parseCSVLine(line []byte) []string {
 	return entries
 }
 
+// Reads a single line from the csv file into the given buffer
+// Returns the string column data, the left over bytes in the buffer,
+// and whether the end of the file was reached.
 func readLine(f *os.File, buffer []byte) ([]string, []byte, bool) {
 	rawData, buffOut, eof := readLineRaw(f, buffer)
 	return parseCSVLine(rawData), buffOut, eof
 }
 
+// Reads raw data from the given line,
+// Returns the raw string as bytes from the buffer,
+// the left over bytes that were read in, but not used,
+// and whether the end of the file was reached or not.
 func readLineRaw(f *os.File, buffer []byte) ([]byte, []byte, bool) {
 	var eof bool = false
 
@@ -106,6 +117,7 @@ func readLineRaw(f *os.File, buffer []byte) ([]byte, []byte, bool) {
 	return []byte{}, buffer, true
 }
 
+// Creates a new csv file with the given columns and the initial data.
 func CreateCSV(path string, columns []string, lines [][]string) CSVFile {
 	logger.Info("Creating %s CSV File...", path)
 
@@ -132,6 +144,7 @@ func CreateCSV(path string, columns []string, lines [][]string) CSVFile {
 	return file
 }
 
+// Parses an existing csv file and returns the data in the csv struct
 func ParseCSV(path string) CSVFile {
 	logger.Info("Reading %s CSV File...", path)
 
@@ -189,6 +202,7 @@ func ParseCSV(path string) CSVFile {
 	}
 }
 
+// Fetches a specific line from the csv file
 func (cf *CSVFile) ReadSpecificLine(line int64) []string {
 	cf.lock.Lock()
 	defer cf.lock.Unlock()
@@ -219,6 +233,9 @@ func (cf *CSVFile) ReadSpecificLine(line int64) []string {
 	return result
 }
 
+// Shifts the contents of the file by a certain number of bytes
+// starting at the given starting byte offset
+// the shift distance can be both positive and negative.
 func shiftFileContents(f *os.File, offset int64, start int64) {
 	var nextBuffer []byte
 	var newNOut int
@@ -263,6 +280,7 @@ func shiftFileContents(f *os.File, offset int64, start int64) {
 	f.Truncate(totalSize)
 }
 
+// Replaces an existing line of data in the csv with a new one
 func (cf *CSVFile) ModifyLine(line int, data []string) {
 	cf.lock.Lock()
 	defer cf.lock.Unlock()
@@ -302,6 +320,7 @@ func (cf *CSVFile) ModifyLine(line int, data []string) {
 	cf.syncLineCount()
 }
 
+// Deletes a single line of data from the csv
 func (cf *CSVFile) DeleteLine(line int64) {
 	cf.lock.Lock()
 	defer cf.lock.Unlock()
@@ -329,6 +348,8 @@ func (cf *CSVFile) DeleteLine(line int64) {
 	cf.syncLineCount()
 }
 
+// Deletes multiple lines of data from the csv
+// sorts the lines first so that they're in descending order
 func (cf *CSVFile) DeleteLines(lines []int64) {
 	// Sort in Descending order
 	sort.Slice(lines, func(i, j int) bool {
@@ -340,6 +361,7 @@ func (cf *CSVFile) DeleteLines(lines []int64) {
 	}
 }
 
+// Adds a new line of data to the csv file and returns it's line number
 func (cf *CSVFile) AppendLine(data []string) int {
 	cf.lock.Lock()
 	defer cf.lock.Unlock()
@@ -361,6 +383,7 @@ func (cf *CSVFile) AppendLine(data []string) int {
 	return newIndex
 }
 
+// Writes the csv file's line count to the first line of the csv file
 func (cf CSVFile) syncLineCount() {
 	lineString := fmt.Sprintf("%d", cf.LineCount)
 	f, err := os.OpenFile(cf.Filepath, os.O_RDWR, 0777)
