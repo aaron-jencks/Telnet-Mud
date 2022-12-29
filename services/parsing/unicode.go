@@ -56,7 +56,7 @@ func ParseUnicode(s string) (string, int) {
 		multiplier := len(codeSegments) - si - 1
 		addition := seg
 		for mi := 0; mi < multiplier; mi++ {
-			addition *= 10
+			addition *= 16
 		}
 		code += int32(addition)
 	}

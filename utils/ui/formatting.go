@@ -105,12 +105,40 @@ func IsCSI(s string, start int) (bool, int) {
 	return false, -1
 }
 
+// Determines if the byte at the starting index is a header marker for
+// utf-8 and returns how many bytes the character will consume
+func IsUnicode(s string, start int) (bool, int) {
+	b := s[start]
+	if b&0xc0 == 0xc0 {
+		// Yes it is
+		length := 2
+		if b&0x20 > 0 {
+			// It has at least 3 bytes
+			length++
+			if b&0x10 > 0 {
+				// It has 4 bytes
+				length++
+			}
+		}
+
+		return true, length
+	}
+	return false, 1
+}
+
 // Returns the length of the string, barring any escape sequences
 func StringLength(s string) int {
 	count := 0
 	tlen := len(s)
 
 	for bi := 0; bi < tlen; bi++ {
+		uni, ulen := IsUnicode(s, bi)
+		if uni {
+			bi += ulen - 1
+			count++
+			continue
+		}
+
 		csi, clen := IsCSI(s, bi)
 		if csi {
 			bi = clen
