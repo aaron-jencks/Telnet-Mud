@@ -22,14 +22,6 @@ type Tile struct {
 	Icon     string
 }
 
-type Detail struct {
-	Id         int
-	Room       int
-	Direction  string
-	Detail     string
-	Perception int
-}
-
 type Loot struct {
 	Id       int
 	Room     int
@@ -131,24 +123,6 @@ func SetupTables() {
 		"string",
 		"string",
 	}, 0, true)
-
-	// Detail
-	logger.Info("Creating details table")
-	table = db.CreateTableIfNotExist("details", []string{
-		"Id",
-		"Room",
-		"Direction",
-		"Detail",
-		"Perception",
-	}, []string{
-		"integer",
-		"integer",
-		"string",
-		"string",
-		"integer",
-	}, 0, true)
-	index = db.CreateIndex(table.CSV, "Room")
-	table.Info.Indices["Room"] = index
 
 	// Loot
 	logger.Info("Creating loot table")
