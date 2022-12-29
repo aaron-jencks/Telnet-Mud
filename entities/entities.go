@@ -57,18 +57,20 @@ type Item struct {
 }
 
 type Player struct {
-	Id       int
-	Name     string
-	Password string
-	Dex      int
-	Str      int
-	Int      int
-	Wis      int
-	Con      int
-	Chr      int
-	Room     int
-	RoomX    int
-	RoomY    int
+	Id             int
+	Name           string
+	Password       string
+	Dex            int
+	Str            int
+	Int            int
+	Wis            int
+	Con            int
+	Chr            int
+	Room           int
+	RoomX          int
+	RoomY          int
+	ActionCapacity int
+	CurrentMode    string
 }
 
 type Inventory struct {
@@ -219,6 +221,8 @@ func SetupTables() {
 		"Room",
 		"RoomX",
 		"RoomY",
+		"ActionCapacity",
+		"CurrentMode",
 	}, []string{
 		"integer",
 		"string",
@@ -232,6 +236,8 @@ func SetupTables() {
 		"integer",
 		"integer",
 		"integer",
+		"integer",
+		"string",
 	}, 1, true)
 
 	// Inventoriy

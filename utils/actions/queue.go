@@ -12,6 +12,15 @@ type ActionQueue struct {
 	QueueSizeLock  sync.Mutex
 }
 
+func CreateActionQueue(maxCapacity int) *ActionQueue {
+	return &ActionQueue{
+		MaxLength:      maxCapacity,
+		QueueWriteLock: sync.Mutex{},
+		QueueReadLock:  sync.Mutex{},
+		QueueSizeLock:  sync.Mutex{},
+	}
+}
+
 func (q *ActionQueue) waitForSpace() {
 	if q.Length() == q.MaxLength {
 		q.QueueSizeLock.Lock()
