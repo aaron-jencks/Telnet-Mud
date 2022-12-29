@@ -5,6 +5,17 @@ import (
 	"mud/utils/ui/logger"
 )
 
+type TileVariant struct {
+	Id   int
+	Name string
+	Icon string
+}
+
+type VariantType struct {
+	Id          int
+	HandlerType string
+}
+
 type Tile struct {
 	Name     string
 	IconType string
@@ -82,6 +93,28 @@ type Transition struct {
 func SetupTables() {
 	var table db.TableDefinition
 	var index map[string][]int64
+
+	// Variant Type
+	logger.Info("Creating variant types table")
+	table = db.CreateTableIfNotExist("variantTypes", []string{
+		"Id",
+		"HandlerType",
+	}, []string{
+		"integer",
+		"string",
+	}, 0, true)
+
+	// Variant
+	logger.Info("Creating tile variants table")
+	table = db.CreateTableIfNotExist("variants", []string{
+		"Id",
+		"Name",
+		"Icon",
+	}, []string{
+		"integer",
+		"string",
+		"string",
+	}, 0, false)
 
 	// Tile
 	logger.Info("Creating tiles table")
