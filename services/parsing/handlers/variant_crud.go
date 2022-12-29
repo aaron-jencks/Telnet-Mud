@@ -66,14 +66,19 @@ func HandleVariantCrud(conn net.Conn, args []string) parsing.CommandResponse {
 		chat.SendSystemMessage(conn, "Updating a tile variant is not currently supported, please delete and replace")
 
 	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: variant delete \"name\"") {
+		if CheckMinArgs(conn, args, 2, "Usage: variant delete id \"name\"") {
 			return result
 		}
 
-		id := strings.StripQuotes(args[1])
+		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: variant retrieve id \"name\"", "id")
+		if !idParsed {
+			return result
+		}
 
-		variant.CRUD.Delete(id)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Variant %s deleted!", id))
+		name := strings.StripQuotes(args[2])
+
+		variant.CRUD.Delete(id, "Id", name, "Name")
+		chat.SendSystemMessage(conn, fmt.Sprintf("Variant %d(%s) deleted!", id, name))
 	}
 
 	return result
