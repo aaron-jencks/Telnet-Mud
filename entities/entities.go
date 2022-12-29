@@ -16,6 +16,14 @@ type VariantType struct {
 	HandlerType string
 }
 
+type Map struct {
+	Room int
+	Tile string
+	X    int
+	Y    int
+	Z    int
+}
+
 type Tile struct {
 	Name     string
 	IconType string
@@ -76,6 +84,8 @@ type Room struct {
 	Id          int
 	Name        string
 	Description string
+	Height      int
+	Width       int
 }
 
 type Transition struct {
@@ -89,6 +99,22 @@ type Transition struct {
 func SetupTables() {
 	var table db.TableDefinition
 	var index map[string][]int64
+
+	// Map
+	logger.Info("Creating map table")
+	table = db.CreateTableIfNotExist("map", []string{
+		"Room",
+		"Tile",
+		"X",
+		"Y",
+		"Z",
+	}, []string{
+		"integer",
+		"string",
+		"integer",
+		"integer",
+		"integer",
+	}, 0, false)
 
 	// Variant Type
 	logger.Info("Creating variant types table")
@@ -236,10 +262,14 @@ func SetupTables() {
 		"Id",
 		"Name",
 		"Description",
+		"Height",
+		"Width",
 	}, []string{
 		"integer",
 		"string",
 		"string",
+		"integer",
+		"integer",
 	}, 0, true)
 
 	// Transition
