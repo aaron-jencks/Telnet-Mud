@@ -121,8 +121,13 @@ func HandleMapCrud(conn net.Conn, args []string) parsing.CommandResponse {
 			return result
 		}
 
-		tmap.CRUD.Delete(id)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Map %s deleted!", id))
+		zParsed, z := ParseIntegerCheck(conn, args[4], usageString, "z")
+		if !zParsed {
+			return result
+		}
+
+		tmap.CRUD.Delete(rid, "Room", x, "X", y, "Y", z, "Z")
+		chat.SendSystemMessage(conn, fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", rid, x, y, z))
 	}
 
 	return result
