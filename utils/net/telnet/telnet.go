@@ -3,7 +3,6 @@ package telnet
 import (
 	"mud/controllers"
 	"mud/services/chat"
-	"mud/services/parsing"
 	"mud/services/player"
 	"mud/services/terminal"
 	"mud/utils"
@@ -148,7 +147,7 @@ func TelnetHandler(conn net.Conn) {
 			}
 
 			if len(text) > 0 && strings.IsNonEmpty(text) {
-				response := parsing.HandlePacket(conn, text)
+				response := controllers.HandlePacket(conn, text)
 				if response.Global {
 					for _, client := range Clients {
 						SendTarget([]byte(controllers.GetDisplayForConn(client, true, false)), client)
