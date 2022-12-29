@@ -20,6 +20,8 @@ func playerToArr(ps interface{}) []interface{} {
 		pec.Con,
 		pec.Chr,
 		pec.Room,
+		pec.RoomX,
+		pec.RoomY,
 	}
 }
 
@@ -35,6 +37,8 @@ func playerFromArr(data []interface{}) interface{} {
 		Con:      data[8].(int),
 		Chr:      data[9].(int),
 		Room:     data[10].(int),
+		RoomX:    data[11].(int),
+		RoomY:    data[12].(int),
 	}
 }
 
@@ -68,6 +72,10 @@ func playerCreateFunc(table *db.TableDefinition, args ...interface{}) []interfac
 			} else {
 				result[9] = 0
 			}
+
+			// room coords
+			result[10] = 0
+			result[11] = 0
 		}
 
 		return result

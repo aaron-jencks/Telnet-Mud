@@ -67,6 +67,8 @@ type Player struct {
 	Con      int
 	Chr      int
 	Room     int
+	RoomX    int
+	RoomY    int
 }
 
 type Inventory struct {
@@ -215,10 +217,14 @@ func SetupTables() {
 		"Con",
 		"Chr",
 		"Room",
+		"RoomX",
+		"RoomY",
 	}, []string{
 		"integer",
 		"string",
 		"string",
+		"integer",
+		"integer",
 		"integer",
 		"integer",
 		"integer",
