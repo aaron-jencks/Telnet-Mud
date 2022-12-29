@@ -9,43 +9,55 @@ import (
 	"strings"
 )
 
+// The default location of the data tables
+// defaults to "./data"
 var DB_LOCATION string = "./data"
 
+// Creates the correct path for the given file name and extension type
 func createDbPath(name string, ending string) string {
 	return fmt.Sprintf("%s/%s.%s", DB_LOCATION, name, ending)
 }
 
+// Returns the correct csv file path for the given table name
 func createCSVPath(name string) string {
 	return createDbPath(name, "csv")
 }
 
+// Returns the correct json file path for the given table name
 func createJsonPath(name string) string {
 	return createDbPath(name, "json")
 }
 
+// Determines if the table file exists for the given table name
 func TableExists(tableName string) bool {
 	_, err := os.Stat(createCSVPath(tableName))
 	return !os.IsNotExist(err)
 }
 
+// Determines if the DB_LOCATION folder exists
 func DbDirectoryExists() bool {
 	_, err := os.Stat(DB_LOCATION)
 	return !os.IsNotExist(err)
 }
 
+// Contains data for the table information
+// translation information and indices
 type TableInfo struct {
-	ColumnTypes   []string
-	PrimaryKey    int
-	UniquePrimary bool
-	PrimaryIndex  map[string][]int64
-	Indices       map[string]map[string][]int64
+	ColumnTypes   []string                      // The types for the database table, currently ("string", or "integer")
+	PrimaryKey    int                           // The column index of the primary key column
+	UniquePrimary bool                          // Indicates if the primary column should be unique or not (not currently implemented)
+	PrimaryIndex  map[string][]int64            // Indicates which lines correspond to each distinct entry in the primary key column
+	Indices       map[string]map[string][]int64 // Indicates which lines corresponse to indices created for other columns
 }
 
+// Represents a data table
+// Contains the name of the table as well as the csv file
+// and a cache  for requests.
 type TableDefinition struct {
-	Name  string
-	CSV   *csv.CSVFile
-	Info  TableInfo
-	Cache *DataCache
+	Name  string       // the name of the data table
+	CSV   *csv.CSVFile // the csv handler for the table
+	Info  TableInfo    // contains other important information for the table
+	Cache *DataCache   // The in-memory cache for the table
 }
 
 func checkError(e interface{}) {
@@ -55,6 +67,7 @@ func checkError(e interface{}) {
 	}
 }
 
+// Fetches an existing table definition from it's json and csv files
 func FetchTableDefinition(tableName string) TableDefinition {
 	file := csv.ParseCSV(createCSVPath(tableName))
 	var jobj TableInfo
@@ -78,6 +91,7 @@ func FetchTableDefinition(tableName string) TableDefinition {
 	}
 }
 
+// Converts a column name to it's corresponding integer index
 func stringColumnToInt(column string, columns []string) int {
 	var cindex int = -1
 
@@ -95,6 +109,9 @@ func stringColumnToInt(column string, columns []string) int {
 	return cindex
 }
 
+// Creates a new index for a given column
+// An index is a map of unique column entries to their corresponding
+// line numbers in the csv file
 func CreateIndex(file *csv.CSVFile, column string) map[string][]int64 {
 	var index map[string][]int64 = make(map[string][]int64)
 	var cindex int = stringColumnToInt(column, file.Columns)
@@ -119,6 +136,7 @@ func CreateIndex(file *csv.CSVFile, column string) map[string][]int64 {
 	return index
 }
 
+// Updates the json file with the table information
 func UpdateJson(tableName string, info TableInfo) {
 	f, err := os.OpenFile(createJsonPath(tableName), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
 	defer f.Close()
@@ -128,6 +146,8 @@ func UpdateJson(tableName string, info TableInfo) {
 	checkError(err)
 }
 
+// Either fetches or creates the table
+// If fetched, all arguments aside from the tablename are not used.
 func CreateTableIfNotExist(tableName string, columns []string,
 	columnTypes []string, primaryKey int, uniquePrimary bool) TableDefinition {
 	if TableExists(tableName) {
@@ -170,6 +190,7 @@ func CreateTableIfNotExist(tableName string, columns []string,
 
 }
 
+// Deletes a table if it exists
 func DeleteTable(tableName string) {
 	if TableExists(tableName) {
 		os.Remove(createCSVPath(tableName))
@@ -179,6 +200,9 @@ func DeleteTable(tableName string) {
 	logger.Warn("Table %s did not exist", tableName)
 }
 
+// Returns a format string for use in fmt.Sprintf
+// based on the typename given
+// currently supports "string" and "integer"
 func getConversionString(typename string) string {
 	var conversionString string = "%v"
 
@@ -192,6 +216,9 @@ func getConversionString(typename string) string {
 	return conversionString
 }
 
+// Converts a string for storage, this
+// involves replacing possibly erroneously parsable data
+// with escaped versions
 func prepareStringForStorage(data string) string {
 	escapeMap := map[string]string{
 		" ":  "\\s",
@@ -208,6 +235,7 @@ func prepareStringForStorage(data string) string {
 	return data
 }
 
+// Undoes the conversions performed in prepareStringForStorage
 func unpackStoredString(data string) string {
 	escapeMap := map[string]string{
 		"\\s":  " ",
@@ -224,6 +252,8 @@ func unpackStoredString(data string) string {
 	return data
 }
 
+// Converts an any interface type to the corresponding typed string
+// for storage in the csv
 func convertToColumnType(data interface{}, typename string) string {
 	conversionString := getConversionString(typename)
 	if typename == "string" {
@@ -233,6 +263,7 @@ func convertToColumnType(data interface{}, typename string) string {
 	return result
 }
 
+// Converts a stored string in the csv back into the correct typed data.
 func convertFromString(sdata, typename string) interface{} {
 	conversionString := getConversionString(typename)
 
@@ -253,6 +284,8 @@ func convertFromString(sdata, typename string) interface{} {
 	}
 }
 
+// Reparses indices, this is performance heavy,
+// but necessary when modifying the database
 func (td *TableDefinition) UpdateIndices() {
 	// TODO usages of this could be more efficient
 
@@ -275,6 +308,7 @@ func (td *TableDefinition) UpdateIndices() {
 	UpdateJson(td.Name, td.Info)
 }
 
+// Adds new data to the data table and returns the number of lines added
 func (td *TableDefinition) AddData(data [][]interface{}) int {
 	for _, dline := range data {
 		var sdata []string = make([]string, len(dline))
@@ -311,6 +345,7 @@ func (td *TableDefinition) AddData(data [][]interface{}) int {
 	return len(data)
 }
 
+// Deletes a single line from the data table
 func (td *TableDefinition) DeleteLine(line int64) {
 	defer td.UpdateIndices()
 
@@ -318,6 +353,7 @@ func (td *TableDefinition) DeleteLine(line int64) {
 	td.Cache.DeleteEntry(line)
 }
 
+// Deletes multiple lines from the data table
 func (td *TableDefinition) DeleteLines(lines []int64) {
 	defer td.UpdateIndices()
 
@@ -328,6 +364,7 @@ func (td *TableDefinition) DeleteLines(lines []int64) {
 	}
 }
 
+// Deletes all lines matching the given primary key
 func (td *TableDefinition) DeleteDataByKey(key interface{}) {
 	qdata := td.Query(key, td.CSV.Columns[td.Info.PrimaryKey])
 
@@ -339,6 +376,7 @@ func (td *TableDefinition) DeleteDataByKey(key interface{}) {
 	td.DeleteLines(lines)
 }
 
+// Returns whether the given column is indexed or not
 func (td TableDefinition) isIndexed(column string) (bool, bool) {
 	_, nIndex := td.Info.Indices[column]
 
@@ -347,6 +385,7 @@ func (td TableDefinition) isIndexed(column string) (bool, bool) {
 	return nIndex, cindex >= 0 && cindex == td.Info.PrimaryKey
 }
 
+// Retrieves a specific line from the data table
 func (td *TableDefinition) RetrieveLine(line int64) []interface{} {
 	if td.Cache.Exists(line) {
 		return td.Cache.RetrieveEntry(line)
@@ -366,6 +405,8 @@ func (td *TableDefinition) RetrieveLine(line int64) []interface{} {
 	return result
 }
 
+// Query's the table for the given value in the given column
+// Returns all rows matching that value
 func (td *TableDefinition) Query(value interface{}, column string) [][]interface{} {
 	var results [][]interface{}
 
@@ -405,6 +446,9 @@ func (td *TableDefinition) Query(value interface{}, column string) [][]interface
 	return results
 }
 
+// Queries multiple columns similar to Query
+// must pass arguments in in pairs of (value, column)
+// where value is the value to look for and column is the column string
 func (td *TableDefinition) MultiQuery(args ...interface{}) [][]interface{} {
 	var results [][]interface{}
 
@@ -437,10 +481,12 @@ func (td *TableDefinition) MultiQuery(args ...interface{}) [][]interface{} {
 	return results
 }
 
+// Queries the primary key column for the given value
 func (td *TableDefinition) QueryPK(key interface{}) [][]interface{} {
 	return td.Query(key, td.CSV.Columns[td.Info.PrimaryKey])
 }
 
+// Updates a specific line in the data table to the new value
 func (td *TableDefinition) ModifyRow(line int, data []interface{}) {
 	var csvLine []string = make([]string, len(data))
 
@@ -459,6 +505,7 @@ func (td *TableDefinition) ModifyRow(line int, data []interface{}) {
 	td.UpdateIndices()
 }
 
+// Modifies a specific column of the given line
 func (td *TableDefinition) ModifyRowColumn(line int, column string, value interface{}) {
 	currentLine := td.RetrieveLine(int64(line))[1:]
 	cindex := stringColumnToInt(column, td.CSV.Columns)
