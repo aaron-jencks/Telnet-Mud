@@ -6,6 +6,14 @@ import (
 	"mud/utils/io/db"
 )
 
+var TILENOTFOUND entities.Map = entities.Map{
+	Tile: "Not Found",
+	Room: -1,
+	X:    -1,
+	Y:    -1,
+	Z:    -1,
+}
+
 func tileToArr(rs interface{}) []interface{} {
 	rec := rs.(entities.Map)
 	return []interface{}{
@@ -60,7 +68,7 @@ func GetTilesForRoom(room int) []entities.Map {
 	return result
 }
 
-func GetCurrentTilesForCoord(room int, x int, y int) []entities.Map {
+func GetCurrentTilesForCoord(room, x, y int) []entities.Map {
 	roomTiles := GetTilesForRoom(room)
 
 	var result []entities.Map
@@ -73,7 +81,19 @@ func GetCurrentTilesForCoord(room int, x int, y int) []entities.Map {
 	return result
 }
 
-func GetTopMostTile(room int, x int, y int) entities.Map {
+func GetTileForCoord(room, x, y, z int) entities.Map {
+	roomTiles := GetTilesForRoom(room)
+
+	for _, tile := range roomTiles {
+		if tile.X == x && tile.Y == y && tile.Z == z {
+			return tile
+		}
+	}
+
+	return TILENOTFOUND
+}
+
+func GetTopMostTile(room, x, y int) entities.Map {
 	tiles := GetCurrentTilesForCoord(room, x, y)
 
 	var maxT entities.Map
@@ -86,7 +106,7 @@ func GetTopMostTile(room int, x int, y int) entities.Map {
 	return maxT
 }
 
-func GetTilesForRegion(room int, trX, trY, blX, blY int) []entities.Map {
+func GetTilesForRegion(room, trX, trY, blX, blY int) []entities.Map {
 	roomTiles := GetTilesForRoom(room)
 
 	var regionTiles []entities.Map

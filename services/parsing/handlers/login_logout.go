@@ -10,6 +10,7 @@ import (
 
 func HandleLogin(conn net.Conn, args []string) parsing.CommandResponse {
 	var result parsing.CommandResponse = parsing.CommandResponse{
+		Chat:   true,
 		Person: true,
 	}
 
@@ -41,13 +42,17 @@ func HandleLogout(conn net.Conn, args []string) parsing.CommandResponse {
 	if !player.LogoutPlayer(player.PlayerConnectionMap[conn]) {
 		chat.SendSystemMessage(conn, "Sorry, either that account doesn't exist or isn't currently logged in")
 		result.Person = true
+		result.Chat = true
 	}
 
 	return result
 }
 
 func HandleRegister(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{}
+	var result parsing.CommandResponse = parsing.CommandResponse{
+		Chat:   true,
+		Person: true,
+	}
 
 	if player.ConnLoggedIn(conn) {
 		chat.SendSystemMessage(conn, "You're already logged in, you can't register a new user from here!")
@@ -56,8 +61,6 @@ func HandleRegister(conn net.Conn, args []string) parsing.CommandResponse {
 	if CheckArgs(conn, args, 2, "Usage: register username password") {
 		return result
 	}
-
-	result.Person = true
 
 	if !player.RegisterPlayer(args[0], args[1]) {
 		chat.SendSystemMessage(conn, "Sorry, that account already exists")

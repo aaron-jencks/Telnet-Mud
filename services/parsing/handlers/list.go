@@ -26,6 +26,7 @@ func ListInventoryHandler(conn net.Conn, args []string) parsing.CommandResponse 
 	chat.SendSystemMessage(conn, text)
 
 	return parsing.CommandResponse{
+		Chat:   true,
 		Person: true,
 	}
 }

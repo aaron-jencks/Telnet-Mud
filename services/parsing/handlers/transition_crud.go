@@ -12,6 +12,7 @@ import (
 
 func HandleTransitionCrud(conn net.Conn, args []string) parsing.CommandResponse {
 	var result parsing.CommandResponse = parsing.CommandResponse{
+		Chat:   true,
 		Person: true,
 	}
 

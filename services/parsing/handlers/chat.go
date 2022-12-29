@@ -13,7 +13,9 @@ func HandleChat(conn net.Conn, body []string) parsing.CommandResponse {
 		return parsing.CommandResponse{}
 	}
 
-	result := parsing.CommandResponse{}
+	result := parsing.CommandResponse{
+		Chat: true,
+	}
 
 	var senderName string
 	if !player.ConnLoggedIn(conn) {
