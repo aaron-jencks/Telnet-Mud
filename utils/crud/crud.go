@@ -57,6 +57,19 @@ func (c Crud) Retrieve(value interface{}) interface{} {
 	return nil
 }
 
+func (c Crud) RetrieveAll(value interface{}) []interface{} {
+	table := c.FetchTable()
+	results := table.QueryPK(value)
+	if len(results) > 0 {
+		var result []interface{} = make([]interface{}, len(results))
+		for ri, row := range results {
+			result[ri] = c.fromArrFunc(row)
+		}
+		return result
+	}
+	return nil
+}
+
 func (c Crud) Update(retrieveValue interface{}, newValue interface{}) interface{} {
 	table := c.FetchTable()
 	oldRows := table.QueryPK(retrieveValue)
