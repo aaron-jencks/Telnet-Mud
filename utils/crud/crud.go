@@ -81,6 +81,27 @@ func (c Crud) Update(retrieveValue interface{}, newValue interface{}) interface{
 	return nil
 }
 
+func (c Crud) UpdateQuery(retrieveValues []interface{}, retrieveColumns []string, newValue interface{}) interface{} {
+	table := c.FetchTable()
+
+	var queryArgs []interface{} = make([]interface{}, len(retrieveColumns)<<1)
+
+	for ai := range retrieveValues {
+		argsIndex := ai << 1
+		queryArgs[argsIndex] = retrieveValues[ai]
+		queryArgs[argsIndex+1] = retrieveColumns[ai]
+	}
+
+	oldRows := table.MultiQuery(queryArgs...)
+	if len(oldRows) > 0 {
+		line := oldRows[0][0].(int)
+		table.ModifyRow(line, c.toArrFunc(newValue))
+		return newValue
+	}
+
+	return nil
+}
+
 func (c Crud) Delete(keys ...interface{}) {
 	table := c.FetchTable()
 
