@@ -388,7 +388,8 @@ func (td TableDefinition) isIndexed(column string) (bool, bool) {
 // Retrieves a specific line from the data table
 func (td *TableDefinition) RetrieveLine(line int64) []interface{} {
 	if td.Cache.Exists(line) {
-		return td.Cache.RetrieveEntry(line)
+		lineData := td.Cache.RetrieveEntry(line)
+		return append([]interface{}{line}, lineData...)
 	}
 
 	var result []interface{} = make([]interface{}, len(td.CSV.Columns)+1)
