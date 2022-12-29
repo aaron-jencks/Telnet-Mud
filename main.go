@@ -21,6 +21,7 @@ func main() {
 	parsing.RegisterHandler("note", handlers.HandleNoteCrud)
 	parsing.RegisterHandler("inventory", handlers.ListInventoryHandler)
 	parsing.RegisterHandler("tile", handlers.HandleTileCrud)
+	parsing.RegisterHandler("map", handlers.HandleMapCrud)
 	parsing.RegisterHandler("pickup", handlers.HandlePickup)
 	parsing.RegisterHandler("about", handlers.HandleInfo)
 
