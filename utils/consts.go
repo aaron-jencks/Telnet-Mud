@@ -13,7 +13,7 @@ const (
 	MAP_H                       = 10
 	MAP_W                       = 40
 	PLAYER_ICON                 = "\033[30m@\033[0m"
-	DEFAULT_MAP_BACKGROUND      = "\033[42m\u00b0\033[0m"
+	DEFAULT_MAP_BACKGROUND      = "\033[42m\u2591\033[0m"
 	CHAT_H                      = 19
 	CHAT_W                      = 40
 	CONN_PORT                   = "23"
