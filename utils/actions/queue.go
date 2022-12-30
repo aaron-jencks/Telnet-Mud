@@ -80,5 +80,5 @@ func (q *ActionQueue) Dequeue() Action {
 
 		return item
 	}
-	return Action{}
+	return ACTION_NOT_FOUND
 }

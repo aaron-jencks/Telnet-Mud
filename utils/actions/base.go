@@ -15,3 +15,9 @@ type Action struct {
 	AlwaysValid bool
 	ValidModes  []string
 }
+
+var ACTION_NOT_FOUND Action = Action{
+	Name:        "Not Found",
+	Duration:    100,
+	AlwaysValid: false,
+}

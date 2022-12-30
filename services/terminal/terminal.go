@@ -24,11 +24,15 @@ func UnregisterConnection(conn net.Conn) {
 
 func LoadPlayer(conn net.Conn, username string) {
 	p := player.CRUD.Retrieve(username).(entities.Player)
-	r := room.CRUD.Retrieve(p.Room).(entities.Room)
-	TerminalMap[conn] = &Terminal{
-		Room: r,
+	rint := room.CRUD.Retrieve(p.Room)
+
+	if rint != nil {
+		r := rint.(entities.Room)
+		TerminalMap[conn] = &Terminal{
+			Room: r,
+		}
+		EnterRoom(conn, r)
 	}
-	EnterRoom(conn, r)
 }
 
 func AppendGameMessage(conn net.Conn, m string) {
