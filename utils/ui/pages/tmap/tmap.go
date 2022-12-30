@@ -108,6 +108,8 @@ func GetMapWindow(conn net.Conn) string {
 		}
 	}
 
+	currentPort[p.RoomY][p.RoomX] = utils.PLAYER_ICON
+
 	var rows []string = make([]string, len(currentPort))
 	for ri, row := range currentPort {
 		rows[ri] = strings.Join(row, "")
