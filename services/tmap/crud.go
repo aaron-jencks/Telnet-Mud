@@ -55,7 +55,7 @@ func createTileFunc(table *db.TableDefinition, args ...interface{}) []interface{
 	return result
 }
 
-var CRUD crud.Crud = crud.CreateCrud("tiles", tileToArr, tileFromArr, createTileFunc)
+var CRUD crud.Crud = crud.CreateCrud("map", tileToArr, tileFromArr, createTileFunc)
 
 func GetTilesForRoom(room int) []entities.Map {
 	tiles := CRUD.RetrieveAll(room)

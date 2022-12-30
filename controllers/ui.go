@@ -7,6 +7,7 @@ import (
 	"mud/utils/ui/gui"
 	"mud/utils/ui/pages/chat"
 	"mud/utils/ui/pages/terminal"
+	"mud/utils/ui/pages/tmap"
 	"net"
 	"strings"
 )
@@ -26,6 +27,7 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 	} else {
 		result += gui.AnsiOffsetText(40, 0, chat.GetConnChatWindow(conn))
 		result += gui.AnsiOffsetText(0, 0, terminal.GetConnTerminal(conn))
+		result += gui.AnsiOffsetText(0, 10, tmap.GetMapWindow(conn))
 	}
 
 	result += "> "
