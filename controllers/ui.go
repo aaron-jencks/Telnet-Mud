@@ -23,11 +23,11 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 
 	if !player.ConnLoggedIn(conn) {
 		result += MOTD()
-		result += chat.GetConnChatWindow(conn) + "\n"
+		result += chat.GetConnChatWindowModHeight(conn, utils.CHAT_H-2) + "\n"
 	} else {
 		result += gui.AnsiOffsetText(40, 0, chat.GetConnChatWindow(conn))
 		result += gui.AnsiOffsetText(0, 0, terminal.GetConnTerminal(conn))
-		result += gui.AnsiOffsetText(0, 10, tmap.GetMapWindow(conn))
+		result += gui.AnsiOffsetText(0, 9, tmap.GetMapWindow(conn))
 	}
 
 	result += "> "
