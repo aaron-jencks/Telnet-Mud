@@ -28,6 +28,8 @@ type Tile struct {
 	Name     string
 	IconType string
 	Icon     string
+	BG       int
+	FG       int
 }
 
 type Loot struct {
@@ -144,10 +146,14 @@ func SetupTables() {
 		"Name",
 		"IconType",
 		"Icon",
+		"BG",
+		"FG",
 	}, []string{
 		"string",
 		"string",
 		"string",
+		"integer",
+		"integer",
 	}, 0, true)
 
 	// Loot

@@ -22,14 +22,32 @@ func HandleTileCrud(conn net.Conn, args []string) parsing.CommandResponse {
 
 	switch args[0] {
 	case "create":
-		if CheckMinArgs(conn, args, 4, "Usage: tile create \"name\" \"type\" \"icon\"") {
+		usageString := "Usage: tile create \"name\" \"type\" \"icon\" [bg fg]"
+		if CheckMinArgs(conn, args, 4, usageString) {
 			return result
 		}
 
-		nr := tile.CRUD.Create(
-			strings.StripQuotes(args[1]),
-			strings.StripQuotes(args[2]),
-			parsing.ParseIconString(strings.StripQuotes(args[3]))).(entities.Tile)
+		name := strings.StripQuotes(args[1])
+		itype := strings.StripQuotes(args[2])
+		icon := parsing.ParseIconString(strings.StripQuotes(args[3]))
+		var nr entities.Tile
+
+		if len(args) == 6 {
+			bgParsed, bg := ParseIntegerCheck(conn, args[4], usageString, "bg")
+			if !bgParsed {
+				return result
+			}
+
+			fgParsed, fg := ParseIntegerCheck(conn, args[5], usageString, "fg")
+			if !fgParsed {
+				return result
+			}
+
+			nr = tile.CRUD.Create(name, itype, icon, bg, fg).(entities.Tile)
+		} else {
+			nr = tile.CRUD.Create(name, itype, icon).(entities.Tile)
+		}
+
 		chat.SendSystemMessage(conn, fmt.Sprintf("Tile %s created!", nr.Name))
 
 	case "retrieve":
@@ -39,15 +57,16 @@ func HandleTileCrud(conn net.Conn, args []string) parsing.CommandResponse {
 
 		r := tile.CRUD.Retrieve(strings.StripQuotes(args[1])).(entities.Tile)
 		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Tile:\nName: \"%s\"\nType: \"%s\"\nIcon: \"%s\"",
-				r.Name, r.IconType, r.Icon))
+			fmt.Sprintf("Tile:\nName: \"%s\"\nType: \"%s\"\nIcon: \"\033[%dm\033%dm%s\033[0m\"",
+				r.Name, r.IconType, r.BG, r.FG, r.Icon))
 
 	case "update":
-		if CheckMinArgs(conn, args, 4, "Usage: tile update \"name\" (name|type|icon) \"newValue\"") {
+		usageString := "Usage: tile update \"name\" (name|type|icon|bg|fg) \"newValue\""
+		if CheckMinArgs(conn, args, 4, usageString) {
 			return result
 		}
 
-		if CheckStringOptions(conn, args[2], []string{"name", "type", "icon"},
+		if CheckStringOptions(conn, args[2], []string{"name", "type", "icon", "bg", "fg"},
 			"Usage: tile update \"name\" property \"newValue\"", "property") {
 			return result
 		}
@@ -63,6 +82,20 @@ func HandleTileCrud(conn net.Conn, args []string) parsing.CommandResponse {
 			r.IconType = nv
 		case "icon":
 			r.Icon = parsing.ParseIconString(nv)
+		case "bg":
+			bgParsed, bg := ParseIntegerCheck(conn, nv, usageString, "bg")
+			if !bgParsed {
+				return result
+			}
+
+			r.BG = bg
+		case "fg":
+			fgParsed, fg := ParseIntegerCheck(conn, nv, usageString, "fg")
+			if !fgParsed {
+				return result
+			}
+
+			r.FG = fg
 		}
 
 		nr := tile.CRUD.Update(id, r).(entities.Tile)

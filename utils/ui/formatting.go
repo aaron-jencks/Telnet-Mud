@@ -171,3 +171,7 @@ func FindFirstNCharacters(s string, n int) string {
 
 	return result
 }
+
+func AddBackground(bg int, inner string) string {
+	return CSI(fmt.Sprint(bg), "m") + inner + CSI("0", "m")
+}

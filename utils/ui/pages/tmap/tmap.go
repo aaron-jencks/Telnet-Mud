@@ -1,12 +1,14 @@
 package tmap
 
 import (
+	"fmt"
 	"mud/entities"
 	"mud/services/player"
 	"mud/services/room"
 	"mud/services/tile"
 	"mud/services/tmap"
 	"mud/utils"
+	"mud/utils/ui"
 	"mud/utils/ui/gui"
 	"net"
 	"strings"
@@ -79,6 +81,18 @@ func GetMapPortCoords(p entities.Player) (int, int, int, int) {
 	return 0, 0, utils.MAP_W - 2 - 1, utils.MAP_H - 2 - 1
 }
 
+type TileInfo struct {
+	Icon  string
+	FG    int
+	BG    int
+	IconZ int
+	BGZ   int
+}
+
+func (ti TileInfo) ToString() string {
+	return ui.AddBackground(ti.BG, ui.CSI(fmt.Sprint(ti.FG), "m")+ti.Icon)
+}
+
 func GetMapWindow(conn net.Conn) string {
 	p := player.CRUD.Retrieve(player.PlayerConnectionMap[conn]).(entities.Player)
 
@@ -86,33 +100,47 @@ func GetMapWindow(conn net.Conn) string {
 
 	tiles := tmap.GetTilesForRegion(p.Room, trx, try, blx, bly)
 
-	var currentPort [][]string = make([][]string, utils.MAP_H-2)
-	var currentPortLevel [][]int = make([][]int, utils.MAP_H-2)
+	var currentPort [][]TileInfo = make([][]TileInfo, utils.MAP_H-2)
 	for row := 0; row < utils.MAP_H-2; row++ {
-		currentPort[row] = make([]string, utils.MAP_W-2)
-		currentPortLevel[row] = make([]int, utils.MAP_W-2)
+		currentPort[row] = make([]TileInfo, utils.MAP_W-2)
 		for col := 0; col < utils.MAP_W-2; col++ {
-			currentPort[row][col] = utils.DEFAULT_MAP_BACKGROUND
-			currentPortLevel[row][col] = -1
+			currentPort[row][col] = TileInfo{
+				Icon:  utils.DEFAULT_MAP_BACKGROUND,
+				FG:    utils.DEFAULT_MAP_BACKGROUND_FG_COLOR,
+				BG:    utils.DEFAULT_MAP_BACKGROUND_BG_COLOR,
+				IconZ: -1,
+				BGZ:   -1,
+			}
 		}
 	}
 
 	for _, mtile := range tiles {
-		if mtile.Z > currentPortLevel[mtile.Y][mtile.X] {
-			tilent := tile.CRUD.Retrieve(mtile.Tile).(entities.Tile)
+		tilent := tile.CRUD.Retrieve(mtile.Tile).(entities.Tile)
 
+		if mtile.Z > currentPort[mtile.Y][mtile.X].IconZ {
 			// TODO add variant parsing here
 
-			currentPort[mtile.Y][mtile.X] = tilent.Icon
-			currentPortLevel[mtile.Y][mtile.X] = mtile.Z
+			currentPort[mtile.Y][mtile.X].Icon = tilent.Icon
+			currentPort[mtile.Y][mtile.X].FG = tilent.FG
+			currentPort[mtile.Y][mtile.X].IconZ = mtile.Z
+		}
+
+		if tilent.BG > 0 && mtile.Z > currentPort[mtile.Y][mtile.X].BGZ {
+			currentPort[mtile.Y][mtile.X].BG = tilent.BG
+			currentPort[mtile.Y][mtile.X].BGZ = mtile.Z
 		}
 	}
 
-	currentPort[p.RoomY][p.RoomX] = utils.PLAYER_ICON
+	currentPort[p.RoomY][p.RoomX].Icon = utils.PLAYER_ICON
+	currentPort[p.RoomY][p.RoomX].FG = utils.PLAYER_ICON_COLOR
 
 	var rows []string = make([]string, len(currentPort))
 	for ri, row := range currentPort {
-		rows[ri] = strings.Join(row, "")
+		var stringRow []string = make([]string, len(row))
+		for ci, col := range row {
+			stringRow[ci] = col.ToString()
+		}
+		rows[ri] = strings.Join(stringRow, "")
 	}
 
 	return gui.SizedBoxText(strings.Join(rows, "\n"), utils.MAP_H, utils.MAP_W)
