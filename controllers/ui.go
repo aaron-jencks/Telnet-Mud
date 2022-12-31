@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"mud/services/parsing"
 	"mud/services/player"
 	"mud/utils"
 	"mud/utils/ui"
@@ -45,4 +46,8 @@ func MOTD() string {
 			"Welcome! Please login using the 'login' command or create a new account using the 'register' command.\n\r",
 			utils.WINDOW_W),
 		"\n\r")
+}
+
+func HandleCommandResponse(conn net.Conn, data parsing.CommandResponse) string {
+
 }

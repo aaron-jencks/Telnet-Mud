@@ -29,6 +29,7 @@ func SendDirectMessage(conn net.Conn, sender, message string) {
 	MessageLogMap[conn] = append(MessageLogMap[conn],
 		gui.FormatChatEntry(sender,
 			ui.StripIllegalChars(message)))
+	player.PushAction()
 }
 
 func SendSystemMessage(conn net.Conn, message string) {

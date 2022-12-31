@@ -8,6 +8,7 @@ import (
 type CommandResponse struct {
 	Map      bool
 	Chat     bool
+	Info     bool
 	Person   bool
 	Global   bool
 	Specific []string
