@@ -118,7 +118,7 @@ func AnsiOffsetText(x, y int, text string) string {
 
 	sep := ui.CSI("B") + ui.CSI(fmt.Sprint(x+1), "G")
 
-	result += strings.Join(lines, sep) + sep
+	result += strings.Join(lines, sep)
 
 	return result
 }

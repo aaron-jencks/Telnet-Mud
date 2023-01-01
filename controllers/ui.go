@@ -25,7 +25,7 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen, wchat, info, dtma
 
 	if !player.ConnLoggedIn(conn) {
 		result += MOTD()
-		result += chat.GetConnChatWindowModHeight(conn, utils.CHAT_H-2) + "\n"
+		result += chat.GetConnChatWindowModHeight(conn, utils.CHAT_H-2)
 	} else {
 		if wchat {
 			result += gui.AnsiOffsetText(40, 0, chat.GetConnChatWindow(conn))
