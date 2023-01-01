@@ -1,10 +1,10 @@
 package main
 
 import (
+	"mud/controllers/telnet/rx"
 	"mud/entities"
 	"mud/services/parsing"
 	"mud/services/parsing/handlers"
-	"mud/utils/net/telnet"
 )
 
 func main() {
@@ -25,5 +25,5 @@ func main() {
 	parsing.RegisterHandler("pickup", handlers.HandlePickup)
 	parsing.RegisterHandler("about", handlers.HandleInfo)
 
-	telnet.TelnetListenAndServe()
+	rx.TelnetListenAndServe()
 }

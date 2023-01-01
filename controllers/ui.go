@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"mud/controllers/telnet/tx"
 	"mud/services/parsing"
 	"mud/services/player"
 	"mud/utils"
@@ -13,7 +14,7 @@ import (
 	"strings"
 )
 
-func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
+func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen, wchat, info, dtmap bool) string {
 	var result string
 
 	if clearScreen {
@@ -26,12 +27,18 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen bool) string {
 		result += MOTD()
 		result += chat.GetConnChatWindowModHeight(conn, utils.CHAT_H-2) + "\n"
 	} else {
-		result += gui.AnsiOffsetText(40, 0, chat.GetConnChatWindow(conn))
-		result += gui.AnsiOffsetText(0, 0, terminal.GetConnTerminal(conn))
-		result += gui.AnsiOffsetText(0, 9, tmap.GetMapWindow(conn))
+		if wchat {
+			result += gui.AnsiOffsetText(40, 0, chat.GetConnChatWindow(conn))
+		}
+		if info {
+			result += gui.AnsiOffsetText(0, 0, terminal.GetConnTerminal(conn))
+		}
+		if dtmap {
+			result += gui.AnsiOffsetText(0, 9, tmap.GetMapWindow(conn))
+		}
 	}
 
-	result += "> "
+	result += gui.AnsiOffsetText(0, 19, "> ")
 
 	if saveCursor {
 		result = ui.SaveAndResetCursor(result)
@@ -48,6 +55,22 @@ func MOTD() string {
 		"\n\r")
 }
 
-func HandleCommandResponse(conn net.Conn, data parsing.CommandResponse) string {
+func HandleCommandResponse(conn net.Conn, data parsing.CommandResponse) {
+	if data.Global {
+		for _, client := range tx.Clients {
+			tx.SendTarget([]byte(GetDisplayForConn(client, true, false,
+				data.Chat, data.Info, data.Map)), client)
+		}
+	} else {
+		if len(data.Specific) > 0 {
+			for _, user := range data.Specific {
+				client := player.LoggedInPlayerMap[user]
+				tx.SendTarget([]byte(GetDisplayForConn(client, true, false,
+					data.Chat, data.Info, data.Map)), client)
+			}
+		}
+	}
 
+	tx.SendTarget([]byte(GetDisplayForConn(conn, true, false,
+		data.Chat, data.Info, data.Map)), conn)
 }
