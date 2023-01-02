@@ -5,10 +5,13 @@ import (
 	"mud/entities"
 	"mud/services/parsing"
 	"mud/services/parsing/handlers"
+	"mud/services/player"
 )
 
 func main() {
 	entities.SetupTables()
+
+	player.CreateDefaultGlobalHandler()
 
 	parsing.RegisterHandler("login", handlers.HandleLogin)
 	parsing.RegisterHandler("logout", handlers.HandleLogout)

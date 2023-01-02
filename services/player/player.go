@@ -108,6 +108,13 @@ var LoggedInPlayerMap map[string]net.Conn = make(map[string]net.Conn)
 var PlayerConnectionMap map[net.Conn]string = make(map[net.Conn]string)
 var PlayerQueueMap map[string]*actions.ActionQueue = make(map[string]*actions.ActionQueue)
 
+func CreateDefaultGlobalHandler() {
+	_, ok := PlayerQueueMap[""]
+	if !ok {
+		PlayerQueueMap[""] = actions.CreateActionQueue(utils.DEFAULT_GLOBAL_ACTION_LIMIT)
+	}
+}
+
 func LoginPlayer(name string, password string, conn net.Conn) bool {
 	if PlayerExists(name) && CRUD.Retrieve(name).(entities.Player).Password == password {
 		_, ok := LoggedInPlayerMap[name]
