@@ -56,12 +56,13 @@ func TelnetHandler(conn net.Conn) {
 		AlwaysValid: true,
 		Handler: func() parsing.CommandResponse {
 			return parsing.CommandResponse{
-				Clear:  true,
-				Chat:   true,
-				Map:    true,
-				Info:   true,
-				Conn:   conn,
-				Person: true,
+				LoggedIn: false,
+				Clear:    true,
+				Chat:     true,
+				Map:      true,
+				Info:     true,
+				Conn:     conn,
+				Person:   true,
 			}
 		},
 	})

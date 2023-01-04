@@ -14,6 +14,10 @@ func ResetCursorPosition() string {
 	return ui.CSI(";H")
 }
 
+func EraseToEndOfLine() string {
+	return ui.CSI("0", "K")
+}
+
 func CenterAlignText(text string, length int) string {
 	tlen := len(text)
 

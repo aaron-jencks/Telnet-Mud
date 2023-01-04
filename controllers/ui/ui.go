@@ -41,6 +41,9 @@ func GetDisplayForConn(conn net.Conn, p entities.Player,
 	}
 
 	result += gui.AnsiOffsetText(0, 19, "> ")
+	if !saveCursor {
+		result += gui.EraseToEndOfLine()
+	}
 
 	if saveCursor {
 		result = ui.SaveAndResetCursor(result)
@@ -60,18 +63,21 @@ func MOTD() string {
 func HandleCommandResponse(data parsing.CommandResponse) {
 	if data.Global {
 		for _, client := range tx.Clients {
-			tx.SendTarget([]byte(GetDisplayForConn(client, data.Player, true, false,
-				data.LoggedIn, data.Chat, data.Info, data.Map)), client)
+			tx.SendTarget([]byte(GetDisplayForConn(client, data.Player, data.LoggedIn,
+				true, false,
+				data.Chat, data.Info, data.Map)), client)
 		}
 	} else {
 		if len(data.Specific) > 0 {
 			for _, user := range data.Specific {
-				tx.SendTarget([]byte(GetDisplayForConn(user, data.Player, true, false,
-					data.LoggedIn, data.Chat, data.Info, data.Map)), user)
+				tx.SendTarget([]byte(GetDisplayForConn(user, data.Player, data.LoggedIn,
+					true, false,
+					data.Chat, data.Info, data.Map)), user)
 			}
 		}
 	}
 
-	tx.SendTarget([]byte(GetDisplayForConn(data.Conn, data.Player, true, false,
-		data.LoggedIn, data.Chat, data.Info, data.Map)), data.Conn)
+	tx.SendTarget([]byte(GetDisplayForConn(data.Conn, data.Player, data.LoggedIn,
+		false, data.Clear,
+		data.Chat, data.Info, data.Map)), data.Conn)
 }
