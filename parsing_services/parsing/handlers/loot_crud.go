@@ -3,9 +3,9 @@ package handlers
 import (
 	"fmt"
 	"mud/entities"
+	"mud/parsing_services/parsing"
 	"mud/services/chat"
 	"mud/services/loot"
-	"mud/services/parsing"
 	"net"
 )
 

@@ -26,6 +26,8 @@ func GenerateRandomUsername(conn net.Conn) string {
 		if !ok {
 			namesCurrentlyInUse[sResult] = conn
 			connAnonNameMap[conn] = sResult
+
+			CreateAnonymousHandler(sResult)
 			return sResult
 		}
 	}
@@ -36,6 +38,7 @@ func UnregisterAnonymousName(name string) {
 	if ok {
 		delete(namesCurrentlyInUse, name)
 		delete(connAnonNameMap, conn)
+		UnregisterHandler(name)
 	}
 }
 

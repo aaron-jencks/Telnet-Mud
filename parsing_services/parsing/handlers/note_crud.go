@@ -3,10 +3,10 @@ package handlers
 import (
 	"fmt"
 	"mud/entities"
+	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/services/chat"
 	"mud/services/note"
-	"mud/services/parsing"
-	"mud/services/player"
 	"mud/utils/strings"
 	"net"
 )

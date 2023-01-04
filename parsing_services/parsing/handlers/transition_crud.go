@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"fmt"
+	"mud/parsing_services/parsing"
 	"mud/services/chat"
 	"mud/services/command"
-	"mud/services/parsing"
 	"mud/services/transition"
 	"mud/utils/strings"
 	"net"

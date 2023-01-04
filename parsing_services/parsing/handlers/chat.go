@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	chatService "mud/services/chat"
-	"mud/services/parsing"
-	"mud/services/player"
 	"net"
 	"strings"
 )

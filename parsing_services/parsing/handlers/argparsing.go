@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
+	"mud/parsing_services/player"
 	"mud/services/chat"
-	"mud/services/player"
 	mstrings "mud/utils/strings"
 	"net"
 	"strings"

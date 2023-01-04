@@ -148,6 +148,12 @@ func LogoutPlayer(name string) bool {
 	return false
 }
 
+func UnregisterHandler(name string) {
+	EnqueueAction(name, definitions.Action{
+		Name: "STOP",
+	})
+}
+
 func PlayerLoggedIn(name string) bool {
 	_, ok := LoggedInPlayerMap[name]
 	return ok
