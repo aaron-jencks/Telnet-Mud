@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"mud/controllers/telnet/tx"
-	"mud/services/parsing"
-	"mud/services/player"
+	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/utils"
 	"mud/utils/ui"
 	"mud/utils/ui/gui"

@@ -2,15 +2,15 @@ package controllers
 
 import (
 	"fmt"
+	"mud/actions/definitions"
 	"mud/entities"
+	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/services/chat"
-	"mud/services/parsing"
-	"mud/services/player"
-	"mud/utils/actions"
 	"net"
 )
 
-func ParseActions(conn net.Conn, actions []actions.Action) parsing.CommandResponse {
+func ParseActions(conn net.Conn, actions []definitions.Action) parsing.CommandResponse {
 	result := parsing.CommandResponse{
 		Person: true,
 	}

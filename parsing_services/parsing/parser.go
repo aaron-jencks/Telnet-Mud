@@ -9,6 +9,7 @@ type CommandResponse struct {
 	Map      bool
 	Chat     bool
 	Info     bool
+	Clear    bool
 	Person   bool
 	Global   bool
 	Specific []string
@@ -16,7 +17,7 @@ type CommandResponse struct {
 
 type DirectMessageMap map[string]string
 
-type CommandHandler func(net.Conn, []string) CommandResponse
+type CommandHandler func(net.Conn, []string)
 
 var CommandMap map[string]CommandHandler = map[string]CommandHandler{}
 

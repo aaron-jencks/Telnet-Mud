@@ -3,7 +3,7 @@ package tmap
 import (
 	"fmt"
 	"mud/entities"
-	"mud/services/player"
+	"mud/parsing_services/player"
 	"mud/services/room"
 	"mud/services/tile"
 	"mud/services/tmap"

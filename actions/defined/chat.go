@@ -1,20 +1,19 @@
 package defined
 
 import (
-	"mud/entities"
+	"mud/actions/definitions"
+	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/services/chat"
-	"mud/services/parsing"
-	"mud/services/player"
-	"mud/utils/actions"
 	"net"
 )
 
-func CreateInfoAction(conn net.Conn, message string) actions.Action {
-	return actions.Action{
+func CreateInfoAction(conn net.Conn, message string) definitions.Action {
+	return definitions.Action{
 		Name:        "System Message",
 		Duration:    0,
 		AlwaysValid: true,
-		Handler: func(p entities.Player) parsing.CommandResponse {
+		Handler: func() parsing.CommandResponse {
 			chat.SendSystemMessage(conn, message)
 
 			response := parsing.CommandResponse{

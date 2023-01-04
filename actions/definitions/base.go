@@ -1,12 +1,11 @@
-package actions
+package definitions
 
 import (
-	"mud/entities"
-	"mud/services/parsing"
+	"mud/parsing_services/parsing"
 	"time"
 )
 
-type ActionHandler func(entities.Player) parsing.CommandResponse
+type ActionHandler func() parsing.CommandResponse
 
 type Action struct {
 	Name        string

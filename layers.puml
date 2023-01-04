@@ -1,21 +1,38 @@
 @startuml
-package Telnet {
-    package Tx 
-    package Rx 
+package controllers {
+    package Telnet {
+        package Tx 
+        package Rx 
+    }
+    package Parsing  
+    package Anonymous
 }
-package Parsing  
-package Action_Service
-package Player_Service
-package Actions 
-package Services 
-package Databases 
+package Parsing_Services {
+    package StringParsing
+    package Action_Service
+    package Player_Service
+    package Handlers
+}
+package Actions {
+    package Defined
+    package Definitions
+}
+package Entities {
+    package EServices 
+    package Databases 
+}
 
 Rx --> Parsing
+Rx --> Anonymous
 Parsing --> Action_Service
+Parsing <-- StringParsing
+Parsing --> Anonymous
+Parsing --> Defined
 Action_Service --> Player_Service
-Action_Service <-- Actions
-Player_Service <-- Actions
-Tx <-- Services
-Actions --> Services
-Services --> Databases
+Action_Service <-- Definitions
+Player_Service <-- Definitions
+Tx <-- EServices
+Defined --> EServices
+Definitions --> Defined
+EServices --> Databases
 @enduml

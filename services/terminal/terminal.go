@@ -2,7 +2,7 @@ package terminal
 
 import (
 	"mud/entities"
-	"mud/services/player"
+	"mud/parsing_services/player"
 	"mud/services/room"
 	"net"
 )

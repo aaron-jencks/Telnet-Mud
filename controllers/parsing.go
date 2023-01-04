@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"mud/services/actions"
-	"mud/services/actions/defined"
-	"mud/services/parsing"
-	"mud/services/player"
+	"mud/actions"
+	"mud/actions/defined"
+	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/utils/strings"
 	"mud/utils/ui/logger"
 	"net"
@@ -27,7 +27,7 @@ func HandlePacket(conn net.Conn, data []byte) {
 		if player.ConnLoggedIn(conn) {
 			actions.ParseString(conn, string(data))
 		} else {
-			player.PushAction("", defined.CreateInfoAction(conn, "You need to login first!"))
+			player.PushAction(player.GetAnonymousUsername(conn), defined.CreateInfoAction(conn, "You need to login first!"))
 		}
 	}
 }

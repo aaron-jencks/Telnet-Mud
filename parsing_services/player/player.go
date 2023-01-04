@@ -1,9 +1,9 @@
 package player
 
 import (
+	"mud/actions/definitions"
 	"mud/entities"
 	"mud/utils"
-	"mud/utils/actions"
 	"mud/utils/crud"
 	"mud/utils/io/db"
 	"net"
@@ -106,12 +106,12 @@ func PlayerExists(name string) bool {
 
 var LoggedInPlayerMap map[string]net.Conn = make(map[string]net.Conn)
 var PlayerConnectionMap map[net.Conn]string = make(map[net.Conn]string)
-var PlayerQueueMap map[string]*actions.ActionQueue = make(map[string]*actions.ActionQueue)
+var PlayerQueueMap map[string]*definitions.ActionQueue = make(map[string]*definitions.ActionQueue)
 
-func CreateDefaultGlobalHandler() {
-	_, ok := PlayerQueueMap[""]
+func CreateAnonymousHandler(username string) {
+	_, ok := PlayerQueueMap[username]
 	if !ok {
-		PlayerQueueMap[""] = actions.CreateActionQueue(utils.DEFAULT_GLOBAL_ACTION_LIMIT)
+		PlayerQueueMap[username] = definitions.CreateActionQueue(utils.DEFAULT_GLOBAL_ACTION_LIMIT)
 	}
 }
 
@@ -120,7 +120,7 @@ func LoginPlayer(name string, password string, conn net.Conn) bool {
 		_, ok := LoggedInPlayerMap[name]
 		if !ok {
 			LoggedInPlayerMap[name] = conn
-			PlayerQueueMap[name] = actions.CreateActionQueue(CRUD.Retrieve(name).(entities.Player).ActionCapacity)
+			PlayerQueueMap[name] = definitions.CreateActionQueue(CRUD.Retrieve(name).(entities.Player).ActionCapacity)
 			PlayerConnectionMap[conn] = name
 
 			// Launch the action processing loop for the player
@@ -139,7 +139,7 @@ func LogoutPlayer(name string) bool {
 		delete(PlayerConnectionMap, conn)
 
 		// Signals to the action handler to quit
-		EnqueueAction(name, actions.Action{
+		EnqueueAction(name, definitions.Action{
 			Name: "STOP",
 		})
 
@@ -166,26 +166,34 @@ func ConnLoggedIn(conn net.Conn) bool {
 	return ok
 }
 
-func EnqueueAction(p string, a actions.Action) {
+func EnqueueAction(p string, a definitions.Action) {
 	PlayerQueueMap[p].Enqueue(a)
 }
 
-func EnqueueActions(player string, actions []actions.Action) {
+func EnqueueActions(player string, actions []definitions.Action) {
 	for _, action := range actions {
 		EnqueueAction(player, action)
 	}
 }
 
-func PushAction(p string, a actions.Action) {
+func PushAction(p string, a definitions.Action) {
 	PlayerQueueMap[p].Push(a)
 }
 
-func PushActions(player string, actions []actions.Action) {
+func PushActions(player string, actions []definitions.Action) {
 	for _, action := range actions {
 		PushAction(player, action)
 	}
 }
 
-func GetNextAction(player string) actions.Action {
+func GetNextAction(player string) definitions.Action {
 	return PlayerQueueMap[player].Dequeue()
+}
+
+func GetConnUsername(conn net.Conn) string {
+	if ConnLoggedIn(conn) {
+		return PlayerConnectionMap[conn]
+	} else {
+		return GetAnonymousUsername(conn)
+	}
 }

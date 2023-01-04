@@ -2,11 +2,11 @@ package actions
 
 import (
 	"fmt"
+	"mud/actions/handlers"
 	"mud/entities"
-	"mud/services/actions/handlers"
+	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/services/chat"
-	"mud/services/parsing"
-	"mud/services/player"
 	"net"
 )
 

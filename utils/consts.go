@@ -27,4 +27,5 @@ const (
 	DEFAULT_PLAYER_ACTION_LIMIT     = 10
 	DEFAULT_GLOBAL_ACTION_LIMIT     = 1000
 	DEFAULT_PLAYER_MODE             = "normal"
+	MIN_USERNAME_LENGTH             = 8
 )

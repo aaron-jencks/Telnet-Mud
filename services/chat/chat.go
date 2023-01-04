@@ -1,7 +1,7 @@
 package chat
 
 import (
-	"mud/services/player"
+	"mud/parsing_services/player"
 	"mud/services/terminal"
 	"mud/utils"
 	"mud/utils/ui"

@@ -3,6 +3,7 @@ package rx
 import (
 	"mud/controllers"
 	"mud/controllers/telnet/tx"
+	"mud/parsing_services/player"
 	"mud/utils"
 	"mud/utils/net/telnet"
 	"mud/utils/strings"
@@ -40,7 +41,10 @@ func TelnetHandler(conn net.Conn) {
 	defer tx.RemoveClient(cid)
 	defer conn.Close()
 
-	logger.Info("New Connection from %s", conn.RemoteAddr().String())
+	anonUsername := player.GenerateRandomUsername(conn)
+	defer player.UnregisterAnonymousName(anonUsername)
+
+	logger.Info("New Connection from %s. Assigned to %s", conn.RemoteAddr().String(), anonUsername)
 
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
