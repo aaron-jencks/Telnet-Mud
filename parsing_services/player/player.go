@@ -112,6 +112,8 @@ func CreateAnonymousHandler(username string) {
 	_, ok := PlayerQueueMap[username]
 	if !ok {
 		PlayerQueueMap[username] = definitions.CreateActionQueue(utils.DEFAULT_GLOBAL_ACTION_LIMIT)
+
+		go ActionHandler(username)
 	}
 }
 

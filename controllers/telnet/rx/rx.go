@@ -1,13 +1,14 @@
 package rx
 
 import (
+	"mud/actions/definitions"
 	"mud/controllers"
 	"mud/controllers/telnet/tx"
+	"mud/parsing_services/parsing"
 	"mud/parsing_services/player"
 	"mud/utils"
 	"mud/utils/net/telnet"
 	"mud/utils/strings"
-	"mud/utils/ui/gui"
 	"mud/utils/ui/logger"
 	"net"
 	"time"
@@ -49,8 +50,21 @@ func TelnetHandler(conn net.Conn) {
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
 
-	tx.SendTarget([]byte(gui.Clearscreen()), conn)
-	tx.SendTarget([]byte(controllers.GetDisplayForConn(conn, false, true, true, true, true)), conn)
+	player.PushAction(anonUsername, definitions.Action{
+		Name:        "Initial Display",
+		Duration:    0,
+		AlwaysValid: true,
+		Handler: func() parsing.CommandResponse {
+			return parsing.CommandResponse{
+				Clear:  true,
+				Chat:   true,
+				Map:    true,
+				Info:   true,
+				Conn:   conn,
+				Person: true,
+			}
+		},
+	})
 
 	for {
 		// Read the incoming connection into the buffer.

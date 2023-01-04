@@ -1,18 +1,22 @@
 package parsing
 
 import (
+	"mud/entities"
 	"mud/utils/ui/logger"
 	"net"
 )
 
 type CommandResponse struct {
+	LoggedIn bool
 	Map      bool
 	Chat     bool
 	Info     bool
 	Clear    bool
 	Person   bool
 	Global   bool
-	Specific []string
+	Conn     net.Conn
+	Player   entities.Player
+	Specific []net.Conn
 }
 
 type DirectMessageMap map[string]string

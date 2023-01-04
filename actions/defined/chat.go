@@ -5,6 +5,7 @@ import (
 	"mud/parsing_services/parsing"
 	"mud/parsing_services/player"
 	"mud/services/chat"
+	"mud/services/terminal"
 	"net"
 )
 
@@ -14,7 +15,13 @@ func CreateInfoAction(conn net.Conn, message string) definitions.Action {
 		Duration:    0,
 		AlwaysValid: true,
 		Handler: func() parsing.CommandResponse {
-			chat.SendSystemMessage(conn, message)
+			loggedIn := player.ConnLoggedIn(conn)
+
+			if loggedIn {
+				terminal.AppendGameMessage(conn, message)
+			} else {
+				chat.SendSystemMessage(conn, message)
+			}
 
 			response := parsing.CommandResponse{
 				Person: true,

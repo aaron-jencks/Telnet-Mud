@@ -31,11 +31,13 @@ func HandleChat(conn net.Conn, body []string) parsing.CommandResponse {
 			chatService.SendSystemMessage(conn, "That player doese not exist, or is not online")
 		}
 
-		chatService.SendMentionMessage(player.LoggedInPlayerMap[body[0][1:]],
+		tConn := player.LoggedInPlayerMap[body[0][1:]]
+
+		chatService.SendMentionMessage(tConn,
 			senderName, body[0],
 			strings.Join(body[1:], " "))
 
-		result.Specific = append(result.Specific, body[0][1:])
+		result.Specific = append(result.Specific, tConn)
 	} else {
 		// Local chat
 		chatService.SendGlobalMessage(senderName, strings.Join(body, " "))

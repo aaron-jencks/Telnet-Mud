@@ -2,7 +2,6 @@ package terminal
 
 import (
 	"mud/entities"
-	"mud/parsing_services/player"
 	"mud/services/room"
 	"net"
 )
@@ -22,8 +21,7 @@ func UnregisterConnection(conn net.Conn) {
 	delete(TerminalMap, conn)
 }
 
-func LoadPlayer(conn net.Conn, username string) {
-	p := player.CRUD.Retrieve(username).(entities.Player)
+func LoadPlayer(conn net.Conn, p entities.Player) {
 	rint := room.CRUD.Retrieve(p.Room)
 
 	if rint != nil {

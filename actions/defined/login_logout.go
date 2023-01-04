@@ -2,6 +2,7 @@ package defined
 
 import (
 	"mud/actions/definitions"
+	"mud/entities"
 	"mud/parsing_services/parsing"
 	"mud/parsing_services/player"
 	"mud/services/terminal"
@@ -24,7 +25,8 @@ func CreateLoginAction(conn net.Conn, username, password string) definitions.Act
 				player.PushAction(username, CreateInfoAction(conn, "Sorry, either that account doesn't exist or the password is incorrect"))
 				result.Info = true
 			} else {
-				terminal.LoadPlayer(conn, username)
+				p := player.CRUD.Retrieve(username).(entities.Player)
+				terminal.LoadPlayer(conn, p)
 				player.PushAction(username, CreateInfoAction(conn, "Welcome! Please be respectful."))
 				result.Chat = true
 			}

@@ -2,6 +2,7 @@ package player
 
 import (
 	"mud/actions/definitions"
+	"mud/controllers/ui"
 	"time"
 )
 
@@ -15,7 +16,7 @@ func ActionHandler(player string) {
 				if nextAction.Duration > 0 {
 					time.Sleep(nextAction.Duration * time.Millisecond)
 				}
-				nextAction.Handler()
+				ui.HandleCommandResponse(nextAction.Handler())
 			}
 		}
 	}

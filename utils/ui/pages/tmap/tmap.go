@@ -3,19 +3,17 @@ package tmap
 import (
 	"fmt"
 	"mud/entities"
-	"mud/parsing_services/player"
 	"mud/services/room"
 	"mud/services/tile"
 	"mud/services/tmap"
 	"mud/utils"
 	"mud/utils/ui"
 	"mud/utils/ui/gui"
-	"net"
 	"strings"
 )
 
-func GetMapPortCoords(p entities.Player) (int, int, int, int) {
-	rint := room.CRUD.Retrieve(p.Room)
+func GetMapPortCoords(roomId, roomX, roomY int) (int, int, int, int) {
+	rint := room.CRUD.Retrieve(roomId)
 	if rint != nil {
 		r := rint.(entities.Room)
 
@@ -23,30 +21,30 @@ func GetMapPortCoords(p entities.Player) (int, int, int, int) {
 		portRangeY := utils.MAP_H - 2>>1
 		smallWidth := utils.MAP_W-2 > r.Width
 		smallHeight := utils.MAP_H-2 > r.Height
-		nearLeft := p.RoomX < portRangeX
-		nearTop := p.RoomY < portRangeY
-		nearBottom := p.RoomY >= r.Height-portRangeY
-		nearRight := p.RoomX >= r.Width-portRangeX
+		nearLeft := roomX < portRangeX
+		nearTop := roomY < portRangeY
+		nearBottom := roomY >= r.Height-portRangeY
+		nearRight := roomX >= r.Width-portRangeX
 
 		// Setup view port
-		trX := p.RoomX - portRangeX
+		trX := roomX - portRangeX
 		if nearLeft {
 			trX = 0
 		}
 
-		trY := p.RoomY - portRangeY
+		trY := roomY - portRangeY
 		if nearTop {
 			trY = 0
 		}
 
-		blX := p.RoomX + portRangeX - 1
+		blX := roomX + portRangeX - 1
 		if nearLeft {
 			blX = utils.MAP_W - 2 - 1
 		} else if nearRight {
 			blX = r.Width - 1
 		}
 
-		blY := p.RoomY + portRangeY - 1
+		blY := roomY + portRangeY - 1
 		if nearTop {
 			blY = utils.MAP_H - 2 - 1
 		} else if nearBottom {
@@ -93,10 +91,8 @@ func (ti TileInfo) ToString() string {
 	return ui.AddBackground(ti.BG, ui.CSI(fmt.Sprint(ti.FG), "m")+ti.Icon)
 }
 
-func GetMapWindow(conn net.Conn) string {
-	p := player.CRUD.Retrieve(player.PlayerConnectionMap[conn]).(entities.Player)
-
-	trx, try, blx, bly := GetMapPortCoords(p)
+func GetMapWindow(p entities.Player) string {
+	trx, try, blx, bly := GetMapPortCoords(p.Room, p.RoomX, p.RoomY)
 
 	tiles := tmap.GetTilesForRegion(p.Room, trx, try, blx, bly)
 

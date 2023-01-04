@@ -1,9 +1,9 @@
-package controllers
+package ui
 
 import (
 	"mud/controllers/telnet/tx"
+	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/parsing_services/player"
 	"mud/utils"
 	"mud/utils/ui"
 	"mud/utils/ui/gui"
@@ -14,7 +14,9 @@ import (
 	"strings"
 )
 
-func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen, wchat, info, dtmap bool) string {
+func GetDisplayForConn(conn net.Conn, p entities.Player,
+	loggedIn, saveCursor, clearScreen, wchat, info, dtmap bool) string {
+
 	var result string
 
 	if clearScreen {
@@ -23,7 +25,7 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen, wchat, info, dtma
 		result += gui.ResetCursorPosition()
 	}
 
-	if !player.ConnLoggedIn(conn) {
+	if !loggedIn {
 		result += MOTD()
 		result += chat.GetConnChatWindowModHeight(conn, utils.CHAT_H-2)
 	} else {
@@ -34,7 +36,7 @@ func GetDisplayForConn(conn net.Conn, saveCursor, clearScreen, wchat, info, dtma
 			result += gui.AnsiOffsetText(0, 0, terminal.GetConnTerminal(conn))
 		}
 		if dtmap {
-			result += gui.AnsiOffsetText(0, 9, tmap.GetMapWindow(conn))
+			result += gui.AnsiOffsetText(0, 9, tmap.GetMapWindow(p))
 		}
 	}
 
@@ -55,22 +57,21 @@ func MOTD() string {
 		"\n\r")
 }
 
-func HandleCommandResponse(conn net.Conn, data parsing.CommandResponse) {
+func HandleCommandResponse(data parsing.CommandResponse) {
 	if data.Global {
 		for _, client := range tx.Clients {
-			tx.SendTarget([]byte(GetDisplayForConn(client, true, false,
-				data.Chat, data.Info, data.Map)), client)
+			tx.SendTarget([]byte(GetDisplayForConn(client, data.Player, true, false,
+				data.LoggedIn, data.Chat, data.Info, data.Map)), client)
 		}
 	} else {
 		if len(data.Specific) > 0 {
 			for _, user := range data.Specific {
-				client := player.LoggedInPlayerMap[user]
-				tx.SendTarget([]byte(GetDisplayForConn(client, true, false,
-					data.Chat, data.Info, data.Map)), client)
+				tx.SendTarget([]byte(GetDisplayForConn(user, data.Player, true, false,
+					data.LoggedIn, data.Chat, data.Info, data.Map)), user)
 			}
 		}
 	}
 
-	tx.SendTarget([]byte(GetDisplayForConn(conn, true, false,
-		data.Chat, data.Info, data.Map)), conn)
+	tx.SendTarget([]byte(GetDisplayForConn(data.Conn, data.Player, true, false,
+		data.LoggedIn, data.Chat, data.Info, data.Map)), data.Conn)
 }
