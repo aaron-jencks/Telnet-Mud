@@ -17,6 +17,7 @@ func CreateLoginAction(conn net.Conn, username, password string) definitions.Act
 		ValidModes:  []string{"Not Logged In"},
 		Handler: func() parsing.CommandResponse {
 			var result parsing.CommandResponse = parsing.CommandResponse{
+				Conn:   conn,
 				Person: true,
 			}
 
@@ -28,7 +29,12 @@ func CreateLoginAction(conn net.Conn, username, password string) definitions.Act
 				p := player.CRUD.Retrieve(username).(entities.Player)
 				terminal.LoadPlayer(conn, p)
 				player.PushAction(username, CreateInfoAction(conn, "Welcome! Please be respectful."))
+				result.LoggedIn = true
 				result.Chat = true
+				result.Info = true
+				result.Map = true
+				result.Player = p
+				result.Clear = true
 			}
 
 			return result
@@ -45,6 +51,7 @@ func CreateLogoutAction(conn net.Conn) definitions.Action {
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
 			result := parsing.CommandResponse{
+				Conn:   conn,
 				Person: true,
 			}
 
@@ -76,6 +83,7 @@ func CreateRegisterAction(conn net.Conn, username, password string) definitions.
 			}
 
 			return parsing.CommandResponse{
+				Conn:   conn,
 				Info:   true,
 				Person: true,
 			}

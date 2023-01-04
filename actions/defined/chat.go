@@ -24,6 +24,7 @@ func CreateInfoAction(conn net.Conn, message string) definitions.Action {
 			}
 
 			response := parsing.CommandResponse{
+				Conn:   conn,
 				Person: true,
 			}
 
