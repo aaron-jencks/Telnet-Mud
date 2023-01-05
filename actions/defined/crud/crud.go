@@ -47,7 +47,7 @@ func CreateCreateAction(conn net.Conn, args []string,
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
-			return crudObj.Create(argFmt(args[1:])...)
+			return crudObj.Create(argFmt(conn, args[1:])...)
 		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
@@ -64,7 +64,7 @@ func CreateRetrieveAction(conn net.Conn, args []string,
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
-			return crudObj.Retrieve(argFmt(args[1:]))
+			return crudObj.Retrieve(argFmt(conn, args[1:]))
 		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
@@ -83,7 +83,7 @@ func CreateMultiRetrieveAction(conn net.Conn, args []string,
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
-			return executor(conn, argFmt(args[1:]))
+			return executor(conn, argFmt(conn, args[1:]))
 		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
@@ -105,9 +105,9 @@ func CreateUpdateAction(conn net.Conn, args []string,
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args) &&
 				crud.CheckStringOptions(conn, args[propertyIndex], validPropertyNames, usageString, "property"))
 		}, func() interface{} {
-			ov := crudObj.Retrieve(argFmt(args[1:]))
+			ov := crudObj.Retrieve(argFmt(conn, args[1:]))
 			nv := valueUpdater(ov, args[propertyIndex], args[propertyIndex+1:])
-			return crudObj.Update(argFmt(args[1:]), nv)
+			return crudObj.Update(argFmt(conn, args[1:]), nv)
 		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
@@ -124,8 +124,8 @@ func CreateDeleteAction(conn net.Conn, args []string,
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
-			ov := crudObj.Retrieve(argFmt(args[1:]))
-			crudObj.Delete(argFmt(args[1:]))
+			ov := crudObj.Retrieve(argFmt(conn, args[1:]))
+			crudObj.Delete(argFmt(conn, args[1:]))
 			return ov
 		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
@@ -144,8 +144,8 @@ func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
-			ov := retriever(conn, argFmt(args[1:]))
-			crudObj.Delete(argFmt(args[1:])...)
+			ov := retriever(conn, argFmt(conn, args[1:]))
+			crudObj.Delete(argFmt(conn, args[1:])...)
 			return ov
 		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))

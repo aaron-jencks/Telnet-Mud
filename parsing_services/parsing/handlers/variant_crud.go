@@ -36,7 +36,7 @@ var VariantCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetri
 
 		return parsable
 	},
-	func(s []string) []interface{} {
+	func(c net.Conn, s []string) []interface{} {
 		if len(s) == 3 {
 			var id int
 			fmt.Sscanf(s[0], "%d", &id)
@@ -44,7 +44,7 @@ var VariantCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetri
 		}
 		return []interface{}{strings.StripQuotes(s[0]), parsing.ParseIconString(strings.StripQuotes(s[1]))}
 	},
-	func(s []string) []interface{} {
+	func(c net.Conn, s []string) []interface{} {
 		var id int
 		fmt.Sscanf(s[0], "%d", &id)
 		return []interface{}{id, strings.StripQuotes(s[1])}

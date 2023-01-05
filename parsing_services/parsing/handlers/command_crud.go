@@ -21,8 +21,8 @@ var CommandCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	func(c net.Conn, s []string) bool { return true },
 	func(c net.Conn, s []string) bool { return true },
 	func(c net.Conn, s []string) bool { return true },
-	func(s []string) []interface{} { return []interface{}{s[0], strings.StripQuotes(s[1])} },
-	func(s []string) interface{} { return s[0] },
+	func(c net.Conn, s []string) []interface{} { return []interface{}{s[0], strings.StripQuotes(s[1])} },
+	func(c net.Conn, s []string) interface{} { return s[0] },
 	func(i interface{}) string { return fmt.Sprintf("Command %s created!", i.(entities.Command).Name) },
 	func(i interface{}) string {
 		c := i.(command.ExpandedCommand)
