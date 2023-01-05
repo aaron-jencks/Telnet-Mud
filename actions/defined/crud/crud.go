@@ -70,6 +70,22 @@ func CreateRetrieveAction(conn net.Conn, args []string,
 		}, reqModes)
 }
 
+// Creates an Action that wraps a Crud struct and calls it's Retrieve method
+// Works with items that have multiple primary keys
+func CreateMultiRetrieveAction(conn net.Conn, args []string,
+	name, usageString string, minArgs int, validator ArgumentValidator,
+	executor CrudExecutor, respFmt ResponseFormatter,
+	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
+	username := player.GetConnUsername(conn)
+
+	return createCrudAction(conn, args, name, "retrieve",
+		func(s []string) bool {
+			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
+		}, executor, func(i interface{}) {
+			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+		}, reqModes)
+}
+
 // Creates an Action that wraps a Crud struct and calls it's Update method
 func CreateUpdateAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int,
@@ -107,6 +123,26 @@ func CreateDeleteAction(conn net.Conn, args []string,
 		}, func() interface{} {
 			ov := crudObj.Retrieve(argFmt(args[1:]))
 			crudObj.Delete(argFmt(args[1:]))
+			return ov
+		}, func(i interface{}) {
+			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+		}, reqModes)
+}
+
+// Creates an Action that wraps a Crud struct and calls it's Delete method
+// Works with items that have multiple primary keys
+func CreateMultiRetrieveDeleteAction(conn net.Conn, args []string,
+	name, usageString string, minArgs int, validator ArgumentValidator,
+	retriever CrudExecutor, argFmt ArgumentFormatter, respFmt ResponseFormatter,
+	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
+	username := player.GetConnUsername(conn)
+
+	return createCrudAction(conn, args, name, "retrieve",
+		func(s []string) bool {
+			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
+		}, func() interface{} {
+			ov := retriever()
+			crudObj.Delete(argFmt(args[1:])...)
 			return ov
 		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
@@ -156,6 +192,49 @@ func CreateCrudParser(name,
 			player.PushAction(username, CreateDeleteAction(conn, args, name,
 				deleteUsageString, deleteMinArgs, deleteValidator,
 				retrievingFormatter, deleteRespFmt,
+				reqModes, crudObj,
+			))
+		}
+	}
+}
+
+func CreateCrudParserMultiRetrieve(name,
+	createUsageString, retrieveUsageString, deleteUsageString string,
+	createMinArgs, retrieveMinArgs, deleteMinArgs int,
+	createValidator, retrieveValidator, deleteValidator ArgumentValidator,
+	createArgFmt ArgumentFormatter, deletingFormatter ArgumentFormatter,
+	retriever CrudExecutor,
+	createRespFmt, retrieveRespFmt, deleteRespFmt ResponseFormatter,
+	reqModes []string, crudObj crudUtils.Crud) parsing.CommandHandler {
+	return func(conn net.Conn, args []string) {
+		if crud.CrudChecks(conn, name, args) {
+			return
+		}
+
+		username := player.GetConnUsername(conn)
+
+		switch args[0] {
+		case "create":
+			player.PushAction(username, CreateCreateAction(conn, args, name,
+				createUsageString, createMinArgs, createValidator,
+				createArgFmt, createRespFmt,
+				reqModes, crudObj,
+			))
+
+		case "retrieve":
+			player.PushAction(username, CreateMultiRetrieveAction(conn, args, name,
+				retrieveUsageString, retrieveMinArgs, retrieveValidator,
+				retriever, retrieveRespFmt,
+				reqModes, crudObj,
+			))
+
+		case "update":
+			player.PushAction(username, defined.CreateInfoAction(conn, "Multi keyed object don't currently support updating"))
+
+		case "delete":
+			player.PushAction(username, CreateMultiRetrieveDeleteAction(conn, args, name,
+				deleteUsageString, deleteMinArgs, deleteValidator,
+				retriever, deletingFormatter, deleteRespFmt,
 				reqModes, crudObj,
 			))
 		}
