@@ -6,7 +6,7 @@ var DefaultCrudModes []string = []string{"Building"}
 
 // This is a function that accepts the arguments being passed to the Crud function
 // and formats them into their corresponding representation and returns them as an array
-type ArgumentFormatter func([]string) []interface{}
+type ArgumentFormatter func(net.Conn, []string) []interface{}
 
 // This is a function that accepts a list of string arguments to be parsed
 // and determines if they are valid for the operation
@@ -15,7 +15,7 @@ type ArgumentValidator func(net.Conn, []string) bool
 // This is a function used for simple retrieval with a Crud function,
 // Used with the Crud Retrieve method, it takes an array of string arguments
 // and returns the search query argument for Crud.Retrieve
-type RetrieveArgumentFormatter func([]string) interface{}
+type RetrieveArgumentFormatter func(net.Conn, []string) interface{}
 
 // Takes the given retrieved value from the Crud Retrieve function
 // and updates the given property(s) and returns an updated copy

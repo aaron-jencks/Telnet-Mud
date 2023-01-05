@@ -38,7 +38,7 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return true
 	},
 	func(c net.Conn, s []string) bool { return true },
-	func(s []string) []interface{} {
+	func(c net.Conn, s []string) []interface{} {
 		name := strings.StripQuotes(s[0])
 		itype := strings.StripQuotes(s[1])
 		icon := parsing.ParseIconString(strings.StripQuotes(s[2]))
@@ -50,7 +50,7 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		}
 		return []interface{}{name, itype, icon}
 	},
-	func(s []string) interface{} {
+	func(c net.Conn, s []string) interface{} {
 		return strings.StripQuotes(s[0])
 	},
 	func(i interface{}) string {

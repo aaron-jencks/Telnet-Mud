@@ -32,6 +32,9 @@ type Loot struct {
 	Room     int
 	Item     int
 	Quantity int
+	X        int
+	Y        int
+	Z        int
 }
 
 type Note struct {
@@ -140,7 +143,13 @@ func SetupTables() {
 		"Room",
 		"Item",
 		"Quantity",
+		"X",
+		"Y",
+		"Z",
 	}, []string{
+		"integer",
+		"integer",
+		"integer",
 		"integer",
 		"integer",
 		"integer",

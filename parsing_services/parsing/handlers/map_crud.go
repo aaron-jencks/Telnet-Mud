@@ -47,7 +47,7 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 		zparsable, _ := crud.ParseIntegerCheck(c, s[4], usageString, "z")
 		return rparsable && xparsable && yparsable && zparsable
 	},
-	func(s []string) []interface{} {
+	func(c net.Conn, s []string) []interface{} {
 		var rid, x, y, z int
 		fmt.Sscanf(s[0], "%d", &rid)
 		fmt.Sscanf(s[3], "%d", &x)
@@ -58,7 +58,7 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 		}
 		return []interface{}{rid, strings.StripQuotes(s[2]), x, y}
 	},
-	func(s []string) []interface{} {
+	func(c net.Conn, s []string) []interface{} {
 		var rid, x, y, z int
 		fmt.Sscanf(s[0], "%d", &rid)
 		fmt.Sscanf(s[1], "%d", &x)

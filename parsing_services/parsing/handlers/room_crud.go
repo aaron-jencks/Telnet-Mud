@@ -46,13 +46,13 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: room delete id", "id")
 		return parsable
 	},
-	func(s []string) []interface{} {
+	func(c net.Conn, s []string) []interface{} {
 		var height, width int
 		fmt.Sscanf(s[2], "%d", &height)
 		fmt.Sscanf(s[3], "%d", &width)
 		return []interface{}{strings.StripQuotes(s[0]), strings.StripQuotes(s[1]), height, width}
 	},
-	func(s []string) interface{} {
+	func(c net.Conn, s []string) interface{} {
 		var id int
 		fmt.Sscanf(s[0], "%d", &id)
 		return id

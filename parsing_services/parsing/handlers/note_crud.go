@@ -31,10 +31,10 @@ var NoteCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: note delete id", "id")
 		return parsable
 	},
-	func(s []string) []interface{} {
+	func(c net.Conn, s []string) []interface{} {
 		return []interface{}{strings.StripQuotes(s[0]), strings.StripQuotes(s[1])}
 	},
-	func(s []string) interface{} {
+	func(c net.Conn, s []string) interface{} {
 		var id int
 		fmt.Sscanf(s[0], "%d", &id)
 		return id
