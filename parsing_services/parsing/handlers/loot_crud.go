@@ -2,109 +2,86 @@ package handlers
 
 import (
 	"fmt"
+	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/services/chat"
 	"mud/services/loot"
+	"mud/utils/handlers/crud"
 	"net"
 )
 
-func HandleLootCrud(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{
-		Chat:   true,
-		Person: true,
-	}
-
-	if CrudChecks(conn, "loot", args) {
-		return result
-	}
-
-	switch args[0] {
-	case "create":
+var LootCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
+	"loot",
+	"Usage: loot create room item quantity",
+	"Usage: loot retrieve id",
+	"Usage: loot update id property:(room|item|quantity) newValue",
+	"Usage: loot delete id",
+	4, 2, 4, 2,
+	func(c net.Conn, s []string) bool {
 		usageString := "Usage: loot create room item quantity"
-		if CheckMinArgs(conn, args, 4, usageString) {
-			return result
-		}
+		rparsable, _ := crud.ParseIntegerCheck(c, s[1], usageString, "room")
+		iparsable, _ := crud.ParseIntegerCheck(c, s[2], usageString, "item")
+		qparsable, _ := crud.ParseIntegerCheck(c, s[3], usageString, "quantity")
+		return rparsable && iparsable && qparsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: loot retrieve id", "id")
+		return parsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: loot update id property:(room|item|quantity) newValue", "id")
+		return parsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: loot delete id", "id")
+		return parsable
+	},
+	func(s []string) []interface{} {
+		var rid, iid, qty int
+		fmt.Sscanf(s[0], "%d", &rid)
+		fmt.Sscanf(s[1], "%d", &iid)
+		fmt.Sscanf(s[2], "%d", &qty)
+		return []interface{}{rid, iid, qty}
+	},
+	func(s []string) interface{} {
+		var id int
+		fmt.Sscanf(s[0], "%d", &id)
+		return id
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Loot)
+		return fmt.Sprintf("Loot %d created!", nv.Id)
+	},
+	func(i interface{}) string {
+		r := i.(entities.Loot)
+		return fmt.Sprintf("Loot %d:\nRoom: %d\nItem: %d\nQuantity: %d",
+			r.Id, r.Room, r.Item, r.Quantity)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Loot)
+		return fmt.Sprintf("Loot %d updated!", nv.Id)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Loot)
+		return fmt.Sprintf("Loot %d updated!", nv.Id)
+	},
+	[]string{"room", "item", "quantity"}, 2,
+	func(i interface{}, s1 string, s2 []string) interface{} {
+		c := i.(entities.Loot)
 
-		idParsed, rId := ParseIntegerCheck(conn, args[1], usageString, "room")
-		if !idParsed {
-			return result
-		}
+		var newValue int
+		fmt.Sscanf(s2[0], "%d", &newValue)
 
-		idParsed, iId := ParseIntegerCheck(conn, args[2], usageString, "item")
-		if !idParsed {
-			return result
-		}
-
-		qtyParsed, qty := ParseIntegerCheck(conn, args[3], usageString, "quantity")
-		if !qtyParsed {
-			return result
-		}
-
-		nr := loot.CRUD.Create(rId, iId, qty).(entities.Loot)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Loot %d created!", nr.Id))
-
-	case "retrieve":
-		if CheckMinArgs(conn, args, 2, "Usage: loot retrieve id") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: loot retrieve id", "id")
-		if !idParsed {
-			return result
-		}
-
-		r := loot.CRUD.Retrieve(id).(entities.Loot)
-		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Loot %d:\nRoom: %d\nItem: %d\nQuantity: %d",
-				r.Id, r.Room, r.Item, r.Quantity))
-
-	case "update":
-		if CheckMinArgs(conn, args, 4, "Usage: loot update id (room|item|quantity) newValue") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: loot update id (room|item|quantity) newValue", "id")
-		if !idParsed {
-			return result
-		}
-
-		if CheckStringOptions(conn, args[2], []string{"room", "item", "quantity"},
-			"Usage: loot update id property newValue", "property") {
-			return result
-		}
-
-		idParsed, newValue := ParseIntegerCheck(conn, args[3], "Usage: loot update id (room|item|quantity) newValue", "newValue")
-		if !idParsed {
-			return result
-		}
-
-		r := loot.CRUD.Retrieve(id).(entities.Loot)
-		switch args[2] {
+		switch s1 {
 		case "room":
-			r.Room = newValue
+			c.Room = newValue
 		case "item":
-			r.Item = newValue
+			c.Item = newValue
 		case "quantity":
-			r.Quantity = newValue
+			c.Quantity = newValue
 		}
 
-		nr := loot.CRUD.Update(id, r).(entities.Loot)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Loot %d updated!", nr.Id))
-
-	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: loot delete id") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: loot delete id", "id")
-		if !idParsed {
-			return result
-		}
-
-		loot.CRUD.Delete(id)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Loot %d deleted!", id))
-	}
-
-	return result
-}
+		return c
+	},
+	acrud.DefaultCrudModes, loot.CRUD,
+)
