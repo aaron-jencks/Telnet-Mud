@@ -2,32 +2,38 @@ package handlers
 
 import (
 	"fmt"
+	"mud/actions/defined"
 	"mud/parsing_services/player"
-	"mud/services/chat"
 	mstrings "mud/utils/strings"
 	"net"
 	"strings"
 )
 
 func CheckArgs(conn net.Conn, args []string, target int, message string) bool {
+	username := player.GetConnUsername(conn)
+
 	if len(args) != target {
-		chat.SendSystemMessage(conn, message)
+		player.PushAction(username, defined.CreateInfoAction(conn, message))
 		return true
 	}
 	return false
 }
 
 func CheckMinArgs(conn net.Conn, args []string, target int, message string) bool {
+	username := player.GetConnUsername(conn)
+
 	if len(args) < target {
-		chat.SendSystemMessage(conn, message)
+		player.PushAction(username, defined.CreateInfoAction(conn, message))
 		return true
 	}
 	return false
 }
 
 func RequiresLoggedIn(conn net.Conn) bool {
+	username := player.GetConnUsername(conn)
+
 	if !player.ConnLoggedIn(conn) {
-		chat.SendSystemMessage(conn, "You must be logged in to perform that action")
+		player.PushAction(username, defined.CreateInfoAction(conn, "You must be logged in to perform that action"))
 		return true
 	}
 	return false
@@ -45,18 +51,22 @@ func CrudChecks(conn net.Conn, crudName string, args []string) bool {
 }
 
 func ParseIntegerCheck(conn net.Conn, s string, usageString string, paramName string) (bool, int) {
+	username := player.GetConnUsername(conn)
+
 	var id int
 	_, err := fmt.Sscanf(s, "%d", &id)
 	if err != nil {
-		chat.SendSystemMessage(conn, fmt.Sprintf("%s (%s is an integer)", usageString, paramName))
+		player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is an integer)", usageString, paramName)))
 		return false, -1
 	}
 	return true, id
 }
 
 func CheckStringOptions(conn net.Conn, s string, options []string, usageString, paramName string) bool {
+	username := player.GetConnUsername(conn)
+
 	if !mstrings.StringContains(options, s) {
-		chat.SendSystemMessage(conn, fmt.Sprintf("%s (%s is one of (%s)", usageString, paramName, strings.Join(options, "|")))
+		player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is one of (%s)", usageString, paramName, strings.Join(options, "|"))))
 		return true
 	}
 	return false
