@@ -44,6 +44,9 @@ type ExpandedLoot struct {
 	Room     entities.Room
 	Item     entities.Item
 	Quantity int
+	X        int
+	Y        int
+	Z        int
 }
 
 func GetLootForRoom(r entities.Room) []ExpandedLoot {
@@ -58,6 +61,9 @@ func GetLootForRoom(r entities.Room) []ExpandedLoot {
 		item := item.CRUD.Retrieve(row[3]).(entities.Item)
 		loots[ri].Item = item
 		loots[ri].Quantity = row[4].(int)
+		loots[ri].X = row[5].(int)
+		loots[ri].Y = row[6].(int)
+		loots[ri].Z = row[7].(int)
 	}
 
 	return loots
