@@ -61,7 +61,7 @@ var ItemCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		c := i.(entities.Item)
 
 		nv := strings.StripQuotes(s2[0])
-		switch s2[0] {
+		switch s1 {
 		case "name":
 			c.Name = nv
 		case "description":
