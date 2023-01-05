@@ -22,6 +22,7 @@ func main() {
 	parsing.RegisterHandler("chat", handlers.HandleChat)
 	parsing.RegisterHandler("room", handlers.RoomCrudHandler)
 	parsing.RegisterHandler("item", handlers.ItemCrudHandler)
+	parsing.RegisterHandler("loot", handlers.LootCrudHandler)
 	parsing.RegisterHandler("command", handlers.CommandCrudHandler)
 	parsing.RegisterHandler("note", handlers.NoteCrudHandler)
 	parsing.RegisterHandler("inventory", handlers.ListInventoryHandler)
@@ -30,6 +31,7 @@ func main() {
 	parsing.RegisterHandler("map", handlers.MapCrudHandler)
 	parsing.RegisterHandler("pickup", handlers.HandlePickup)
 	parsing.RegisterHandler("about", handlers.HandleInfo)
+	parsing.RegisterHandler("here", handlers.ListLootHandler)
 
 	rx.TelnetListenAndServe()
 }
