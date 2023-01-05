@@ -2,84 +2,68 @@ package handlers
 
 import (
 	"fmt"
+	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/services/chat"
 	"mud/services/variant"
+	"mud/utils/handlers/crud"
 	"mud/utils/strings"
 	"net"
 )
 
-func HandleVariantCrud(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{
-		Chat:   true,
-		Person: true,
-	}
-
-	if CrudChecks(conn, "variant", args) {
-		return result
-	}
-
-	switch args[0] {
-	case "create":
+var VariantCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
+	"variant",
+	"Usage: variant create [id] \"name\" \"icon\"",
+	"Usage: variant retrieve id \"name\"",
+	"Usage: variant delete id \"name\"",
+	3, 3, 3,
+	func(c net.Conn, s []string) bool {
 		usageString := "Usage: variant create [id] \"name\" \"icon\""
-		if CheckMinArgs(conn, args, 3, usageString) {
-			return result
+		if len(s) == 3 {
+			parsable, _ := crud.ParseIntegerCheck(c, s[1], usageString, "id")
+
+			return parsable
 		}
+		return true
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: variant retrieve id \"name\"", "id")
 
-		var nr entities.TileVariant
+		return parsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: variant retrieve id \"name\"", "id")
 
-		if len(args) == 4 {
-			idParsed, id := ParseIntegerCheck(conn, args[1], usageString, "id")
-			if !idParsed {
-				return result
-			}
-
-			nr = variant.CRUD.Create(
-				id,
-				strings.StripQuotes(args[2]),
-				parsing.ParseIconString(strings.StripQuotes(args[3]))).(entities.TileVariant)
-		} else {
-			nr = variant.CRUD.Create(
-				strings.StripQuotes(args[1]),
-				parsing.ParseIconString(strings.StripQuotes(args[2]))).(entities.TileVariant)
+		return parsable
+	},
+	func(s []string) []interface{} {
+		if len(s) == 3 {
+			var id int
+			fmt.Sscanf(s[0], "%d", &id)
+			return []interface{}{id, strings.StripQuotes(s[1]), parsing.ParseIconString(strings.StripQuotes(s[2]))}
 		}
-
-		chat.SendSystemMessage(conn, fmt.Sprintf("Variant %d(%s) created!", nr.Id, nr.Name))
-
-	case "retrieve":
-		if CheckMinArgs(conn, args, 3, "Usage: variant retrieve id \"name\"") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: variant retrieve id \"name\"", "id")
-		if !idParsed {
-			return result
-		}
-
-		r := variant.GetSpecificVariant(id, strings.StripQuotes(args[2]))
-		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Variant:\nId: %d\nName: \"%s\"\nIcon: \"%s\"",
-				r.Id, r.Name, r.Icon))
-
-	case "update":
-		chat.SendSystemMessage(conn, "Updating a tile variant is not currently supported, please delete and replace")
-
-	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: variant delete id \"name\"") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: variant retrieve id \"name\"", "id")
-		if !idParsed {
-			return result
-		}
-
-		name := strings.StripQuotes(args[2])
-
-		variant.CRUD.Delete(id, "Id", name, "Name")
-		chat.SendSystemMessage(conn, fmt.Sprintf("Variant %d(%s) deleted!", id, name))
-	}
-
-	return result
-}
+		return []interface{}{strings.StripQuotes(s[0]), parsing.ParseIconString(strings.StripQuotes(s[1]))}
+	},
+	func(s []string) []interface{} {
+		var id int
+		fmt.Sscanf(s[0], "%d", &id)
+		return []interface{}{id, strings.StripQuotes(s[1])}
+	},
+	func(c net.Conn, i []interface{}) interface{} {
+		return variant.GetSpecificVariant(i[0].(int), i[1].(string))
+	},
+	func(i interface{}) string {
+		nr := i.(entities.TileVariant)
+		return fmt.Sprintf("Variant %d(%s) created!", nr.Id, nr.Name)
+	},
+	func(i interface{}) string {
+		r := i.(entities.TileVariant)
+		return fmt.Sprintf("Variant:\nId: %d\nName: \"%s\"\nIcon: \"%s\"",
+			r.Id, r.Name, r.Icon)
+	},
+	func(i interface{}) string {
+		nr := i.(entities.TileVariant)
+		return fmt.Sprintf("Variant %d(%s) deleted!", nr.Id, nr.Name)
+	},
+	acrud.DefaultCrudModes, variant.CRUD,
+)

@@ -19,7 +19,7 @@ func main() {
 	parsing.RegisterHandler("command", handlers.CommandCrudHandler)
 	parsing.RegisterHandler("note", handlers.NoteCrudHandler)
 	// parsing.RegisterHandler("inventory", handlers.ListInventoryHandler)
-	// parsing.RegisterHandler("tile", handlers.HandleTileCrud)
+	parsing.RegisterHandler("tile", handlers.TileCrudHandler)
 	parsing.RegisterHandler("map", handlers.MapCrudHandler)
 	// parsing.RegisterHandler("pickup", handlers.HandlePickup)
 	parsing.RegisterHandler("about", handlers.HandleInfo)

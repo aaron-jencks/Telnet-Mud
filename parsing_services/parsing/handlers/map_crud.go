@@ -89,7 +89,7 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 	},
 	func(i interface{}) string {
 		nv := i.(entities.Map)
-		return fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", nv.Room, nv.X, nv.Y)
+		return fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", nv.Room, nv.X, nv.Y, nv.Z)
 	},
 	acrud.DefaultCrudModes, tmap.CRUD,
 )
