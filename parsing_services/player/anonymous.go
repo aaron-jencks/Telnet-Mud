@@ -20,10 +20,10 @@ func GenerateRandomUsername(conn net.Conn) string {
 			result[ri] = byte(rand.Int()%94) + 33
 		}
 
-		sResult := string(result)
+		sResult := "Anon." + string(result)
 
 		_, ok := namesCurrentlyInUse[sResult]
-		if !ok {
+		if !ok && !PlayerExists(sResult) {
 			namesCurrentlyInUse[sResult] = conn
 			connAnonNameMap[conn] = sResult
 
