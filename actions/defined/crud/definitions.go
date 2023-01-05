@@ -26,6 +26,8 @@ type UpdateNewValueFormatter func(interface{}, string, []string) interface{}
 // This string is sent to the user via a system message
 type ResponseFormatter func(interface{}) string
 
+type MultiKeyExecutor func(net.Conn, []interface{}) interface{}
+
 type CrudValidator func([]string) bool
 type CrudExecutor func() interface{}
 type CrudResponseHandler func(interface{})

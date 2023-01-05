@@ -74,14 +74,17 @@ func CreateRetrieveAction(conn net.Conn, args []string,
 // Works with items that have multiple primary keys
 func CreateMultiRetrieveAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
-	executor CrudExecutor, respFmt ResponseFormatter,
+	argFmt ArgumentFormatter, executor MultiKeyExecutor,
+	respFmt ResponseFormatter,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
 	return createCrudAction(conn, args, name, "retrieve",
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
-		}, executor, func(i interface{}) {
+		}, func() interface{} {
+			return executor(conn, argFmt(args[1:]))
+		}, func(i interface{}) {
 			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
 }
@@ -133,7 +136,7 @@ func CreateDeleteAction(conn net.Conn, args []string,
 // Works with items that have multiple primary keys
 func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
-	retriever CrudExecutor, argFmt ArgumentFormatter, respFmt ResponseFormatter,
+	retriever MultiKeyExecutor, argFmt ArgumentFormatter, respFmt ResponseFormatter,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
@@ -141,7 +144,7 @@ func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
-			ov := retriever()
+			ov := retriever(conn, argFmt(args[1:]))
 			crudObj.Delete(argFmt(args[1:])...)
 			return ov
 		}, func(i interface{}) {
@@ -203,7 +206,7 @@ func CreateCrudParserMultiRetrieve(name,
 	createMinArgs, retrieveMinArgs, deleteMinArgs int,
 	createValidator, retrieveValidator, deleteValidator ArgumentValidator,
 	createArgFmt ArgumentFormatter, deletingFormatter ArgumentFormatter,
-	retriever CrudExecutor,
+	retriever MultiKeyExecutor,
 	createRespFmt, retrieveRespFmt, deleteRespFmt ResponseFormatter,
 	reqModes []string, crudObj crudUtils.Crud) parsing.CommandHandler {
 	return func(conn net.Conn, args []string) {
@@ -224,7 +227,7 @@ func CreateCrudParserMultiRetrieve(name,
 		case "retrieve":
 			player.PushAction(username, CreateMultiRetrieveAction(conn, args, name,
 				retrieveUsageString, retrieveMinArgs, retrieveValidator,
-				retriever, retrieveRespFmt,
+				deletingFormatter, retriever, retrieveRespFmt,
 				reqModes, crudObj,
 			))
 

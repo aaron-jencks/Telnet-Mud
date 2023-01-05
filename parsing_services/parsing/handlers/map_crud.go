@@ -66,6 +66,17 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		fmt.Sscanf(s[3], "%d", &z)
 		return []interface{}{rid, "Room", x, "X", y, "Y", z, "Z"}
 	},
+	func(conn net.Conn, args []interface{}) interface{} {
+		var rid, x, y, z int
+		rid = args[0].(int)
+		x = args[1].(int)
+		y = args[2].(int)
+		if len(args) == 4 {
+			z = args[3].(int)
+			return tmap.GetTileForCoord(rid, x, y, z)
+		}
+		return tmap.GetTopMostTile(rid, x, y)
+	},
 	func(i interface{}) string {
 		nr := i.(entities.Map)
 		return fmt.Sprintf("Tile %s placed at (Room: %d, X: %d, Y: %d, Z: %d) created!",
@@ -78,7 +89,7 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	},
 	func(i interface{}) string {
 		nv := i.(entities.Map)
-		return fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", nv.Room, nv.X, nv.Y, nv.Z)
+		return fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", nv.Room, nv.X, nv.Y)
 	},
 	acrud.DefaultCrudModes, tmap.CRUD,
 )
