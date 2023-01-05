@@ -5,10 +5,16 @@ import (
 	"mud/entities"
 	"mud/parsing_services/parsing"
 	"mud/parsing_services/parsing/handlers"
+	"mud/utils/net/telnet"
+	"net"
 )
 
 func main() {
 	entities.SetupTables()
+
+	telnet.OptionMap[34] = func(c net.Conn, b []byte) ([]byte, int) {
+		return []byte{}, 0
+	}
 
 	parsing.RegisterHandler("login", handlers.HandleLogin)
 	parsing.RegisterHandler("logout", handlers.HandleLogout)
