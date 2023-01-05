@@ -31,11 +31,8 @@ func createLootFunc(table *db.TableDefinition, args ...interface{}) []interface{
 	if table.CSV.LineCount > 0 {
 		id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
 	}
-	result := []interface{}{id, args[0], args[1], args[2]}
-
-	if len(args) > 4 {
-
-	}
+	result := []interface{}{id}
+	result = append(result, args...)
 
 	return result
 }

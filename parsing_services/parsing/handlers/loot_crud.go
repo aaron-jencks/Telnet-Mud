@@ -5,7 +5,9 @@ import (
 	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/services/loot"
+	"mud/services/tmap"
 	"mud/utils/handlers/crud"
 	"net"
 )
@@ -56,19 +58,25 @@ var LootCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		fmt.Sscanf(s[0], "%d", &rid)
 		fmt.Sscanf(s[1], "%d", &iid)
 		fmt.Sscanf(s[2], "%d", &qty)
+
 		if len(s) > 4 {
 			fmt.Sscanf(s[3], "%d", &x)
 			fmt.Sscanf(s[4], "%d", &y)
 
 			if len(s) == 6 {
 				fmt.Sscanf(s[5], "%d", &z)
-
-				return []interface{}{rid, iid, qty, x, y, z}
+			} else {
+				z = tmap.GetTopMostTile(rid, x, y).Z + 1
 			}
-
-			return []interface{}{rid, iid, qty, x, y}
+		} else {
+			username := player.GetConnUsername(c)
+			p := player.CRUD.Retrieve(username).(entities.Player)
+			x = p.RoomX
+			y = p.RoomY
+			z = tmap.GetTopMostTile(rid, x, y).Z + 1
 		}
-		return []interface{}{rid, iid, qty}
+
+		return []interface{}{rid, iid, qty, x, y, z}
 	},
 	func(c net.Conn, s []string) interface{} {
 		var id int
