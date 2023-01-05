@@ -16,14 +16,13 @@ func main() {
 	parsing.RegisterHandler("chat", handlers.HandleChat)
 	parsing.RegisterHandler("room", handlers.RoomCrudHandler)
 	parsing.RegisterHandler("item", handlers.ItemCrudHandler)
-	// parsing.RegisterHandler("transition", handlers.HandleTransitionCrud)
 	parsing.RegisterHandler("command", handlers.CommandCrudHandler)
 	parsing.RegisterHandler("note", handlers.NoteCrudHandler)
 	// parsing.RegisterHandler("inventory", handlers.ListInventoryHandler)
 	// parsing.RegisterHandler("tile", handlers.HandleTileCrud)
 	parsing.RegisterHandler("map", handlers.MapCrudHandler)
 	// parsing.RegisterHandler("pickup", handlers.HandlePickup)
-	// parsing.RegisterHandler("about", handlers.HandleInfo)
+	parsing.RegisterHandler("about", handlers.HandleInfo)
 
 	rx.TelnetListenAndServe()
 }

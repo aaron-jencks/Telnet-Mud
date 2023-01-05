@@ -76,12 +76,8 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	acrud.DefaultCrudModes, room.CRUD,
 )
 
-func HandleInfo(conn net.Conn, args []string) parsing.CommandResponse {
+func HandleInfo(conn net.Conn, args []string) {
 	username := player.GetConnUsername(conn)
 	t := terminal.TerminalMap[conn]
 	player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s:\n%s", t.Room.Name, t.Room.Description)))
-	return parsing.CommandResponse{
-		Info:   true,
-		Person: true,
-	}
 }

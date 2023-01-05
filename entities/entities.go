@@ -90,14 +90,6 @@ type Room struct {
 	Width       int
 }
 
-type Transition struct {
-	Id          int
-	Source      int
-	Target      int
-	Command     string
-	CommandArgs string
-}
-
 func SetupTables() {
 	var table db.TableDefinition
 	var index map[string][]int64
@@ -277,23 +269,4 @@ func SetupTables() {
 		"integer",
 		"integer",
 	}, 0, true)
-
-	// Transition
-	table = db.CreateTableIfNotExist("transitions", []string{
-		"Id",
-		"Source",
-		"Target",
-		"Command",
-		"CommandArgs",
-	}, []string{
-		"integer",
-		"integer",
-		"integer",
-		"string",
-		"string",
-	}, 0, true)
-	index = db.CreateIndex(table.CSV, "Target")
-	table.Info.Indices["Target"] = index
-	index = db.CreateIndex(table.CSV, "Source")
-	table.Info.Indices["Source"] = index
 }
