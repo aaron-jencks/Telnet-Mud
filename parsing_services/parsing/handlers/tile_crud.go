@@ -2,80 +2,83 @@ package handlers
 
 import (
 	"fmt"
+	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/services/chat"
 	"mud/services/tile"
+	"mud/utils/handlers/crud"
 	"mud/utils/strings"
 	"net"
 )
 
-func HandleTileCrud(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{
-		Chat:   true,
-		Person: true,
-	}
-
-	if CrudChecks(conn, "tile", args) {
-		return result
-	}
-
-	switch args[0] {
-	case "create":
+var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
+	"tile",
+	"Usage: tile create \"name\" \"type\" \"icon\" [bg fg]",
+	"Usage: tile retrieve \"name\"",
+	"Usage: tile update \"name\" (name|type|icon|bg|fg) \"newValue\"",
+	"Usage: tile delete \"name\"",
+	4, 2, 4, 2,
+	func(c net.Conn, s []string) bool {
 		usageString := "Usage: tile create \"name\" \"type\" \"icon\" [bg fg]"
-		if CheckMinArgs(conn, args, 4, usageString) {
-			return result
+		if len(s) == 6 {
+			bgParsed, _ := crud.ParseIntegerCheck(c, s[4], usageString, "bg")
+			fgParsed, _ := crud.ParseIntegerCheck(c, s[5], usageString, "fg")
+
+			return bgParsed && fgParsed
 		}
-
-		name := strings.StripQuotes(args[1])
-		itype := strings.StripQuotes(args[2])
-		icon := parsing.ParseIconString(strings.StripQuotes(args[3]))
-		var nr entities.Tile
-
-		if len(args) == 6 {
-			bgParsed, bg := ParseIntegerCheck(conn, args[4], usageString, "bg")
-			if !bgParsed {
-				return result
-			}
-
-			fgParsed, fg := ParseIntegerCheck(conn, args[5], usageString, "fg")
-			if !fgParsed {
-				return result
-			}
-
-			nr = tile.CRUD.Create(name, itype, icon, bg, fg).(entities.Tile)
-		} else {
-			nr = tile.CRUD.Create(name, itype, icon).(entities.Tile)
+		return true
+	},
+	func(c net.Conn, s []string) bool { return true },
+	func(c net.Conn, s []string) bool {
+		if s[2] == "bg" || s[2] == "fg" {
+			nv := strings.StripQuotes(s[3])
+			parsable, _ := crud.ParseIntegerCheck(c, nv, "Usage: tile update \"name\" (name|type|icon|bg|fg) \"newValue\"", "newValue")
+			return parsable
 		}
-
-		chat.SendSystemMessage(conn, fmt.Sprintf("Tile %s created!", nr.Name))
-
-	case "retrieve":
-		if CheckMinArgs(conn, args, 2, "Usage: tile retrieve \"name\"") {
-			return result
+		return true
+	},
+	func(c net.Conn, s []string) bool { return true },
+	func(s []string) []interface{} {
+		name := strings.StripQuotes(s[0])
+		itype := strings.StripQuotes(s[1])
+		icon := parsing.ParseIconString(strings.StripQuotes(s[2]))
+		if len(s) == 5 {
+			var fg, bg int
+			fmt.Sscanf(s[3], "%d", &bg)
+			fmt.Sscanf(s[4], "%d", &fg)
+			return []interface{}{name, itype, icon, bg, fg}
 		}
+		return []interface{}{name, itype, icon}
+	},
+	func(s []string) interface{} {
+		return strings.StripQuotes(s[0])
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Tile)
+		return fmt.Sprintf("Tile %s created!", nv.Name)
+	},
+	func(i interface{}) string {
+		r := i.(entities.Tile)
+		return fmt.Sprintf("Tile:\nName: \"%s\"\nType: \"%s\"\nIcon: \"\033[%dm\033%dm%s\033[0m\"",
+			r.Name, r.IconType, r.BG, r.FG, r.Icon)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Tile)
+		return fmt.Sprintf("Tile %s updated!", nv.Name)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Tile)
+		return fmt.Sprintf("Tile %s deleted!", nv.Name)
+	},
+	[]string{"name", "type", "icon", "bg", "fg"}, 2,
+	func(i interface{}, s1 string, s2 []string) interface{} {
+		r := i.(entities.Tile)
 
-		r := tile.CRUD.Retrieve(strings.StripQuotes(args[1])).(entities.Tile)
-		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Tile:\nName: \"%s\"\nType: \"%s\"\nIcon: \"\033[%dm\033%dm%s\033[0m\"",
-				r.Name, r.IconType, r.BG, r.FG, r.Icon))
+		var newValue int
+		fmt.Sscanf(s2[0], "%d", &newValue)
 
-	case "update":
-		usageString := "Usage: tile update \"name\" (name|type|icon|bg|fg) \"newValue\""
-		if CheckMinArgs(conn, args, 4, usageString) {
-			return result
-		}
-
-		if CheckStringOptions(conn, args[2], []string{"name", "type", "icon", "bg", "fg"},
-			"Usage: tile update \"name\" property \"newValue\"", "property") {
-			return result
-		}
-
-		id := strings.StripQuotes(args[1])
-
-		r := tile.CRUD.Retrieve(id).(entities.Tile)
-		nv := strings.StripQuotes(args[3])
-		switch args[2] {
+		nv := strings.StripQuotes(s2[0])
+		switch s1 {
 		case "name":
 			r.Name = nv
 		case "type":
@@ -83,34 +86,16 @@ func HandleTileCrud(conn net.Conn, args []string) parsing.CommandResponse {
 		case "icon":
 			r.Icon = parsing.ParseIconString(nv)
 		case "bg":
-			bgParsed, bg := ParseIntegerCheck(conn, nv, usageString, "bg")
-			if !bgParsed {
-				return result
-			}
+			fmt.Sscanf(nv, "%d", &newValue)
 
-			r.BG = bg
+			r.BG = newValue
 		case "fg":
-			fgParsed, fg := ParseIntegerCheck(conn, nv, usageString, "fg")
-			if !fgParsed {
-				return result
-			}
+			fmt.Sscanf(nv, "%d", &newValue)
 
-			r.FG = fg
+			r.FG = newValue
 		}
 
-		nr := tile.CRUD.Update(id, r).(entities.Tile)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Tile %s updated!", nr.Name))
-
-	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: tile delete \"name\"") {
-			return result
-		}
-
-		id := strings.StripQuotes(args[1])
-
-		tile.CRUD.Delete(id)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Tile %s deleted!", id))
-	}
-
-	return result
-}
+		return r
+	},
+	acrud.DefaultCrudModes, tile.CRUD,
+)
