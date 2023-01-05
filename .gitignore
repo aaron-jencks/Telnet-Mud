@@ -24,4 +24,6 @@ go.work
 data/
 TODO.txt
 out/
+
+# debug build
 __debug_bin
