@@ -78,6 +78,6 @@ func HandleCommandResponse(data parsing.CommandResponse) {
 	}
 
 	tx.SendTarget([]byte(GetDisplayForConn(data.Conn, data.Player, data.LoggedIn,
-		false, data.Clear,
+		data.SaveCursor, data.Clear,
 		data.Chat, data.Info, data.Map)), data.Conn)
 }

@@ -7,16 +7,17 @@ import (
 )
 
 type CommandResponse struct {
-	LoggedIn bool
-	Map      bool
-	Chat     bool
-	Info     bool
-	Clear    bool
-	Person   bool
-	Global   bool
-	Conn     net.Conn
-	Player   entities.Player
-	Specific []net.Conn
+	LoggedIn   bool
+	Map        bool
+	Chat       bool
+	Info       bool
+	Clear      bool
+	Person     bool
+	Global     bool
+	SaveCursor bool
+	Conn       net.Conn
+	Player     entities.Player
+	Specific   []net.Conn
 }
 
 type DirectMessageMap map[string]string

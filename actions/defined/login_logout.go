@@ -11,10 +11,8 @@ import (
 
 func CreateLoginAction(conn net.Conn, username, password string) definitions.Action {
 	return definitions.Action{
-		Name:        "Login",
-		Duration:    0,
-		AlwaysValid: false,
-		ValidModes:  []string{"Not Logged In"},
+		Name:       "Login",
+		ValidModes: []string{"Not Logged In"},
 		Handler: func() parsing.CommandResponse {
 			var result parsing.CommandResponse = parsing.CommandResponse{
 				Conn:   conn,
@@ -44,10 +42,8 @@ func CreateLoginAction(conn net.Conn, username, password string) definitions.Act
 
 func CreateLogoutAction(conn net.Conn) definitions.Action {
 	return definitions.Action{
-		Name:        "Logout",
-		Duration:    0,
-		AlwaysValid: false,
-		ValidModes:  []string{"Logged In"},
+		Name:       "Logout",
+		ValidModes: []string{"Logged In"},
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
 			result := parsing.CommandResponse{
@@ -69,10 +65,8 @@ func CreateLogoutAction(conn net.Conn) definitions.Action {
 
 func CreateRegisterAction(conn net.Conn, username, password string) definitions.Action {
 	return definitions.Action{
-		Name:        "Register",
-		Duration:    0,
-		AlwaysValid: false,
-		ValidModes:  []string{"Not Logged In"},
+		Name:       "Register",
+		ValidModes: []string{"Not Logged In"},
 		Handler: func() parsing.CommandResponse {
 			anonUsername := player.GetConnUsername(conn)
 

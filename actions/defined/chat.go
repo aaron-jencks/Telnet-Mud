@@ -12,7 +12,6 @@ import (
 func CreateInfoAction(conn net.Conn, message string) definitions.Action {
 	return definitions.Action{
 		Name:        "System Message",
-		Duration:    0,
 		AlwaysValid: true,
 		Handler: func() parsing.CommandResponse {
 			loggedIn := player.ConnLoggedIn(conn)
@@ -24,8 +23,9 @@ func CreateInfoAction(conn net.Conn, message string) definitions.Action {
 			}
 
 			response := parsing.CommandResponse{
-				Conn:   conn,
-				Person: true,
+				Conn:       conn,
+				Person:     true,
+				SaveCursor: true,
 			}
 
 			if player.ConnLoggedIn(conn) {
@@ -35,6 +35,50 @@ func CreateInfoAction(conn net.Conn, message string) definitions.Action {
 			}
 
 			return response
+		},
+	}
+}
+
+func CreateLocalChatAction(conn net.Conn, message string) definitions.Action {
+	return definitions.Action{
+		Name:        "Local Message",
+		AlwaysValid: true,
+		Handler: func() parsing.CommandResponse {
+			loggedIn := player.ConnLoggedIn(conn)
+			username := player.GetConnUsername(conn)
+
+			response := parsing.CommandResponse{
+				LoggedIn:   loggedIn,
+				Conn:       conn,
+				Chat:       true,
+				Global:     true,
+				SaveCursor: true,
+			}
+
+			chat.SendGlobalMessage(username, message)
+
+			return response
+		},
+	}
+}
+
+func CreateDirectMessageAction(conn net.Conn, target string, message string) definitions.Action {
+	return definitions.Action{
+		Name:        "Direct Message",
+		AlwaysValid: true,
+		Handler: func() parsing.CommandResponse {
+			username := player.GetConnUsername(conn)
+			tConn := player.LoggedInPlayerMap[target]
+
+			chat.SendMentionMessage(tConn,
+				username, target,
+				message)
+
+			return parsing.CommandResponse{
+				Chat:     true,
+				Person:   true,
+				Specific: []net.Conn{tConn},
+			}
 		},
 	}
 }

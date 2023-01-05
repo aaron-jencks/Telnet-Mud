@@ -21,8 +21,12 @@ func HandlePacket(conn net.Conn, data []byte) {
 
 	handler, ok := parsing.CommandMap[bits[0]]
 
+	username := player.GetConnUsername(conn)
+
 	if ok {
 		handler(conn, bits[1:])
+		player.PushAction(username,
+			defined.CreateScreenBlip(conn))
 	} else {
 		if player.ConnLoggedIn(conn) {
 			actions.ParseString(conn, string(data))

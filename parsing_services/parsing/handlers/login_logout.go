@@ -19,6 +19,7 @@ func HandleLogin(conn net.Conn, args []string) {
 	}
 
 	player.PushAction(username, defined.CreateLoginAction(conn, args[0], args[1]))
+	player.PushAction(username, defined.CreateScreenBlip(conn))
 }
 
 func HandleLogout(conn net.Conn, args []string) {
@@ -29,6 +30,7 @@ func HandleLogout(conn net.Conn, args []string) {
 	}
 
 	player.PushAction(username, defined.CreateLogoutAction(conn))
+	player.PushAction(username, defined.CreateScreenBlip(conn))
 }
 
 func HandleRegister(conn net.Conn, args []string) {
@@ -43,4 +45,5 @@ func HandleRegister(conn net.Conn, args []string) {
 	}
 
 	player.PushAction(username, defined.CreateRegisterAction(conn, args[0], args[1]))
+	player.PushAction(username, defined.CreateScreenBlip(conn))
 }
