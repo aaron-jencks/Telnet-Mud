@@ -9,6 +9,7 @@ import (
 	"mud/services/inventory"
 	"mud/services/loot"
 	"mud/services/room"
+	"mud/utils/handlers/crud"
 	"mud/utils/strings"
 	"net"
 )
@@ -19,7 +20,7 @@ func HandlePickup(conn net.Conn, args []string) parsing.CommandResponse {
 		Person: true,
 	}
 
-	if CheckMinArgs(conn, args, 1, "Usage: pickup \"item name\" [qty=1]") {
+	if crud.CheckMinArgs(conn, args, 1, "Usage: pickup \"item name\" [qty=1]") {
 		return result
 	}
 
@@ -29,7 +30,7 @@ func HandlePickup(conn net.Conn, args []string) parsing.CommandResponse {
 
 	var qty int = 1
 	if len(args) > 1 {
-		idParsed, pQty := ParseIntegerCheck(conn, args[1], "Usage: pickup \"item name\" [qty=1]", "qty")
+		idParsed, pQty := crud.ParseIntegerCheck(conn, args[1], "Usage: pickup \"item name\" [qty=1]", "qty")
 		if !idParsed {
 			return result
 		}
