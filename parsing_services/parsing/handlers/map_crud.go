@@ -11,7 +11,7 @@ import (
 	"net"
 )
 
-var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
+var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 	"map",
 	"Usage: map create room \"icon\" x y [z]",
 	"Usage: map retrieve room x y [z]",
