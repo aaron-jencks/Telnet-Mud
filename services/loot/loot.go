@@ -31,7 +31,13 @@ func createLootFunc(table *db.TableDefinition, args ...interface{}) []interface{
 	if table.CSV.LineCount > 0 {
 		id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
 	}
-	return []interface{}{id, args[0], args[1], args[2]}
+	result := []interface{}{id, args[0], args[1], args[2]}
+
+	if len(args) > 4 {
+
+	}
+
+	return result
 }
 
 var CRUD crud.Crud = crud.CreateCrud("loot", lootToArr, lootFromArr, createLootFunc)
