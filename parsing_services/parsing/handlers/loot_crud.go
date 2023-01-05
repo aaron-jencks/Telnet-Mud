@@ -63,7 +63,7 @@ var LootCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	},
 	func(i interface{}) string {
 		nv := i.(entities.Loot)
-		return fmt.Sprintf("Loot %d updated!", nv.Id)
+		return fmt.Sprintf("Loot %d deleted!", nv.Id)
 	},
 	[]string{"room", "item", "quantity"}, 2,
 	func(i interface{}, s1 string, s2 []string) interface{} {
