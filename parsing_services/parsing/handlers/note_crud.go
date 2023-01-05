@@ -2,95 +2,73 @@ package handlers
 
 import (
 	"fmt"
+	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/parsing_services/player"
-	"mud/services/chat"
 	"mud/services/note"
+	"mud/utils/handlers/crud"
 	"mud/utils/strings"
 	"net"
 )
 
-func HandleNoteCrud(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{
-		Chat:   true,
-		Person: true,
-	}
+var NoteCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
+	"note",
+	"Usage: note create \"name\" \"description\"",
+	"Usage: note retrieve id",
+	"Usage: note update id property:(name|description) \"newValue\"",
+	"Usage: note delete id",
+	3, 2, 4, 2,
+	func(c net.Conn, s []string) bool { return true },
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: note retrieve id", "id")
+		return parsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: note update id property:(name|description) \"newValue\"", "id")
+		return parsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: note delete id", "id")
+		return parsable
+	},
+	func(s []string) []interface{} {
+		return []interface{}{strings.StripQuotes(s[0]), strings.StripQuotes(s[1])}
+	},
+	func(s []string) interface{} {
+		var id int
+		fmt.Sscanf(s[0], "%d", &id)
+		return id
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Note)
+		return fmt.Sprintf("Note %d(%s) created!", nv.Id, nv.Title)
+	},
+	func(i interface{}) string {
+		r := i.(entities.Note)
+		return fmt.Sprintf("Note %d:\nName: \"%s\"\nDescription: \"%s\"",
+			r.Id, r.Title, r.Contents)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Note)
+		return fmt.Sprintf("Note %d(%s) updated!", nv.Id, nv.Title)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Note)
+		return fmt.Sprintf("Note %d(%s) deleted!", nv.Id, nv.Title)
+	},
+	[]string{"title", "contents"}, 2,
+	func(i interface{}, s1 string, s2 []string) interface{} {
+		c := i.(entities.Note)
 
-	if CrudChecks(conn, "note", args) {
-		return result
-	}
-
-	switch args[0] {
-	case "create":
-		if CheckMinArgs(conn, args, 3, "Usage: note create \"title\" \"contents\"") {
-			return result
-		}
-
-		p := player.PlayerConnectionMap[conn]
-		pe := player.CRUD.Retrieve(p).(entities.Player)
-
-		nr := note.CRUD.Create(
-			pe.Id,
-			strings.StripQuotes(args[1]),
-			strings.StripQuotes(args[2])).(entities.Note)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Note %d(%s) created!", nr.Id, nr.Title))
-
-	case "retrieve":
-		if CheckMinArgs(conn, args, 2, "Usage: note retrieve id") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: note retrieve id", "id")
-		if !idParsed {
-			return result
-		}
-
-		r := note.CRUD.Retrieve(id).(entities.Note)
-		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Note %d:\nTitle: \"%s\"\nContents: \"%s\"",
-				r.Id, r.Title, r.Contents))
-
-	case "update":
-		if CheckMinArgs(conn, args, 4, "Usage: note update id (title|contents) \"newValue\"") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: note update id (title|contents) \"newValue\"", "id")
-		if !idParsed {
-			return result
-		}
-
-		if CheckStringOptions(conn, args[2], []string{"title", "contents"},
-			"Usage: note update id property \"newValue\"", "property") {
-			return result
-		}
-
-		r := note.CRUD.Retrieve(id).(entities.Note)
-		nv := strings.StripQuotes(args[3])
-		switch args[2] {
+		nv := strings.StripQuotes(s2[0])
+		switch s1 {
 		case "title":
-			r.Title = nv
+			c.Title = nv
 		case "contents":
-			r.Contents = nv
+			c.Contents = nv
 		}
 
-		nr := note.CRUD.Update(id, r).(entities.Note)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Note %d(%s) updated!", nr.Id, nr.Title))
-
-	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: note delete id") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: note delete id", "id")
-		if !idParsed {
-			return result
-		}
-
-		note.CRUD.Delete(id)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Note %d deleted!", id))
-	}
-
-	return result
-}
+		return c
+	},
+	acrud.DefaultCrudModes, note.CRUD,
+)
