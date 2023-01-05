@@ -2,73 +2,47 @@ package handlers
 
 import (
 	"fmt"
+	acrud "mud/actions/defined/crud"
+	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/services/chat"
 	"mud/services/command"
 	"mud/utils/strings"
 	"net"
 )
 
-func HandleCommandCrud(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{
-		Chat:   true,
-		Person: true,
-	}
+var CommandCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
+	"command",
+	"Usage: command create name \"arg0regex,arg1regex,...,argNregex\"",
+	"Usage: command retrieve name",
+	"Usage: command update name property:(name|args) \"newValue\"",
+	"Usage: command delete name",
+	3, 2, 4, 2,
+	func(c net.Conn, s []string) bool { return true },
+	func(c net.Conn, s []string) bool { return true },
+	func(c net.Conn, s []string) bool { return true },
+	func(c net.Conn, s []string) bool { return true },
+	func(s []string) []interface{} { return []interface{}{s[0], strings.StripQuotes(s[1])} },
+	func(s []string) interface{} { return s[0] },
+	func(i interface{}) string { return fmt.Sprintf("Command %s created!", i.(entities.Command).Name) },
+	func(i interface{}) string {
+		c := i.(command.ExpandedCommand)
+		return fmt.Sprintf("Command %s:\nArgs: %v", c.Name, c.Args)
+	},
+	func(i interface{}) string { return fmt.Sprintf("Command %s updated!", i.(entities.Command).Name) },
+	func(i interface{}) string { return fmt.Sprintf("Command %s deleted!", i.(entities.Command).Name) },
+	[]string{"name", "args"}, 2,
+	func(i interface{}, s1 string, s2 []string) interface{} {
+		c := i.(command.ExpandedCommand)
 
-	if CrudChecks(conn, "command", args) {
-		return result
-	}
-
-	switch args[0] {
-	case "create":
-		usageString := "Usage: command create name \"arg0regex,arg1regex,...,argNregex\""
-		if CheckMinArgs(conn, args, 3, usageString) {
-			return result
-		}
-
-		nc := command.CRUD.Create(args[1], strings.StripQuotes(args[2])).(command.ExpandedCommand)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Command %s created!", nc.Name))
-
-	case "retrieve":
-		if CheckMinArgs(conn, args, 2, "Usage: command retrieve name") {
-			return result
-		}
-
-		c := command.CRUD.Retrieve(args[1]).(command.ExpandedCommand)
-		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Command %s:\nArgs: %v", c.Name, c.Args))
-
-	case "update":
-		usageString := "Usage: command update name (name|args) \"newValue\""
-		if CheckMinArgs(conn, args, 4, usageString) {
-			return result
-		}
-
-		if CheckStringOptions(conn, args[2], []string{"name", "args"},
-			"Usage: command update name property \"newValue\"", "property") {
-			return result
-		}
-
-		c := command.CRUD.Retrieve(args[1]).(command.ExpandedCommand)
-		nv := strings.StripQuotes(args[3])
-		switch args[2] {
+		nv := strings.StripQuotes(s2[0])
+		switch s1 {
 		case "name":
 			c.Name = nv
 		case "args":
 			c.Args = command.FormatRegexToArr(nv)
 		}
 
-		nc := command.CRUD.Update(args[1], c).(command.ExpandedCommand)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Command %s updated!", nc.Name))
-
-	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: command delete name") {
-			return result
-		}
-
-		command.CRUD.Delete(args[1])
-		chat.SendSystemMessage(conn, fmt.Sprintf("Command %s deleted!", args[1]))
-	}
-
-	return result
-}
+		return c
+	},
+	acrud.DefaultCrudModes, command.CRUD,
+)
