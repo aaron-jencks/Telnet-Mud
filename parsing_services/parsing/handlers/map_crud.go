@@ -2,133 +2,83 @@ package handlers
 
 import (
 	"fmt"
+	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/services/chat"
 	"mud/services/tmap"
+	"mud/utils/handlers/crud"
 	"mud/utils/strings"
 	"net"
 )
 
-func HandleMapCrud(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{
-		Chat:   true,
-		Person: true,
-	}
-
-	if CrudChecks(conn, "map", args) {
-		return result
-	}
-
-	switch args[0] {
-	case "create":
+var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
+	"map",
+	"Usage: map create room \"icon\" x y [z]",
+	"Usage: map retrieve room x y [z]",
+	"Usage: map delete room x y z",
+	5, 4, 5,
+	func(c net.Conn, s []string) bool {
 		usageString := "Usage: map create room \"icon\" x y [z]"
-
-		if CheckMinArgs(conn, args, 5, usageString) {
-			return result
+		rparsable, _ := crud.ParseIntegerCheck(c, s[1], usageString, "room")
+		xparsable, _ := crud.ParseIntegerCheck(c, s[3], usageString, "x")
+		yparsable, _ := crud.ParseIntegerCheck(c, s[4], usageString, "y")
+		zparsable := len(s) < 6
+		if !zparsable {
+			zparsable, _ = crud.ParseIntegerCheck(c, s[5], usageString, "z")
 		}
-
-		idParsed, rid := ParseIntegerCheck(conn, args[1], usageString, "room")
-		if !idParsed {
-			return result
-		}
-
-		xParsed, x := ParseIntegerCheck(conn, args[3], usageString, "x")
-		if !xParsed {
-			return result
-		}
-
-		yParsed, y := ParseIntegerCheck(conn, args[4], usageString, "y")
-		if !yParsed {
-			return result
-		}
-
-		var nr entities.Map
-		if len(args) == 6 {
-			zParsed, z := ParseIntegerCheck(conn, args[5], usageString, "z")
-			if !zParsed {
-				return result
-			}
-
-			nr = tmap.CRUD.Create(rid, strings.StripQuotes(args[2]), x, y, z).(entities.Map)
-		} else {
-			nr = tmap.CRUD.Create(rid, strings.StripQuotes(args[2]), x, y).(entities.Map)
-		}
-
-		chat.SendSystemMessage(conn, fmt.Sprintf("Tile %s placed at (Room: %d, X: %d, Y: %d, Z: %d) created!",
-			nr.Tile, nr.Room, nr.X, nr.Y, nr.Z))
-
-	case "retrieve":
+		return rparsable && xparsable && yparsable && zparsable
+	},
+	func(c net.Conn, s []string) bool {
 		usageString := "Usage: map retrieve room x y [z]"
-
-		if CheckMinArgs(conn, args, 4, usageString) {
-			return result
+		rparsable, _ := crud.ParseIntegerCheck(c, s[1], usageString, "room")
+		xparsable, _ := crud.ParseIntegerCheck(c, s[2], usageString, "x")
+		yparsable, _ := crud.ParseIntegerCheck(c, s[3], usageString, "y")
+		zparsable := len(s) < 5
+		if !zparsable {
+			zparsable, _ = crud.ParseIntegerCheck(c, s[4], usageString, "z")
 		}
-
-		idParsed, rid := ParseIntegerCheck(conn, args[1], usageString, "room")
-		if !idParsed {
-			return result
-		}
-
-		xParsed, x := ParseIntegerCheck(conn, args[2], usageString, "x")
-		if !xParsed {
-			return result
-		}
-
-		yParsed, y := ParseIntegerCheck(conn, args[3], usageString, "y")
-		if !yParsed {
-			return result
-		}
-
-		var r entities.Map
-
-		if len(args) == 5 {
-			zParsed, z := ParseIntegerCheck(conn, args[4], usageString, "z")
-			if !zParsed {
-				return result
-			}
-
-			r = tmap.GetTileForCoord(rid, x, y, z)
-		} else {
-			r = tmap.GetTopMostTile(rid, x, y)
-		}
-
-		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Map:\nRoom: %d\nCoord: (%d, %d, %d)\nTile: \"%s\"",
-				r.Room, r.X, r.Y, r.Z, r.Tile))
-
-	case "update":
-		chat.SendSystemMessage(conn, "Updating a tile is not currently supported, please delete and replace")
-
-	case "delete":
+		return rparsable && xparsable && yparsable && zparsable
+	},
+	func(c net.Conn, s []string) bool {
 		usageString := "Usage: map delete room x y z"
-		if CheckMinArgs(conn, args, 5, usageString) {
-			return result
+		rparsable, _ := crud.ParseIntegerCheck(c, s[1], usageString, "room")
+		xparsable, _ := crud.ParseIntegerCheck(c, s[2], usageString, "x")
+		yparsable, _ := crud.ParseIntegerCheck(c, s[3], usageString, "y")
+		zparsable, _ := crud.ParseIntegerCheck(c, s[4], usageString, "z")
+		return rparsable && xparsable && yparsable && zparsable
+	},
+	func(s []string) []interface{} {
+		var rid, x, y, z int
+		fmt.Sscanf(s[0], "%d", &rid)
+		fmt.Sscanf(s[3], "%d", &x)
+		fmt.Sscanf(s[4], "%d", &y)
+		if len(s) == 6 {
+			fmt.Sscanf(s[5], "%d", &z)
+			return []interface{}{rid, strings.StripQuotes(s[2]), x, y, z}
 		}
-
-		idParsed, rid := ParseIntegerCheck(conn, args[1], usageString, "room")
-		if !idParsed {
-			return result
-		}
-
-		xParsed, x := ParseIntegerCheck(conn, args[2], usageString, "x")
-		if !xParsed {
-			return result
-		}
-
-		yParsed, y := ParseIntegerCheck(conn, args[3], usageString, "y")
-		if !yParsed {
-			return result
-		}
-
-		zParsed, z := ParseIntegerCheck(conn, args[4], usageString, "z")
-		if !zParsed {
-			return result
-		}
-
-		tmap.CRUD.Delete(rid, "Room", x, "X", y, "Y", z, "Z")
-		chat.SendSystemMessage(conn, fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", rid, x, y, z))
-	}
-
-	return result
-}
+		return []interface{}{rid, strings.StripQuotes(s[2]), x, y}
+	},
+	func(s []string) []interface{} {
+		var rid, x, y, z int
+		fmt.Sscanf(s[0], "%d", &rid)
+		fmt.Sscanf(s[1], "%d", &x)
+		fmt.Sscanf(s[2], "%d", &y)
+		fmt.Sscanf(s[3], "%d", &z)
+		return []interface{}{rid, "Room", x, "X", y, "Y", z, "Z"}
+	},
+	func(i interface{}) string {
+		nr := i.(entities.Map)
+		return fmt.Sprintf("Tile %s placed at (Room: %d, X: %d, Y: %d, Z: %d) created!",
+			nr.Tile, nr.Room, nr.X, nr.Y, nr.Z)
+	},
+	func(i interface{}) string {
+		r := i.(entities.Map)
+		return fmt.Sprintf("Map:\nRoom: %d\nCoord: (%d, %d, %d)\nTile: \"%s\"",
+			r.Room, r.X, r.Y, r.Z, r.Tile)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Map)
+		return fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", nv.Room, nv.X, nv.Y, nv.Z)
+	},
+	acrud.DefaultCrudModes, tmap.CRUD,
+)
