@@ -2,99 +2,86 @@ package handlers
 
 import (
 	"fmt"
+	"mud/actions/defined"
+	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
-	"mud/services/chat"
+	"mud/parsing_services/player"
 	"mud/services/room"
 	"mud/services/terminal"
+	"mud/utils/handlers/crud"
 	"mud/utils/strings"
 	"net"
 )
 
-func HandleRoomCrud(conn net.Conn, args []string) parsing.CommandResponse {
-	var result parsing.CommandResponse = parsing.CommandResponse{
-		Chat:   true,
-		Person: true,
-	}
+var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
+	"room",
+	"Usage: room create \"name\" \"description\"",
+	"Usage: room retrieve id",
+	"Usage: room update id property:(name|description) \"newValue\"",
+	"Usage: room delete id",
+	3, 2, 4, 2,
+	func(c net.Conn, s []string) bool { return true },
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: room retrieve id", "id")
+		return parsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: room update id property:(name|description) \"newValue\"", "id")
+		return parsable
+	},
+	func(c net.Conn, s []string) bool {
+		parsable, _ := crud.ParseIntegerCheck(c, s[1], "Usage: room delete id", "id")
+		return parsable
+	},
+	func(s []string) []interface{} {
+		return []interface{}{strings.StripQuotes(s[0]), strings.StripQuotes(s[1])}
+	},
+	func(s []string) interface{} {
+		var id int
+		fmt.Sscanf(s[0], "%d", &id)
+		return id
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Room)
+		return fmt.Sprintf("Room %d(%s) created!", nv.Id, nv.Name)
+	},
+	func(i interface{}) string {
+		r := i.(entities.Room)
+		return fmt.Sprintf("Room %d:\nName: \"%s\"\nDescription: \"%s\"",
+			r.Id, r.Name, r.Description)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Room)
+		return fmt.Sprintf("Room %d(%s) updated!", nv.Id, nv.Name)
+	},
+	func(i interface{}) string {
+		nv := i.(entities.Room)
+		return fmt.Sprintf("Room %d(%s) deleted!", nv.Id, nv.Name)
+	},
+	[]string{"name", "description"}, 2,
+	func(i interface{}, s1 string, s2 []string) interface{} {
+		c := i.(entities.Room)
 
-	if CrudChecks(conn, "room", args) {
-		return result
-	}
-
-	switch args[0] {
-	case "create":
-		if CheckMinArgs(conn, args, 3, "Usage: room create \"name\" \"description\"") {
-			return result
-		}
-
-		nr := room.CRUD.Create(
-			strings.StripQuotes(args[1]),
-			strings.StripQuotes(args[2])).(entities.Room)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Room %d(%s) created!", nr.Id, nr.Name))
-
-	case "retrieve":
-		if CheckMinArgs(conn, args, 2, "Usage: room retrieve id") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: room retrieve id", "id")
-		if !idParsed {
-			return result
-		}
-
-		r := room.CRUD.Retrieve(id).(entities.Room)
-		chat.SendSystemMessage(conn,
-			fmt.Sprintf("Room %d:\nName: \"%s\"\nDescription: \"%s\"",
-				r.Id, r.Name, r.Description))
-
-	case "update":
-		if CheckMinArgs(conn, args, 4, "Usage: room update id (name|description) \"newValue\"") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: room update id (name|description) \"newValue\"", "id")
-		if !idParsed {
-			return result
-		}
-
-		if CheckStringOptions(conn, args[2], []string{"name", "description"},
-			"Usage: room update id property \"newValue\"", "property") {
-			return result
-		}
-
-		r := room.CRUD.Retrieve(id).(entities.Room)
-		nv := strings.StripQuotes(args[3])
-		switch args[2] {
+		nv := strings.StripQuotes(s2[0])
+		switch s1 {
 		case "name":
-			r.Name = nv
+			c.Name = nv
 		case "description":
-			r.Description = nv
+			c.Description = nv
 		}
 
-		nr := room.CRUD.Update(id, r).(entities.Room)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Room %d(%s) updated!", nr.Id, nr.Name))
-
-	case "delete":
-		if CheckMinArgs(conn, args, 2, "Usage: room delete id") {
-			return result
-		}
-
-		idParsed, id := ParseIntegerCheck(conn, args[1], "Usage: room delete id", "id")
-		if !idParsed {
-			return result
-		}
-
-		room.CRUD.Delete(id)
-		chat.SendSystemMessage(conn, fmt.Sprintf("Room %d deleted!", id))
-	}
-
-	return result
-}
+		return c
+	},
+	acrud.DefaultCrudModes, room.CRUD,
+)
 
 func HandleInfo(conn net.Conn, args []string) parsing.CommandResponse {
+	username := player.GetConnUsername(conn)
 	t := terminal.TerminalMap[conn]
-	chat.SendSystemMessage(conn, fmt.Sprintf("%s:\n%s", t.Room.Name, t.Room.Description))
+	player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s:\n%s", t.Room.Name, t.Room.Description)))
 	return parsing.CommandResponse{
+		Info:   true,
 		Person: true,
 	}
 }
