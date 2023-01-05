@@ -26,7 +26,7 @@ func HandlePickup(conn net.Conn, args []string) parsing.CommandResponse {
 
 	p := player.CRUD.Retrieve(player.PlayerConnectionMap[conn]).(entities.Player)
 	r := room.CRUD.Retrieve(p.Room).(entities.Room)
-	roomLoot := loot.GetLootForRoom(r)
+	roomLoot := loot.GetLootForPosition(r, p.RoomX, p.RoomY)
 
 	var qty int = 1
 	if len(args) > 1 {
@@ -38,15 +38,13 @@ func HandlePickup(conn net.Conn, args []string) parsing.CommandResponse {
 	}
 
 	for _, loot := range roomLoot {
-		if loot.X == p.RoomX && loot.Y == p.RoomY {
-			if loot.Item.Name == strings.StripQuotes(args[0]) && loot.Quantity <= qty {
-				nQty := inventory.AddItemToInventory(p, loot.Item, qty)
-				chat.SendSystemMessage(conn, fmt.Sprintf("You now have %dx %s", nQty, loot.Item.Name))
-				return result
-			} else if loot.Quantity < qty {
-				chat.SendSystemMessage(conn, fmt.Sprintf("There are only %dx here", loot.Quantity))
-				return result
-			}
+		if loot.Item.Name == strings.StripQuotes(args[0]) && loot.Quantity <= qty {
+			nQty := inventory.AddItemToInventory(p, loot.Item, qty)
+			chat.SendSystemMessage(conn, fmt.Sprintf("You now have %dx %s", nQty, loot.Item.Name))
+			return result
+		} else if loot.Quantity < qty {
+			chat.SendSystemMessage(conn, fmt.Sprintf("There are only %dx here", loot.Quantity))
+			return result
 		}
 	}
 
