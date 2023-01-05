@@ -131,7 +131,7 @@ func CreateDeleteAction(conn net.Conn, args []string,
 
 // Creates an Action that wraps a Crud struct and calls it's Delete method
 // Works with items that have multiple primary keys
-func CreateMultiRetrieveDeleteAction(conn net.Conn, args []string,
+func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
 	retriever CrudExecutor, argFmt ArgumentFormatter, respFmt ResponseFormatter,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
@@ -232,7 +232,7 @@ func CreateCrudParserMultiRetrieve(name,
 			player.PushAction(username, defined.CreateInfoAction(conn, "Multi keyed object don't currently support updating"))
 
 		case "delete":
-			player.PushAction(username, CreateMultiRetrieveDeleteAction(conn, args, name,
+			player.PushAction(username, CreateMultiKeyDeleteAction(conn, args, name,
 				deleteUsageString, deleteMinArgs, deleteValidator,
 				retriever, deletingFormatter, deleteRespFmt,
 				reqModes, crudObj,
