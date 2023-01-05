@@ -11,6 +11,7 @@ import (
 	"mud/services/room"
 	"net"
 	"strings"
+	"time"
 )
 
 func CreateInventoryListAction(conn net.Conn) definitions.Action {
@@ -45,7 +46,7 @@ func CreateInventoryListAction(conn net.Conn) definitions.Action {
 func CreatePickupItemAction(conn net.Conn, p entities.Player, targetItem string, qty int) definitions.Action {
 	return definitions.Action{
 		Name:       "Pickup",
-		Duration:   1000000000,
+		Duration:   1 * time.Second,
 		ValidModes: []string{"Logged In"},
 		Handler: func() parsing.CommandResponse {
 			var result parsing.CommandResponse = parsing.CommandResponse{
@@ -70,6 +71,38 @@ func CreatePickupItemAction(conn net.Conn, p entities.Player, targetItem string,
 
 			player.PushAction(p.Name, CreateInfoAction(conn, "There is none of that here to pick up"))
 			return result
+		},
+	}
+}
+
+func CreateListLootAction(conn net.Conn) definitions.Action {
+	return definitions.Action{
+		Name:       "Pickup",
+		Duration:   500 * time.Millisecond,
+		ValidModes: []string{"Logged In"},
+		Handler: func() parsing.CommandResponse {
+			username := player.GetConnUsername(conn)
+			p := player.CRUD.Retrieve(username).(entities.Player)
+			r := room.CRUD.Retrieve(p.Room).(entities.Room)
+			roomLoot := loot.GetLootForPosition(r, p.RoomX, p.RoomY)
+
+			var displayList []string
+			for _, item := range roomLoot {
+				displayList = append(displayList, fmt.Sprintf("%dx %s", item.Quantity, item.Item.Name))
+			}
+
+			text := "Loot: Empty."
+			if len(displayList) > 0 {
+				text = "Loot:\n" + strings.Join(displayList, "\n")
+			}
+
+			player.PushAction(username, CreateInfoAction(conn, text))
+
+			return parsing.CommandResponse{
+				LoggedIn: true,
+				Info:     true,
+				Person:   true,
+			}
 		},
 	}
 }
