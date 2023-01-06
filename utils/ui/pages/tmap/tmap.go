@@ -113,22 +113,40 @@ func GetMapWindow(p entities.Player) string {
 	for _, mtile := range tiles {
 		tilent := tile.CRUD.Retrieve(mtile.Tile).(entities.Tile)
 
-		if mtile.Z > currentPort[mtile.Y][mtile.X].IconZ {
-			// TODO add variant parsing here
-
-			currentPort[mtile.Y][mtile.X].Icon = tilent.Icon
-			currentPort[mtile.Y][mtile.X].FG = tilent.FG
-			currentPort[mtile.Y][mtile.X].IconZ = mtile.Z
+		yindex := mtile.Y
+		if try < 0 {
+			yindex -= try
+		}
+		xindex := mtile.X
+		if trx < 0 {
+			xindex -= trx
 		}
 
-		if tilent.BG > 0 && mtile.Z > currentPort[mtile.Y][mtile.X].BGZ {
-			currentPort[mtile.Y][mtile.X].BG = tilent.BG
-			currentPort[mtile.Y][mtile.X].BGZ = mtile.Z
+		if mtile.Z > currentPort[yindex][xindex].IconZ {
+			// TODO add variant parsing here
+
+			currentPort[yindex][xindex].Icon = tilent.Icon
+			currentPort[yindex][xindex].FG = tilent.FG
+			currentPort[yindex][xindex].IconZ = mtile.Z
+		}
+
+		if tilent.BG > 0 && mtile.Z > currentPort[yindex][xindex].BGZ {
+			currentPort[yindex][xindex].BG = tilent.BG
+			currentPort[yindex][xindex].BGZ = mtile.Z
 		}
 	}
 
-	currentPort[p.RoomY][p.RoomX].Icon = utils.PLAYER_ICON
-	currentPort[p.RoomY][p.RoomX].FG = utils.PLAYER_ICON_COLOR
+	pyindex := p.RoomY
+	if try < 0 {
+		pyindex -= try
+	}
+	pxindex := p.RoomX
+	if trx < 0 {
+		pxindex -= trx
+	}
+
+	currentPort[pyindex][pxindex].Icon = utils.PLAYER_ICON
+	currentPort[pyindex][pxindex].FG = utils.PLAYER_ICON_COLOR
 
 	var rows []string = make([]string, len(currentPort))
 	for ri, row := range currentPort {

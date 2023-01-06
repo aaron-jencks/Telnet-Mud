@@ -4,6 +4,7 @@ import (
 	"mud/actions/definitions"
 	"mud/entities"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/parsing/utils"
 	"mud/parsing_services/player"
 	"mud/services/terminal"
 	"net"
@@ -27,12 +28,7 @@ func CreateLoginAction(conn net.Conn, username, password string) definitions.Act
 				p := player.CRUD.Retrieve(username).(entities.Player)
 				terminal.LoadPlayer(conn, p)
 				player.PushAction(username, CreateInfoAction(conn, "Welcome! Please be respectful."))
-				result.LoggedIn = true
-				result.Chat = true
-				result.Info = true
-				result.Map = true
-				result.Player = p
-				result.Clear = true
+				result = utils.GetDefaultRepaintCommandResponse(conn)
 			}
 
 			return result
@@ -76,11 +72,7 @@ func CreateRegisterAction(conn net.Conn, username, password string) definitions.
 				player.PushAction(anonUsername, CreateInfoAction(conn, "User created successfully, you may now login."))
 			}
 
-			return parsing.CommandResponse{
-				Conn:   conn,
-				Info:   true,
-				Person: true,
-			}
+			return utils.GetDefaultInfoCommandResponse(conn)
 		},
 	}
 }

@@ -3,6 +3,7 @@ package defined
 import (
 	"mud/actions/definitions"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/parsing/utils"
 	"mud/parsing_services/player"
 	"mud/services/chat"
 	"mud/services/terminal"
@@ -22,11 +23,8 @@ func CreateInfoAction(conn net.Conn, message string) definitions.Action {
 				chat.SendSystemMessage(conn, message)
 			}
 
-			response := parsing.CommandResponse{
-				Conn:       conn,
-				Person:     true,
-				SaveCursor: true,
-			}
+			response := utils.GetDefaultCommandResponse(conn)
+			response.SaveCursor = true
 
 			if player.ConnLoggedIn(conn) {
 				response.Info = true
@@ -44,16 +42,13 @@ func CreateLocalChatAction(conn net.Conn, message string) definitions.Action {
 		Name:        "Local Message",
 		AlwaysValid: true,
 		Handler: func() parsing.CommandResponse {
-			loggedIn := player.ConnLoggedIn(conn)
 			username := player.GetConnUsername(conn)
 
-			response := parsing.CommandResponse{
-				LoggedIn:   loggedIn,
-				Conn:       conn,
-				Chat:       true,
-				Global:     true,
-				SaveCursor: true,
-			}
+			response := utils.GetDefaultChatCommandResponse(conn)
+
+			response.Person = false
+			response.Global = true
+			response.SaveCursor = true
 
 			chat.SendGlobalMessage(username, message)
 
@@ -74,11 +69,7 @@ func CreateDirectMessageAction(conn net.Conn, target string, message string) def
 				username, target,
 				message)
 
-			return parsing.CommandResponse{
-				Chat:     true,
-				Person:   true,
-				Specific: []net.Conn{tConn},
-			}
+			return utils.GetDefaultChatCommandResponse(conn)
 		},
 	}
 }

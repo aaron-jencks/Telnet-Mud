@@ -5,6 +5,7 @@ import (
 	"mud/actions/defined"
 	"mud/actions/definitions"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/parsing/utils"
 	"mud/parsing_services/player"
 	crudUtils "mud/utils/crud"
 	"mud/utils/handlers/crud"
@@ -19,10 +20,7 @@ func createCrudAction(conn net.Conn, args []string,
 		Name:       fmt.Sprintf("%s %s", name, crudMethod),
 		ValidModes: reqModes,
 		Handler: func() parsing.CommandResponse {
-			result := parsing.CommandResponse{
-				Info:   true,
-				Person: true,
-			}
+			result := utils.GetDefaultInfoCommandResponse(conn)
 
 			if !validator(args) {
 				return result

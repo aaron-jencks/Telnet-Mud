@@ -5,6 +5,7 @@ import (
 	"mud/actions/definitions"
 	"mud/entities"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/parsing/utils"
 	"mud/parsing_services/player"
 	"mud/services/inventory"
 	"mud/services/loot"
@@ -34,11 +35,7 @@ func CreateInventoryListAction(conn net.Conn) definitions.Action {
 
 			player.PushAction(username, CreateInfoAction(conn, text))
 
-			return parsing.CommandResponse{
-				LoggedIn: true,
-				Info:     true,
-				Person:   true,
-			}
+			return utils.GetDefaultInfoCommandResponse(conn)
 		},
 	}
 }
@@ -49,11 +46,7 @@ func CreatePickupItemAction(conn net.Conn, p entities.Player, targetItem string,
 		Duration:   1 * time.Second,
 		ValidModes: []string{"Logged In"},
 		Handler: func() parsing.CommandResponse {
-			var result parsing.CommandResponse = parsing.CommandResponse{
-				LoggedIn: true,
-				Info:     true,
-				Person:   true,
-			}
+			var result parsing.CommandResponse = utils.GetDefaultInfoCommandResponse(conn)
 
 			r := room.CRUD.Retrieve(p.Room).(entities.Room)
 			roomLoot := loot.GetLootForRoom(r)
@@ -98,11 +91,7 @@ func CreateListLootAction(conn net.Conn) definitions.Action {
 
 			player.PushAction(username, CreateInfoAction(conn, text))
 
-			return parsing.CommandResponse{
-				LoggedIn: true,
-				Info:     true,
-				Person:   true,
-			}
+			return utils.GetDefaultInfoCommandResponse(conn)
 		},
 	}
 }

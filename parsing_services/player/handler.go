@@ -14,9 +14,10 @@ func ActionHandler(player string) {
 				break
 			} else {
 				if nextAction.Duration > 0 {
-					time.Sleep(nextAction.Duration * time.Millisecond)
+					time.Sleep(nextAction.Duration)
 				}
-				ui.HandleCommandResponse(nextAction.Handler())
+				response := nextAction.Handler()
+				ui.HandleCommandResponse(response)
 			}
 		}
 	}

@@ -2,9 +2,10 @@ package actions
 
 import (
 	"fmt"
+	"mud/actions/defined"
 	"mud/actions/handlers"
 	"mud/parsing_services/parsing"
-	"mud/services/chat"
+	"mud/parsing_services/player"
 	"net"
 )
 
@@ -16,6 +17,8 @@ var letterMapping map[rune]func(net.Conn) = map[rune]func(net.Conn){
 }
 
 func ParseString(conn net.Conn, s string) parsing.CommandResponse {
+	username := player.GetConnUsername(conn)
+
 	var num string = ""
 	for _, r := range s {
 		if r >= '0' && r <= '9' {
@@ -24,18 +27,23 @@ func ParseString(conn net.Conn, s string) parsing.CommandResponse {
 		} else {
 			handler, ok := letterMapping[r]
 			if !ok {
-				chat.SendSystemMessage(conn, fmt.Sprintf("Unknown parsing symbol %c", r))
+				player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("Unknown parsing symbol %c", r)))
 				return parsing.CommandResponse{
 					Chat:   true,
 					Person: true,
 				}
 			} else {
-				var inum int
-				fmt.Sscanf(num, "%d", &inum)
+				var inum int = 1
+
+				if len(num) > 0 {
+					fmt.Sscanf(num, "%d", &inum)
+				}
 
 				for i := 0; i < inum; i++ {
 					handler(conn)
 				}
+
+				player.PushAction(username, defined.CreateScreenBlip(conn))
 				num = ""
 			}
 		}

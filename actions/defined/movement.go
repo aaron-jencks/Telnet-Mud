@@ -4,6 +4,7 @@ import (
 	"mud/actions/definitions"
 	"mud/entities"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/parsing/utils"
 	"mud/parsing_services/player"
 	"mud/services/room"
 	"net"
@@ -23,20 +24,12 @@ func CreateMoveUpAction(conn net.Conn) definitions.Action {
 				p.RoomY--
 				player.CRUD.Update(username, p)
 
-				return parsing.CommandResponse{
-					LoggedIn: true,
-					Map:      true,
-					Person:   true,
-				}
+				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
 			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
-			return parsing.CommandResponse{
-				LoggedIn: true,
-				Info:     true,
-				Person:   true,
-			}
+			return utils.GetDefaultInfoCommandResponse(conn)
 		},
 	}
 }
@@ -54,20 +47,12 @@ func CreateMoveLeftAction(conn net.Conn) definitions.Action {
 				p.RoomX--
 				player.CRUD.Update(username, p)
 
-				return parsing.CommandResponse{
-					LoggedIn: true,
-					Map:      true,
-					Person:   true,
-				}
+				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
 			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
-			return parsing.CommandResponse{
-				LoggedIn: true,
-				Info:     true,
-				Person:   true,
-			}
+			return utils.GetDefaultInfoCommandResponse(conn)
 		},
 	}
 }
@@ -86,20 +71,12 @@ func CreateMoveRightAction(conn net.Conn) definitions.Action {
 				p.RoomX++
 				player.CRUD.Update(username, p)
 
-				return parsing.CommandResponse{
-					LoggedIn: true,
-					Map:      true,
-					Person:   true,
-				}
+				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
 			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
-			return parsing.CommandResponse{
-				LoggedIn: true,
-				Info:     true,
-				Person:   true,
-			}
+			return utils.GetDefaultInfoCommandResponse(conn)
 		},
 	}
 }
@@ -118,20 +95,12 @@ func CreateMoveDownAction(conn net.Conn) definitions.Action {
 				p.RoomY++
 				player.CRUD.Update(username, p)
 
-				return parsing.CommandResponse{
-					LoggedIn: true,
-					Map:      true,
-					Person:   true,
-				}
+				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
 			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
-			return parsing.CommandResponse{
-				LoggedIn: true,
-				Info:     true,
-				Person:   true,
-			}
+			return utils.GetDefaultInfoCommandResponse(conn)
 		},
 	}
 }

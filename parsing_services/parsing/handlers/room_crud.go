@@ -20,7 +20,7 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	"Usage: room retrieve id",
 	"Usage: room update id property:(name|description|height|width) \"newValue\"",
 	"Usage: room delete id",
-	3, 2, 4, 2,
+	5, 2, 4, 2,
 	func(c net.Conn, s []string) bool {
 		usageString := "Usage: room create \"name\" \"description\" height width"
 

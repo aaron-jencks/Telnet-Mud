@@ -7,6 +7,7 @@ import (
 	"mud/utils/crud"
 	"mud/utils/io/db"
 	"net"
+	"sync"
 )
 
 func playerToArr(ps interface{}) []interface{} {
@@ -106,9 +107,13 @@ func PlayerExists(name string) bool {
 
 var LoggedInPlayerMap map[string]net.Conn = make(map[string]net.Conn)
 var PlayerConnectionMap map[net.Conn]string = make(map[net.Conn]string)
+var PlayerRegistrationLock sync.Mutex = sync.Mutex{}
 var PlayerQueueMap map[string]*definitions.ActionQueue = make(map[string]*definitions.ActionQueue)
+var PlayerQueueMapLock sync.Mutex = sync.Mutex{}
 
 func CreateAnonymousHandler(username string) {
+	PlayerQueueMapLock.Lock()
+	defer PlayerQueueMapLock.Unlock()
 	_, ok := PlayerQueueMap[username]
 	if !ok {
 		PlayerQueueMap[username] = definitions.CreateActionQueue(utils.DEFAULT_GLOBAL_ACTION_LIMIT)
@@ -119,10 +124,14 @@ func CreateAnonymousHandler(username string) {
 
 func LoginPlayer(name string, password string, conn net.Conn) bool {
 	if PlayerExists(name) && CRUD.Retrieve(name).(entities.Player).Password == password {
+		PlayerRegistrationLock.Lock()
+		defer PlayerRegistrationLock.Unlock()
 		_, ok := LoggedInPlayerMap[name]
 		if !ok {
 			LoggedInPlayerMap[name] = conn
+			PlayerQueueMapLock.Lock()
 			PlayerQueueMap[name] = definitions.CreateActionQueue(CRUD.Retrieve(name).(entities.Player).ActionCapacity)
+			PlayerQueueMapLock.Unlock()
 			PlayerConnectionMap[conn] = name
 
 			// Launch the action processing loop for the player
@@ -135,15 +144,15 @@ func LoginPlayer(name string, password string, conn net.Conn) bool {
 }
 
 func LogoutPlayer(name string) bool {
+	PlayerRegistrationLock.Lock()
+	defer PlayerRegistrationLock.Unlock()
 	conn, ok := LoggedInPlayerMap[name]
 	if ok {
 		delete(LoggedInPlayerMap, name)
 		delete(PlayerConnectionMap, conn)
 
 		// Signals to the action handler to quit
-		EnqueueAction(name, definitions.Action{
-			Name: "STOP",
-		})
+		UnregisterHandler(name)
 
 		return true
 	}
@@ -157,6 +166,8 @@ func UnregisterHandler(name string) {
 }
 
 func PlayerLoggedIn(name string) bool {
+	PlayerRegistrationLock.Lock()
+	defer PlayerRegistrationLock.Unlock()
 	_, ok := LoggedInPlayerMap[name]
 	return ok
 }
@@ -170,11 +181,15 @@ func RegisterPlayer(name string, password string) bool {
 }
 
 func ConnLoggedIn(conn net.Conn) bool {
+	PlayerRegistrationLock.Lock()
+	defer PlayerRegistrationLock.Unlock()
 	_, ok := PlayerConnectionMap[conn]
 	return ok
 }
 
 func EnqueueAction(p string, a definitions.Action) {
+	PlayerQueueMapLock.Lock()
+	defer PlayerQueueMapLock.Unlock()
 	PlayerQueueMap[p].Enqueue(a)
 }
 
@@ -185,6 +200,8 @@ func EnqueueActions(player string, actions []definitions.Action) {
 }
 
 func PushAction(p string, a definitions.Action) {
+	PlayerQueueMapLock.Lock()
+	defer PlayerQueueMapLock.Unlock()
 	PlayerQueueMap[p].Push(a)
 }
 
@@ -195,11 +212,15 @@ func PushActions(player string, actions []definitions.Action) {
 }
 
 func GetNextAction(player string) definitions.Action {
+	PlayerQueueMapLock.Lock()
+	defer PlayerQueueMapLock.Unlock()
 	return PlayerQueueMap[player].Dequeue()
 }
 
 func GetConnUsername(conn net.Conn) string {
 	if ConnLoggedIn(conn) {
+		PlayerRegistrationLock.Lock()
+		defer PlayerRegistrationLock.Unlock()
 		return PlayerConnectionMap[conn]
 	} else {
 		return GetAnonymousUsername(conn)
