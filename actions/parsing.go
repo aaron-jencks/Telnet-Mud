@@ -29,6 +29,7 @@ func ParseString(conn net.Conn, s string) parsing.CommandResponse {
 			if !ok {
 				player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("Unknown parsing symbol %c", r)))
 				return parsing.CommandResponse{
+					Conn:   conn,
 					Chat:   true,
 					Person: true,
 				}
