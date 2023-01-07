@@ -114,6 +114,7 @@ var PlayerQueueMapLock sync.Mutex = sync.Mutex{}
 func CreateAnonymousHandler(username string) {
 	PlayerQueueMapLock.Lock()
 	defer PlayerQueueMapLock.Unlock()
+
 	_, ok := PlayerQueueMap[username]
 	if !ok {
 		PlayerQueueMap[username] = definitions.CreateActionQueue(utils.DEFAULT_GLOBAL_ACTION_LIMIT)
@@ -189,8 +190,9 @@ func ConnLoggedIn(conn net.Conn) bool {
 
 func EnqueueAction(p string, a definitions.Action) {
 	PlayerQueueMapLock.Lock()
-	defer PlayerQueueMapLock.Unlock()
-	PlayerQueueMap[p].Enqueue(a)
+	q := PlayerQueueMap[p]
+	PlayerQueueMapLock.Unlock()
+	q.Enqueue(a)
 }
 
 func EnqueueActions(player string, actions []definitions.Action) {
@@ -201,8 +203,9 @@ func EnqueueActions(player string, actions []definitions.Action) {
 
 func GetNextAction(player string) definitions.Action {
 	PlayerQueueMapLock.Lock()
-	defer PlayerQueueMapLock.Unlock()
-	return PlayerQueueMap[player].Dequeue()
+	q := PlayerQueueMap[player]
+	PlayerQueueMapLock.Unlock()
+	return q.Dequeue()
 }
 
 func GetConnUsername(conn net.Conn) string {
