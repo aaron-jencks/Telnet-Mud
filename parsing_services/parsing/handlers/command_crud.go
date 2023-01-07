@@ -30,6 +30,10 @@ var CommandCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	},
 	func(i interface{}) string { return fmt.Sprintf("Command %s updated!", i.(entities.Command).Name) },
 	func(i interface{}) string { return fmt.Sprintf("Command %s deleted!", i.(entities.Command).Name) },
+	func(c net.Conn) {},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
 	[]string{"name", "args"}, 2,
 	func(i interface{}, s1 string, s2 []string) interface{} {
 		c := i.(command.ExpandedCommand)

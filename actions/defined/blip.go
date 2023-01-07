@@ -16,3 +16,15 @@ func CreateScreenBlip(conn net.Conn) definitions.Action {
 		},
 	}
 }
+
+func CreateGlobalMapRepaint(conn net.Conn) definitions.Action {
+	return definitions.Action{
+		Name:        "Map Repaint",
+		AlwaysValid: true,
+		Handler: func() parsing.CommandResponse {
+			response := utils.GetDefaultMapCommandResponse(conn)
+			response.Global = true
+			return response
+		},
+	}
+}

@@ -65,5 +65,8 @@ var VariantCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetri
 		nr := i.(entities.TileVariant)
 		return fmt.Sprintf("Variant %d(%s) deleted!", nr.Id, nr.Name)
 	},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
 	acrud.DefaultCrudModes, variant.CRUD,
 )

@@ -38,6 +38,7 @@ func createCrudAction(conn net.Conn, args []string,
 func CreateCreateAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
 	argFmt ArgumentFormatter, respFmt ResponseFormatter,
+	miscUpdate AfterActionHandler,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
@@ -55,6 +56,7 @@ func CreateCreateAction(conn net.Conn, args []string,
 func CreateRetrieveAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
 	argFmt RetrieveArgumentFormatter, respFmt ResponseFormatter,
+	miscUpdate AfterActionHandler,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
@@ -74,6 +76,7 @@ func CreateMultiRetrieveAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
 	argFmt ArgumentFormatter, executor MultiKeyExecutor,
 	respFmt ResponseFormatter,
+	miscUpdate AfterActionHandler,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
@@ -95,6 +98,7 @@ func CreateUpdateAction(conn net.Conn, args []string,
 	valueUpdater UpdateNewValueFormatter,
 	validPropertyNames []string,
 	respFmt ResponseFormatter,
+	miscUpdate AfterActionHandler,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
@@ -115,6 +119,7 @@ func CreateUpdateAction(conn net.Conn, args []string,
 func CreateDeleteAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
 	argFmt RetrieveArgumentFormatter, respFmt ResponseFormatter,
+	miscUpdate AfterActionHandler,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
@@ -135,6 +140,7 @@ func CreateDeleteAction(conn net.Conn, args []string,
 func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 	name, usageString string, minArgs int, validator ArgumentValidator,
 	retriever MultiKeyExecutor, argFmt ArgumentFormatter, respFmt ResponseFormatter,
+	miscUpdate AfterActionHandler,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
@@ -156,6 +162,7 @@ func CreateCrudParser(name,
 	createValidator, retrieveValidator, updateValidator, deleteValidator ArgumentValidator,
 	createArgFmt ArgumentFormatter, retrievingFormatter RetrieveArgumentFormatter,
 	createRespFmt, retrieveRespFmt, updateRespFmt, deleteRespFmt ResponseFormatter,
+	createMiscUpdate, retrieveMiscUpdate, updateMiscUpdate, deleteMiscUpdate AfterActionHandler,
 	validPropertyNames []string, propertyIndex int, valueUpdater UpdateNewValueFormatter,
 	reqModes []string, crudObj crudUtils.Crud) parsing.CommandHandler {
 	return func(conn net.Conn, args []string) {
@@ -170,6 +177,7 @@ func CreateCrudParser(name,
 			player.EnqueueAction(username, CreateCreateAction(conn, args, name,
 				createUsageString, createMinArgs, createValidator,
 				createArgFmt, createRespFmt,
+				createMiscUpdate,
 				reqModes, crudObj,
 			))
 
@@ -177,6 +185,7 @@ func CreateCrudParser(name,
 			player.EnqueueAction(username, CreateRetrieveAction(conn, args, name,
 				retrieveUsageString, retrieveMinArgs, retrieveValidator,
 				retrievingFormatter, retrieveRespFmt,
+				retrieveMiscUpdate,
 				reqModes, crudObj,
 			))
 
@@ -186,6 +195,7 @@ func CreateCrudParser(name,
 				retrievingFormatter, valueUpdater,
 				validPropertyNames,
 				updateRespFmt,
+				updateMiscUpdate,
 				reqModes, crudObj,
 			))
 
@@ -193,6 +203,7 @@ func CreateCrudParser(name,
 			player.EnqueueAction(username, CreateDeleteAction(conn, args, name,
 				deleteUsageString, deleteMinArgs, deleteValidator,
 				retrievingFormatter, deleteRespFmt,
+				deleteMiscUpdate,
 				reqModes, crudObj,
 			))
 		}
@@ -206,6 +217,7 @@ func CreateCrudParserMultiRetrieve(name,
 	createArgFmt ArgumentFormatter, deletingFormatter ArgumentFormatter,
 	retriever MultiKeyExecutor,
 	createRespFmt, retrieveRespFmt, deleteRespFmt ResponseFormatter,
+	createMiscUpdate, retrieveMiscUpdate, deleteMiscUpdate AfterActionHandler,
 	reqModes []string, crudObj crudUtils.Crud) parsing.CommandHandler {
 	return func(conn net.Conn, args []string) {
 		if crud.CrudChecks(conn, name, args) {
@@ -219,6 +231,7 @@ func CreateCrudParserMultiRetrieve(name,
 			player.EnqueueAction(username, CreateCreateAction(conn, args, name,
 				createUsageString, createMinArgs, createValidator,
 				createArgFmt, createRespFmt,
+				createMiscUpdate,
 				reqModes, crudObj,
 			))
 
@@ -226,6 +239,7 @@ func CreateCrudParserMultiRetrieve(name,
 			player.EnqueueAction(username, CreateMultiRetrieveAction(conn, args, name,
 				retrieveUsageString, retrieveMinArgs, retrieveValidator,
 				deletingFormatter, retriever, retrieveRespFmt,
+				retrieveMiscUpdate,
 				reqModes, crudObj,
 			))
 
@@ -236,6 +250,7 @@ func CreateCrudParserMultiRetrieve(name,
 			player.EnqueueAction(username, CreateMultiKeyDeleteAction(conn, args, name,
 				deleteUsageString, deleteMinArgs, deleteValidator,
 				retriever, deletingFormatter, deleteRespFmt,
+				deleteMiscUpdate,
 				reqModes, crudObj,
 			))
 		}

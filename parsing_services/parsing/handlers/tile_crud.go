@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"mud/actions/defined"
 	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/services/tile"
 	"mud/utils/handlers/crud"
 	"mud/utils/strings"
@@ -70,6 +72,13 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		nv := i.(entities.Tile)
 		return fmt.Sprintf("Tile %s deleted!", nv.Name)
 	},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
+	func(c net.Conn) {
+		username := player.GetConnUsername(c)
+		player.EnqueueAction(username, defined.CreateGlobalMapRepaint(c))
+	},
+	func(c net.Conn) {},
 	[]string{"name", "type", "icon", "bg", "fg"}, 2,
 	func(i interface{}, s1 string, s2 []string) interface{} {
 		r := i.(entities.Tile)

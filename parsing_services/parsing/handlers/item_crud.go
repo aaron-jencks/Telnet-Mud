@@ -56,6 +56,10 @@ var ItemCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		nv := i.(entities.Item)
 		return fmt.Sprintf("Item %d(%s) deleted!", nv.Id, nv.Name)
 	},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
 	[]string{"name", "description"}, 2,
 	func(i interface{}, s1 string, s2 []string) interface{} {
 		c := i.(entities.Item)

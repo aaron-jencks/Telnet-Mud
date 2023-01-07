@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"mud/actions/defined"
 	acrud "mud/actions/defined/crud"
 	"mud/entities"
 	"mud/parsing_services/parsing"
+	"mud/parsing_services/player"
 	"mud/services/tmap"
 	"mud/utils/handlers/crud"
 	"mud/utils/strings"
@@ -50,13 +52,13 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 	func(c net.Conn, s []string) []interface{} {
 		var rid, x, y, z int
 		fmt.Sscanf(s[0], "%d", &rid)
-		fmt.Sscanf(s[3], "%d", &x)
-		fmt.Sscanf(s[4], "%d", &y)
+		fmt.Sscanf(s[2], "%d", &x)
+		fmt.Sscanf(s[3], "%d", &y)
 		if len(s) == 6 {
 			fmt.Sscanf(s[5], "%d", &z)
-			return []interface{}{rid, strings.StripQuotes(s[2]), x, y, z}
+			return []interface{}{rid, strings.StripQuotes(s[1]), x, y, z}
 		}
-		return []interface{}{rid, strings.StripQuotes(s[2]), x, y}
+		return []interface{}{rid, strings.StripQuotes(s[1]), x, y}
 	},
 	func(c net.Conn, s []string) []interface{} {
 		var rid, x, y, z int
@@ -90,6 +92,15 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 	func(i interface{}) string {
 		nv := i.(entities.Map)
 		return fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", nv.Room, nv.X, nv.Y, nv.Z)
+	},
+	func(c net.Conn) {
+		username := player.GetConnUsername(c)
+		player.EnqueueAction(username, defined.CreateGlobalMapRepaint(c))
+	},
+	func(c net.Conn) {},
+	func(c net.Conn) {
+		username := player.GetConnUsername(c)
+		player.EnqueueAction(username, defined.CreateGlobalMapRepaint(c))
 	},
 	acrud.DefaultCrudModes, tmap.CRUD,
 )

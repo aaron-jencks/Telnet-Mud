@@ -74,6 +74,13 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		nv := i.(entities.Room)
 		return fmt.Sprintf("Room %d(%s) deleted!", nv.Id, nv.Name)
 	},
+	func(c net.Conn) {},
+	func(c net.Conn) {},
+	func(c net.Conn) {
+		username := player.GetConnUsername(c)
+		player.EnqueueAction(username, defined.CreateGlobalMapRepaint(c))
+	},
+	func(c net.Conn) {},
 	[]string{"name", "description", "height", "width"}, 2,
 	func(i interface{}, s1 string, s2 []string) interface{} {
 		c := i.(entities.Room)

@@ -28,6 +28,9 @@ type ResponseFormatter func(interface{}) string
 
 type MultiKeyExecutor func(net.Conn, []interface{}) interface{}
 
+// This function will do any extra actions you'd like performed after the operation is complete
+type AfterActionHandler func(net.Conn)
+
 type CrudValidator func([]string) bool
 type CrudExecutor func() interface{}
 type CrudResponseHandler func(interface{})
