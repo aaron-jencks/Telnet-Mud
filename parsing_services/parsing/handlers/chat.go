@@ -17,17 +17,17 @@ func HandleChat(conn net.Conn, body []string) {
 	if body[0][0] == '@' {
 		// Direct message
 		if !player.PlayerLoggedIn(body[0][1:]) {
-			player.PushAction(username,
+			player.EnqueueAction(username,
 				defined.CreateInfoAction(conn, "That player doese not exist, or is not online"))
 		}
 
-		player.PushAction(username,
+		player.EnqueueAction(username,
 			defined.CreateDirectMessageAction(conn, body[0][1:], strings.Join(body[1:], " ")))
 	} else {
 		// Local chat
-		player.PushAction(username,
+		player.EnqueueAction(username,
 			defined.CreateLocalChatAction(conn, strings.Join(body, " ")))
 	}
 
-	player.PushAction(username, defined.CreateScreenBlip(conn))
+	player.EnqueueAction(username, defined.CreateScreenBlip(conn))
 }

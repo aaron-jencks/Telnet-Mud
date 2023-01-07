@@ -8,10 +8,10 @@ import (
 
 func ListInventoryHandler(conn net.Conn, args []string) {
 	username := player.GetConnUsername(conn)
-	player.PushAction(username, defined.CreateInventoryListAction(conn))
+	player.EnqueueAction(username, defined.CreateInventoryListAction(conn))
 }
 
 func ListLootHandler(conn net.Conn, args []string) {
 	username := player.GetConnUsername(conn)
-	player.PushAction(username, defined.CreateListLootAction(conn))
+	player.EnqueueAction(username, defined.CreateListLootAction(conn))
 }

@@ -50,7 +50,7 @@ func TelnetHandler(conn net.Conn) {
 	// Make a buffer to hold incoming data.
 	buf := make([]byte, 1024)
 
-	player.PushAction(anonUsername, definitions.Action{
+	player.EnqueueAction(anonUsername, definitions.Action{
 		Name:        "Initial Display",
 		Duration:    0,
 		AlwaysValid: true,

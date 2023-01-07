@@ -13,7 +13,7 @@ func CheckArgs(conn net.Conn, args []string, target int, message string) bool {
 	username := player.GetConnUsername(conn)
 
 	if len(args) != target {
-		player.PushAction(username, defined.CreateInfoAction(conn, message))
+		player.EnqueueAction(username, defined.CreateInfoAction(conn, message))
 		return true
 	}
 	return false
@@ -23,7 +23,7 @@ func CheckMinArgs(conn net.Conn, args []string, target int, message string) bool
 	username := player.GetConnUsername(conn)
 
 	if len(args) < target {
-		player.PushAction(username, defined.CreateInfoAction(conn, message))
+		player.EnqueueAction(username, defined.CreateInfoAction(conn, message))
 		return true
 	}
 	return false
@@ -33,7 +33,7 @@ func RequiresLoggedIn(conn net.Conn) bool {
 	username := player.GetConnUsername(conn)
 
 	if !player.ConnLoggedIn(conn) {
-		player.PushAction(username, defined.CreateInfoAction(conn, "You must be logged in to perform that action"))
+		player.EnqueueAction(username, defined.CreateInfoAction(conn, "You must be logged in to perform that action"))
 		return true
 	}
 	return false
@@ -56,7 +56,7 @@ func ParseIntegerCheck(conn net.Conn, s string, usageString string, paramName st
 	var id int
 	_, err := fmt.Sscanf(s, "%d", &id)
 	if err != nil {
-		player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is an integer)", usageString, paramName)))
+		player.EnqueueAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is an integer)", usageString, paramName)))
 		return false, -1
 	}
 	return true, id
@@ -66,7 +66,7 @@ func CheckStringOptions(conn net.Conn, s string, options []string, usageString, 
 	username := player.GetConnUsername(conn)
 
 	if !mstrings.StringContains(options, s) {
-		player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is one of (%s)", usageString, paramName, strings.Join(options, "|"))))
+		player.EnqueueAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is one of (%s)", usageString, paramName, strings.Join(options, "|"))))
 		return true
 	}
 	return false

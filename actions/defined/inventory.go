@@ -33,7 +33,7 @@ func CreateInventoryListAction(conn net.Conn) definitions.Action {
 				text = "Inventory:\n" + strings.Join(displayList, "\n")
 			}
 
-			player.PushAction(username, CreateInfoAction(conn, text))
+			player.EnqueueAction(username, CreateInfoAction(conn, text))
 
 			return utils.GetDefaultInfoCommandResponse(conn)
 		},
@@ -54,15 +54,15 @@ func CreatePickupItemAction(conn net.Conn, p entities.Player, targetItem string,
 			for _, loot := range roomLoot {
 				if loot.Item.Name == targetItem && loot.Quantity <= qty {
 					nQty := inventory.AddItemToInventory(p, loot.Item, qty)
-					player.PushAction(p.Name, CreateInfoAction(conn, fmt.Sprintf("You now have %dx %s", nQty, loot.Item.Name)))
+					player.EnqueueAction(p.Name, CreateInfoAction(conn, fmt.Sprintf("You now have %dx %s", nQty, loot.Item.Name)))
 					return result
 				} else if loot.Quantity < qty {
-					player.PushAction(p.Name, CreateInfoAction(conn, fmt.Sprintf("There are only %dx here", loot.Quantity)))
+					player.EnqueueAction(p.Name, CreateInfoAction(conn, fmt.Sprintf("There are only %dx here", loot.Quantity)))
 					return result
 				}
 			}
 
-			player.PushAction(p.Name, CreateInfoAction(conn, "There is none of that here to pick up"))
+			player.EnqueueAction(p.Name, CreateInfoAction(conn, "There is none of that here to pick up"))
 			return result
 		},
 	}
@@ -89,7 +89,7 @@ func CreateListLootAction(conn net.Conn) definitions.Action {
 				text = "Loot:\n" + strings.Join(displayList, "\n")
 			}
 
-			player.PushAction(username, CreateInfoAction(conn, text))
+			player.EnqueueAction(username, CreateInfoAction(conn, text))
 
 			return utils.GetDefaultInfoCommandResponse(conn)
 		},

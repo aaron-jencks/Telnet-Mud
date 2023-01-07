@@ -102,5 +102,5 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 func HandleInfo(conn net.Conn, args []string) {
 	username := player.GetConnUsername(conn)
 	t := terminal.TerminalMap[conn]
-	player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s:\n%s", t.Room.Name, t.Room.Description)))
+	player.EnqueueAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s:\n%s", t.Room.Name, t.Room.Description)))
 }

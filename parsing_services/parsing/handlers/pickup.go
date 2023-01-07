@@ -28,5 +28,5 @@ func HandlePickup(conn net.Conn, args []string) {
 
 	targetItem := strings.StripQuotes(args[0])
 
-	player.PushAction(username, defined.CreatePickupItemAction(conn, p, targetItem, qty))
+	player.EnqueueAction(username, defined.CreatePickupItemAction(conn, p, targetItem, qty))
 }

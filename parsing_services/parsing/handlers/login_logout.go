@@ -12,15 +12,15 @@ func HandleLogin(conn net.Conn, args []string) {
 	username := player.GetConnUsername(conn)
 
 	if player.ConnLoggedIn(conn) {
-		player.PushAction(username, defined.CreateInfoAction(conn, "You're already logged in, you can't log in again!"))
+		player.EnqueueAction(username, defined.CreateInfoAction(conn, "You're already logged in, you can't log in again!"))
 	}
 
 	if crud.CheckArgs(conn, args, 2, "Usage: login username password") {
 		return
 	}
 
-	player.PushAction(username, defined.CreateLoginAction(conn, args[0], args[1]))
-	player.PushAction(username, defined.CreateScreenBlip(conn))
+	player.EnqueueAction(username, defined.CreateLoginAction(conn, args[0], args[1]))
+	player.EnqueueAction(username, defined.CreateScreenBlip(conn))
 }
 
 func HandleLogout(conn net.Conn, args []string) {
@@ -30,8 +30,8 @@ func HandleLogout(conn net.Conn, args []string) {
 		return
 	}
 
-	player.PushAction(username, defined.CreateLogoutAction(conn))
-	player.PushAction(username, defined.CreateScreenBlip(conn))
+	player.EnqueueAction(username, defined.CreateLogoutAction(conn))
+	player.EnqueueAction(username, defined.CreateScreenBlip(conn))
 }
 
 func HandleRegister(conn net.Conn, args []string) {
@@ -45,6 +45,6 @@ func HandleRegister(conn net.Conn, args []string) {
 		return
 	}
 
-	player.PushAction(username, defined.CreateRegisterAction(conn, args[0], args[1]))
-	player.PushAction(username, defined.CreateScreenBlip(conn))
+	player.EnqueueAction(username, defined.CreateRegisterAction(conn, args[0], args[1]))
+	player.EnqueueAction(username, defined.CreateScreenBlip(conn))
 }

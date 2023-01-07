@@ -47,7 +47,7 @@ func CreateCreateAction(conn net.Conn, args []string,
 		}, func() interface{} {
 			return crudObj.Create(argFmt(conn, args[1:])...)
 		}, func(i interface{}) {
-			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
 }
 
@@ -64,7 +64,7 @@ func CreateRetrieveAction(conn net.Conn, args []string,
 		}, func() interface{} {
 			return crudObj.Retrieve(argFmt(conn, args[1:]))
 		}, func(i interface{}) {
-			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
 }
 
@@ -83,7 +83,7 @@ func CreateMultiRetrieveAction(conn net.Conn, args []string,
 		}, func() interface{} {
 			return executor(conn, argFmt(conn, args[1:]))
 		}, func(i interface{}) {
-			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
 }
 
@@ -107,7 +107,7 @@ func CreateUpdateAction(conn net.Conn, args []string,
 			nv := valueUpdater(ov, args[propertyIndex], args[propertyIndex+1:])
 			return crudObj.Update(argFmt(conn, args[1:]), nv)
 		}, func(i interface{}) {
-			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
 }
 
@@ -126,7 +126,7 @@ func CreateDeleteAction(conn net.Conn, args []string,
 			crudObj.Delete(argFmt(conn, args[1:]))
 			return ov
 		}, func(i interface{}) {
-			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
 }
 
@@ -146,7 +146,7 @@ func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 			crudObj.Delete(argFmt(conn, args[1:])...)
 			return ov
 		}, func(i interface{}) {
-			player.PushAction(username, defined.CreateInfoAction(conn, respFmt(i)))
+			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, reqModes)
 }
 
@@ -167,21 +167,21 @@ func CreateCrudParser(name,
 
 		switch args[0] {
 		case "create":
-			player.PushAction(username, CreateCreateAction(conn, args, name,
+			player.EnqueueAction(username, CreateCreateAction(conn, args, name,
 				createUsageString, createMinArgs, createValidator,
 				createArgFmt, createRespFmt,
 				reqModes, crudObj,
 			))
 
 		case "retrieve":
-			player.PushAction(username, CreateRetrieveAction(conn, args, name,
+			player.EnqueueAction(username, CreateRetrieveAction(conn, args, name,
 				retrieveUsageString, retrieveMinArgs, retrieveValidator,
 				retrievingFormatter, retrieveRespFmt,
 				reqModes, crudObj,
 			))
 
 		case "update":
-			player.PushAction(username, CreateUpdateAction(conn, args, name,
+			player.EnqueueAction(username, CreateUpdateAction(conn, args, name,
 				updateUsageString, updateMinArgs, propertyIndex, updateValidator,
 				retrievingFormatter, valueUpdater,
 				validPropertyNames,
@@ -190,7 +190,7 @@ func CreateCrudParser(name,
 			))
 
 		case "delete":
-			player.PushAction(username, CreateDeleteAction(conn, args, name,
+			player.EnqueueAction(username, CreateDeleteAction(conn, args, name,
 				deleteUsageString, deleteMinArgs, deleteValidator,
 				retrievingFormatter, deleteRespFmt,
 				reqModes, crudObj,
@@ -216,24 +216,24 @@ func CreateCrudParserMultiRetrieve(name,
 
 		switch args[0] {
 		case "create":
-			player.PushAction(username, CreateCreateAction(conn, args, name,
+			player.EnqueueAction(username, CreateCreateAction(conn, args, name,
 				createUsageString, createMinArgs, createValidator,
 				createArgFmt, createRespFmt,
 				reqModes, crudObj,
 			))
 
 		case "retrieve":
-			player.PushAction(username, CreateMultiRetrieveAction(conn, args, name,
+			player.EnqueueAction(username, CreateMultiRetrieveAction(conn, args, name,
 				retrieveUsageString, retrieveMinArgs, retrieveValidator,
 				deletingFormatter, retriever, retrieveRespFmt,
 				reqModes, crudObj,
 			))
 
 		case "update":
-			player.PushAction(username, defined.CreateInfoAction(conn, "Multi keyed object don't currently support updating"))
+			player.EnqueueAction(username, defined.CreateInfoAction(conn, "Multi keyed object don't currently support updating"))
 
 		case "delete":
-			player.PushAction(username, CreateMultiKeyDeleteAction(conn, args, name,
+			player.EnqueueAction(username, CreateMultiKeyDeleteAction(conn, args, name,
 				deleteUsageString, deleteMinArgs, deleteValidator,
 				retriever, deletingFormatter, deleteRespFmt,
 				reqModes, crudObj,

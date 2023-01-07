@@ -22,12 +22,12 @@ func CreateLoginAction(conn net.Conn, username, password string) definitions.Act
 
 			if !player.LoginPlayer(username, password, conn) {
 				username = player.GetAnonymousUsername(conn)
-				player.PushAction(username, CreateInfoAction(conn, "Sorry, either that account doesn't exist or the password is incorrect"))
+				player.EnqueueAction(username, CreateInfoAction(conn, "Sorry, either that account doesn't exist or the password is incorrect"))
 				result.Info = true
 			} else {
 				p := player.CRUD.Retrieve(username).(entities.Player)
 				terminal.LoadPlayer(conn, p)
-				player.PushAction(username, CreateInfoAction(conn, "Welcome! Please be respectful."))
+				player.EnqueueAction(username, CreateInfoAction(conn, "Welcome! Please be respectful."))
 				result = utils.GetDefaultRepaintCommandResponse(conn)
 			}
 
@@ -48,7 +48,7 @@ func CreateLogoutAction(conn net.Conn) definitions.Action {
 			}
 
 			if !player.LogoutPlayer(username) {
-				player.PushAction(username, CreateInfoAction(conn, "Sorry, either that account doesn't exist or isn't currently logged in"))
+				player.EnqueueAction(username, CreateInfoAction(conn, "Sorry, either that account doesn't exist or isn't currently logged in"))
 				result.Info = true
 			} else {
 				result.Clear = true
@@ -67,9 +67,9 @@ func CreateRegisterAction(conn net.Conn, username, password string) definitions.
 			anonUsername := player.GetConnUsername(conn)
 
 			if !player.RegisterPlayer(username, password) {
-				player.PushAction(anonUsername, CreateInfoAction(conn, "Sorry, that account already exists"))
+				player.EnqueueAction(anonUsername, CreateInfoAction(conn, "Sorry, that account already exists"))
 			} else {
-				player.PushAction(anonUsername, CreateInfoAction(conn, "User created successfully, you may now login."))
+				player.EnqueueAction(anonUsername, CreateInfoAction(conn, "User created successfully, you may now login."))
 			}
 
 			return utils.GetDefaultInfoCommandResponse(conn)

@@ -8,20 +8,20 @@ import (
 
 func HandleUpMovement(conn net.Conn) {
 	username := player.GetConnUsername(conn)
-	player.PushAction(username, defined.CreateMoveUpAction(conn))
+	player.EnqueueAction(username, defined.CreateMoveUpAction(conn))
 }
 
 func HandleLeftMovement(conn net.Conn) {
 	username := player.GetConnUsername(conn)
-	player.PushAction(username, defined.CreateMoveLeftAction(conn))
+	player.EnqueueAction(username, defined.CreateMoveLeftAction(conn))
 }
 
 func HandleRightMovement(conn net.Conn) {
 	username := player.GetConnUsername(conn)
-	player.PushAction(username, defined.CreateMoveRightAction(conn))
+	player.EnqueueAction(username, defined.CreateMoveRightAction(conn))
 }
 
 func HandleDownMovement(conn net.Conn) {
 	username := player.GetConnUsername(conn)
-	player.PushAction(username, defined.CreateMoveDownAction(conn))
+	player.EnqueueAction(username, defined.CreateMoveDownAction(conn))
 }

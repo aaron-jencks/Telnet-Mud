@@ -25,13 +25,13 @@ func HandlePacket(conn net.Conn, data []byte) {
 
 	if ok {
 		handler(conn, bits[1:])
-		player.PushAction(username,
+		player.EnqueueAction(username,
 			defined.CreateScreenBlip(conn))
 	} else {
 		if player.ConnLoggedIn(conn) {
 			actions.ParseString(conn, string(data))
 		} else {
-			player.PushAction(player.GetAnonymousUsername(conn), defined.CreateInfoAction(conn, "You need to login first!"))
+			player.EnqueueAction(player.GetAnonymousUsername(conn), defined.CreateInfoAction(conn, "You need to login first!"))
 		}
 	}
 }

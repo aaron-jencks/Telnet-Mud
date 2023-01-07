@@ -27,7 +27,7 @@ func ParseString(conn net.Conn, s string) parsing.CommandResponse {
 		} else {
 			handler, ok := letterMapping[r]
 			if !ok {
-				player.PushAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("Unknown parsing symbol %c", r)))
+				player.EnqueueAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("Unknown parsing symbol %c", r)))
 				return parsing.CommandResponse{
 					Conn:   conn,
 					Chat:   true,
@@ -44,7 +44,7 @@ func ParseString(conn net.Conn, s string) parsing.CommandResponse {
 					handler(conn)
 				}
 
-				player.PushAction(username, defined.CreateScreenBlip(conn))
+				player.EnqueueAction(username, defined.CreateScreenBlip(conn))
 				num = ""
 			}
 		}

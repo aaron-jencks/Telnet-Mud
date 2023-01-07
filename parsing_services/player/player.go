@@ -199,18 +199,6 @@ func EnqueueActions(player string, actions []definitions.Action) {
 	}
 }
 
-func PushAction(p string, a definitions.Action) {
-	PlayerQueueMapLock.Lock()
-	defer PlayerQueueMapLock.Unlock()
-	PlayerQueueMap[p].Push(a)
-}
-
-func PushActions(player string, actions []definitions.Action) {
-	for _, action := range actions {
-		PushAction(player, action)
-	}
-}
-
 func GetNextAction(player string) definitions.Action {
 	PlayerQueueMapLock.Lock()
 	defer PlayerQueueMapLock.Unlock()

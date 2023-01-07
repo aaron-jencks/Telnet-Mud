@@ -27,7 +27,7 @@ func CreateMoveUpAction(conn net.Conn) definitions.Action {
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
-			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
+			player.EnqueueAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
 			return utils.GetDefaultInfoCommandResponse(conn)
 		},
@@ -50,7 +50,7 @@ func CreateMoveLeftAction(conn net.Conn) definitions.Action {
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
-			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
+			player.EnqueueAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
 			return utils.GetDefaultInfoCommandResponse(conn)
 		},
@@ -74,7 +74,7 @@ func CreateMoveRightAction(conn net.Conn) definitions.Action {
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
-			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
+			player.EnqueueAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
 			return utils.GetDefaultInfoCommandResponse(conn)
 		},
@@ -98,7 +98,7 @@ func CreateMoveDownAction(conn net.Conn) definitions.Action {
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
 
-			player.PushAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
+			player.EnqueueAction(username, CreateInfoAction(conn, "You're at the edge of the room"))
 
 			return utils.GetDefaultInfoCommandResponse(conn)
 		},
