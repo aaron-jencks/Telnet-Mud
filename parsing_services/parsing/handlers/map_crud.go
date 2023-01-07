@@ -71,10 +71,10 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 	func(conn net.Conn, args []interface{}) interface{} {
 		var rid, x, y, z int
 		rid = args[0].(int)
-		x = args[1].(int)
-		y = args[2].(int)
+		x = args[2].(int)
+		y = args[4].(int)
 		if len(args) == 4 {
-			z = args[3].(int)
+			z = args[6].(int)
 			return tmap.GetTileForCoord(rid, x, y, z)
 		}
 		return tmap.GetTopMostTile(rid, x, y)
