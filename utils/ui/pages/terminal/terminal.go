@@ -25,7 +25,14 @@ func DisplayTerminal(ts *terminal.Terminal) string {
 		if len(lines) > utils.TERMINAL_H-2 {
 			// Truncate down to target length
 			lines = lines[len(lines)-(utils.TERMINAL_H-2):]
-			logLines = lines
+
+			// Reverse lines
+			var reversedLines []string = make([]string, len(lines))
+			for li, lentry := range lines {
+				reversedLines[len(lines)-li-1] = lentry
+			}
+
+			logLines = reversedLines
 			break
 		}
 
