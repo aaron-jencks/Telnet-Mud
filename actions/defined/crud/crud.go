@@ -15,6 +15,7 @@ import (
 func createCrudAction(conn net.Conn, args []string,
 	name, crudMethod string, validator CrudValidator,
 	queryExecutor CrudExecutor, responseHandler CrudResponseHandler,
+	miscUpdate AfterActionHandler,
 	reqModes []string) definitions.Action {
 	return definitions.Action{
 		Name:       fmt.Sprintf("%s %s", name, crudMethod),
@@ -28,6 +29,8 @@ func createCrudAction(conn net.Conn, args []string,
 
 			nv := queryExecutor()
 			responseHandler(nv)
+
+			miscUpdate(conn)
 
 			return result
 		},
@@ -49,7 +52,7 @@ func CreateCreateAction(conn net.Conn, args []string,
 			return crudObj.Create(argFmt(conn, args[1:])...)
 		}, func(i interface{}) {
 			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
-		}, reqModes)
+		}, miscUpdate, reqModes)
 }
 
 // Creates an Action that wraps a Crud struct and calls it's Retrieve method
@@ -67,7 +70,7 @@ func CreateRetrieveAction(conn net.Conn, args []string,
 			return crudObj.Retrieve(argFmt(conn, args[1:]))
 		}, func(i interface{}) {
 			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
-		}, reqModes)
+		}, miscUpdate, reqModes)
 }
 
 // Creates an Action that wraps a Crud struct and calls it's Retrieve method
@@ -87,7 +90,7 @@ func CreateMultiRetrieveAction(conn net.Conn, args []string,
 			return executor(conn, argFmt(conn, args[1:]))
 		}, func(i interface{}) {
 			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
-		}, reqModes)
+		}, miscUpdate, reqModes)
 }
 
 // Creates an Action that wraps a Crud struct and calls it's Update method
@@ -112,7 +115,7 @@ func CreateUpdateAction(conn net.Conn, args []string,
 			return crudObj.Update(argFmt(conn, args[1:]), nv)
 		}, func(i interface{}) {
 			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
-		}, reqModes)
+		}, miscUpdate, reqModes)
 }
 
 // Creates an Action that wraps a Crud struct and calls it's Delete method
@@ -123,7 +126,7 @@ func CreateDeleteAction(conn net.Conn, args []string,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
-	return createCrudAction(conn, args, name, "retrieve",
+	return createCrudAction(conn, args, name, "delete",
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
@@ -132,7 +135,7 @@ func CreateDeleteAction(conn net.Conn, args []string,
 			return ov
 		}, func(i interface{}) {
 			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
-		}, reqModes)
+		}, miscUpdate, reqModes)
 }
 
 // Creates an Action that wraps a Crud struct and calls it's Delete method
@@ -144,7 +147,7 @@ func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 	reqModes []string, crudObj crudUtils.Crud) definitions.Action {
 	username := player.GetConnUsername(conn)
 
-	return createCrudAction(conn, args, name, "retrieve",
+	return createCrudAction(conn, args, name, "delete",
 		func(s []string) bool {
 			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
 		}, func() interface{} {
@@ -153,7 +156,7 @@ func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 			return ov
 		}, func(i interface{}) {
 			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
-		}, reqModes)
+		}, miscUpdate, reqModes)
 }
 
 func CreateCrudParser(name,
