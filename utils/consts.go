@@ -2,7 +2,9 @@ package utils
 
 import "mud/utils/net"
 
-var CONN_HOST string = net.GetOutboundIP().String()
+const LOCAL_HOST = true
+
+var CONN_HOST string = net.GetOutboundIP(LOCAL_HOST).String()
 
 const (
 	SYSTEM_NAME                     = "SYSTEM"
