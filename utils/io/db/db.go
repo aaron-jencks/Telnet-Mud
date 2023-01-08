@@ -387,10 +387,10 @@ func (td TableDefinition) isIndexed(column string) (bool, bool) {
 
 // Retrieves a specific line from the data table
 func (td *TableDefinition) RetrieveLine(line int64) []interface{} {
-	if td.Cache.Exists(line) {
-		lineData := td.Cache.RetrieveEntry(line)
-		return append([]interface{}{int(line)}, lineData...)
-	}
+	// if td.Cache.Exists(line) {
+	// 	lineData := td.Cache.RetrieveEntry(line)
+	// 	return append([]interface{}{int(line)}, lineData...)
+	// }
 
 	var result []interface{} = make([]interface{}, len(td.CSV.Columns)+1)
 	result[0] = int(line)
@@ -401,7 +401,7 @@ func (td *TableDefinition) RetrieveLine(line int64) []interface{} {
 		result[ci+1] = convertFromString(cvalue, td.Info.ColumnTypes[ci])
 	}
 
-	td.Cache.InsertValue(line, result[1:])
+	// td.Cache.InsertValue(line, result[1:])
 
 	return result
 }
