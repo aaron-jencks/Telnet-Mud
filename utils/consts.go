@@ -7,6 +7,7 @@ const LOCAL_HOST = true
 var CONN_HOST string = net.GetOutboundIP(LOCAL_HOST).String()
 
 const (
+	DB_LOCATION                     = "./data/world.db"
 	SYSTEM_NAME                     = "SYSTEM"
 	WINDOW_W                        = 80
 	WINDOW_H                        = 20

@@ -4,7 +4,7 @@ import (
 	"mud/utils/io/db"
 )
 
-var tableMap map[string]*db.TableDefinition = make(map[string]*db.TableDefinition)
+var tableMap map[string]db.TableDefinition = make(map[string]db.TableDefinition)
 
 type ICrud interface {
 	Create(...interface{}) interface{}
@@ -21,11 +21,11 @@ type CrudUpdate struct {
 type Crud struct {
 	TableName      string
 	toArrFunc      func(interface{}) []interface{}
-	fromArrFunc    func([]interface{}) interface{}
+	fromArrFunc    db.RowScanner
 	createFunction func(*db.TableDefinition, ...interface{}) []interface{}
 }
 
-func CreateCrud(tableName string, toArrFunc func(interface{}) []interface{}, fromArrFunc func([]interface{}) interface{}, createFunc func(*db.TableDefinition, ...interface{}) []interface{}) Crud {
+func CreateCrud(tableName string, toArrFunc func(interface{}) []interface{}, fromArrFunc db.RowScanner, createFunc func(*db.TableDefinition, ...interface{}) []interface{}) Crud {
 	return Crud{tableName, toArrFunc, fromArrFunc, createFunc}
 }
 
