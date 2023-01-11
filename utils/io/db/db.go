@@ -68,14 +68,6 @@ func DbDirectoryExists() bool {
 	return !os.IsNotExist(err)
 }
 
-// Represents a data table
-// Contains the name of the table as well as the csv file
-// and a cache  for requests.
-type TableDefinition struct {
-	Name        string   // the name of the data table
-	ColumnNames []string // The names of the columns in the table
-}
-
 func checkError(e interface{}) {
 	if e != nil {
 		logger.ErrorCustomCaller(1, e)
@@ -113,7 +105,8 @@ func CreateTableIfNotExist(tableName string, columns, columnSpecs []string) Tabl
 		if len(columns) == len(oldDef.ColumnNames) {
 			matches = true
 			for ci, col := range oldDef.ColumnNames {
-				if col != columns[ci] {
+				if !(col == columns[ci] &&
+					oldDef.ColumnSpecs[ci] == columnSpecs[ci]) {
 					matches = false
 					break
 				}
@@ -143,6 +136,7 @@ func CreateTableIfNotExist(tableName string, columns, columnSpecs []string) Tabl
 	table := TableDefinition{
 		tableName,
 		columns,
+		columnSpecs,
 	}
 
 	table.UpdateJson()
