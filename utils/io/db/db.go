@@ -165,13 +165,25 @@ func DeleteTable(tableName string) {
 }
 
 // Adds new data to the data table and returns the number of lines added
-func (td TableDefinition) AddData(data [][]interface{}) int {
-	_, err := RunInsert(fmt.Sprintf(`insert into %s (%s) values (%s)`,
+func (td TableDefinition) AddData(data [][]interface{}) ([]int64, int64) {
+	results, err := RunInsert(fmt.Sprintf(`insert into %s (%s) values (%s)`,
 		td.Name, strings.Join(td.ColumnNames, ","),
 		strings.Join(strings.Split(strings.Repeat("?", len(td.ColumnNames)), ""), ",")), data)
 	checkError(err)
 
-	return len(data)
+	var ids []int64
+	var rowCount int64 = 0
+	for _, rowResult := range results {
+		id, err := rowResult.LastInsertId()
+		checkError(err)
+		ids = append(ids, id)
+
+		count, err := rowResult.RowsAffected()
+		checkError(err)
+		rowCount += count
+	}
+
+	return ids, rowCount
 }
 
 func (td TableDefinition) DeleteData(selector string) int64 {

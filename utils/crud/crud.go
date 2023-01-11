@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"errors"
 	"mud/utils/io/db"
 )
 
@@ -21,19 +22,20 @@ type CrudUpdate struct {
 type Crud struct {
 	TableName      string
 	toArrFunc      func(interface{}) []interface{}
-	fromArrFunc    db.RowScanner
-	createFunction func(*db.TableDefinition, ...interface{}) []interface{}
+	scannerFunc    db.RowScanner
+	fromArrFunc    func([]interface{}) interface{}
+	createFunction func(db.TableDefinition, ...interface{}) []interface{}
 }
 
-func CreateCrud(tableName string, toArrFunc func(interface{}) []interface{}, fromArrFunc db.RowScanner, createFunc func(*db.TableDefinition, ...interface{}) []interface{}) Crud {
-	return Crud{tableName, toArrFunc, fromArrFunc, createFunc}
+func CreateCrud(tableName string, toArrFunc func(interface{}) []interface{}, scannerFunc db.RowScanner, fromArrFunc func([]interface{}) interface{}, createFunc func(db.TableDefinition, ...interface{}) []interface{}) Crud {
+	return Crud{tableName, toArrFunc, scannerFunc, fromArrFunc, createFunc}
 }
 
-func (c Crud) FetchTable() *db.TableDefinition {
+func (c Crud) FetchTable() db.TableDefinition {
 	_, ok := tableMap[c.TableName]
 	if !ok {
 		newTable := db.FetchTableDefinition(c.TableName)
-		tableMap[c.TableName] = &newTable
+		tableMap[c.TableName] = newTable
 	}
 	return tableMap[c.TableName]
 }
@@ -41,13 +43,18 @@ func (c Crud) FetchTable() *db.TableDefinition {
 func (c Crud) Create(args ...interface{}) interface{} {
 	table := c.FetchTable()
 	newValue := c.createFunction(table, args...)
-	table.AddData([][]interface{}{
+	ids, _ := table.AddData([][]interface{}{
 		newValue,
 	})
-	return c.Retrieve(newValue[table.Info.PrimaryKey])
+
+	if len(ids) > 1 || len(ids) == 0 {
+		panic(errors.New("Create function for CRUD didn't insert a new row, or inserted too many"))
+	}
+
+	return
 }
 
-func (c Crud) Retrieve(value interface{}) interface{} {
+func (c Crud) Retrieve(query string) interface{} {
 	table := c.FetchTable()
 	results := table.QueryPK(value)
 	if len(results) > 0 {
