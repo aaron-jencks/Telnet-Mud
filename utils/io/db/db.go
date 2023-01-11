@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"mud/utils"
 	"mud/utils/ui/logger"
@@ -97,11 +98,24 @@ func CreateTableIfNotExist(tableName string, columns, columnSpecs []string) Tabl
 	_, err := RunExec(statement)
 	checkError(err)
 
-	return TableDefinition{
+	table := TableDefinition{
 		tableName,
 		columns,
 	}
 
+	table.UpdateJson()
+
+	return table
+}
+
+// Updates the json file with the table information
+func (td TableDefinition) UpdateJson() {
+	f, err := os.OpenFile(fmt.Sprintf("%s/%s.json", path.Dir(utils.DB_LOCATION), td.Name), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0777)
+	defer f.Close()
+	checkError(err)
+	encoder := json.NewEncoder(f)
+	err = encoder.Encode(td)
+	checkError(err)
 }
 
 // Deletes a table if it exists
