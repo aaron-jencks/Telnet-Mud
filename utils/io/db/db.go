@@ -83,9 +83,51 @@ func checkError(e interface{}) {
 	}
 }
 
+func TableDefinitionExists(table string) bool {
+	_, err := os.Stat(fmt.Sprintf("%s/%s.json",
+		path.Dir(utils.DB_LOCATION), table))
+	return !os.IsNotExist(err)
+}
+
+func FetchTableDefinition(table string) TableDefinition {
+	f, err := os.Open(fmt.Sprintf("%s/%s.json",
+		path.Dir(utils.DB_LOCATION), table))
+	defer f.Close()
+	checkError(err)
+
+	var jobj TableDefinition
+	decoder := json.NewDecoder(f)
+	err = decoder.Decode(&jobj)
+	checkError(err)
+
+	return jobj
+}
+
 // Either fetches or creates the table
 // If fetched, all arguments aside from the tablename are not used.
 func CreateTableIfNotExist(tableName string, columns, columnSpecs []string) TableDefinition {
+	if TableDefinitionExists(tableName) {
+		oldDef := FetchTableDefinition(tableName)
+
+		matches := false
+		if len(columns) == len(oldDef.ColumnNames) {
+			matches = true
+			for ci, col := range oldDef.ColumnNames {
+				if col != columns[ci] {
+					matches = false
+					break
+				}
+			}
+		}
+
+		if !matches {
+			// Delete the table and recreate it
+			DeleteTable(tableName)
+		} else {
+			return oldDef
+		}
+	}
+
 	if !DbDirectoryExists() {
 		logger.Info("db directory %s did not exist, creating...", utils.DB_LOCATION)
 		err := os.MkdirAll(utils.DB_LOCATION, 0777)
