@@ -1,5 +1,7 @@
 package strings
 
+import "strings"
+
 // Splits a string on the given separator
 // Unless the separator appears between two
 // Quotes "Like this" or is escaped,
@@ -62,4 +64,8 @@ func StringContains(arr []string, target string) bool {
 		}
 	}
 	return false
+}
+
+func PrepareStringForQuery(s string) string {
+	return strings.ReplaceAll(s, "\"", "\\\"")
 }

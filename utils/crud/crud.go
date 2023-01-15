@@ -2,14 +2,13 @@ package crud
 
 import (
 	"errors"
-	"fmt"
 	"mud/utils/io/db"
 	"mud/utils/ui/logger"
-	"reflect"
 )
 
-func CreateCrud(tableName string, selectorFormatter SelectorFormatter, toArrFunc ToArrFunc, scannerFunc db.RowScanner, rowSelector RowSelector, fromArrFunc FromArrFunc, createFunc CreateFunc) Crud {
-	return Crud{tableName, selectorFormatter, toArrFunc, scannerFunc, rowSelector, fromArrFunc, createFunc}
+func CreateCrud(tableName string, selectorFormatter SelectorFormatter, toArrFunc ToArrFunc,
+	scannerFunc db.RowScanner, fromArrFunc FromArrFunc, createFunc CreateFunc, updatefunc UpdateFunc) Crud {
+	return Crud{tableName, selectorFormatter, toArrFunc, scannerFunc, fromArrFunc, createFunc, updatefunc}
 }
 
 func (c Crud) FetchTable() db.TableDefinition {
@@ -21,10 +20,10 @@ func (c Crud) FetchTable() db.TableDefinition {
 	return tableMap[c.TableName]
 }
 
-func (c Crud) Create(args ...interface{}) interface{} {
+func (c Crud) Create(args ...interface{}) int64 {
 	table := c.FetchTable()
 	newValue := c.createFunction(table, args...)
-	_, rc := table.AddData([][]interface{}{
+	rid, rc := table.AddData([][]interface{}{
 		newValue,
 	})
 
@@ -32,13 +31,12 @@ func (c Crud) Create(args ...interface{}) interface{} {
 		panic(errors.New("Create function for CRUD didn't insert a new row, or inserted too many"))
 	}
 
-	return c.Retrieve(c.rowSelector(newValue)...)
+	return rid[0]
 }
 
 func (c Crud) Retrieve(args ...interface{}) interface{} {
 	table := c.FetchTable()
-	query := fmt.Sprintf("select from %s where %s", c.TableName, c.selectorFormatter(args))
-	results := table.QueryData(query, c.scannerFunc)
+	results := table.QueryData(c.selectorFormatter(args), c.scannerFunc)
 	if len(results) > 0 {
 		result := results[0]
 		return result
@@ -48,8 +46,7 @@ func (c Crud) Retrieve(args ...interface{}) interface{} {
 
 func (c Crud) RetrieveAll(args ...interface{}) []interface{} {
 	table := c.FetchTable()
-	query := fmt.Sprintf("select from %s where %s", c.TableName, c.selectorFormatter(args))
-	results := table.QueryData(query, c.scannerFunc)
+	results := table.QueryData(c.selectorFormatter(args), c.scannerFunc)
 	if len(results) > 0 {
 		return results
 	}
@@ -62,42 +59,13 @@ func (c Crud) Update(newValue interface{}, selectorArgs ...interface{}) interfac
 
 	oldValue := c.Retrieve(selectorArgs...)
 	if oldValue != nil {
-		// Convert to reflect container
-		oldValue := reflect.ValueOf(&oldValue)
-		newValue := reflect.ValueOf(&newValue)
-		oldType := reflect.TypeOf(oldValue)
-		newType := reflect.TypeOf(newValue)
-
-		if oldValue.NumField() == newValue.NumField() {
-			// Extract the struct itself
-			oldStruct := oldValue.Elem()
-			newStruct := newValue.Elem()
-
-			for fi := range make([]int, oldValue.NumField()) {
-				oldField := oldStruct.Field(fi)
-				newField := newStruct.Field(fi)
-
-				// for struct field name
-				oldFieldType := oldType.Field(fi)
-				newFieldType := newType.Field(fi)
-
-				if oldField.Type().Name() == newField.Type().Name() &&
-					oldFieldType.Name == newFieldType.Name {
-					oldField.Set(newField)
-
-					// Now that the field is updated correctly
-					// we can update it in the database
-					table.UpdateData(selector,
-						oldFieldType.Name,
-						newField.Interface())
-				} else {
-					logger.Error("Modifying column type/name is not supported in update statements")
-					return nil
-				}
-			}
-		} else {
-			logger.Error("Adding or Removing columns from a table is not supported for Update actions")
-			return nil
+		modifValues := c.updateFunc(oldValue, newValue)
+		for mvi := range modifValues {
+			// Now that the field is updated correctly
+			// we can update it in the database
+			table.UpdateData(selector,
+				modifValues[mvi].Column,
+				modifValues[mvi].NewValue)
 		}
 	} else {
 		logger.Error("You can't insert a new value using an update statement")

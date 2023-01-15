@@ -17,27 +17,19 @@ type FromArrFunc func([]interface{}) interface{}
 // Returns the row to insert, and the selector data for that row
 type CreateFunc func(db.TableDefinition, ...interface{}) []interface{}
 
-// A function that takes in a row and returns the data necessary for selecting it from the table
-type RowSelector func([]interface{}) []interface{}
-
-type ICrud interface {
-	Create(...interface{}) interface{}
-	Retrieve(interface{}) interface{}
-	Update(interface{}, interface{}) interface{}
-	Delete(interface{})
+type RowModStruct struct {
+	Column   string
+	NewValue interface{}
 }
 
-type CrudUpdate struct {
-	Key     interface{}
-	NewData interface{}
-}
+type UpdateFunc func(interface{}, interface{}) []RowModStruct
 
 type Crud struct {
 	TableName         string
 	selectorFormatter SelectorFormatter
 	toArrFunc         ToArrFunc
 	scannerFunc       db.RowScanner
-	rowSelector       RowSelector
 	fromArrFunc       FromArrFunc
 	createFunction    CreateFunc
+	updateFunc        UpdateFunc
 }
