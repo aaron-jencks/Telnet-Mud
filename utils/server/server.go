@@ -61,12 +61,6 @@ func CreateHandlers(dict map[string]map[string]func(http.ResponseWriter, *http.R
 	}
 }
 
-func DefaultUpdateParser(d []byte) (interface{}, interface{}) {
-	var payload crud.CrudUpdate
-	json.Unmarshal(d, &payload)
-	return payload.Key, payload.NewData
-}
-
 type CrudParsers struct {
 	Create   func([]byte) []interface{}
 	Retrieve func([]byte) interface{}
@@ -76,16 +70,6 @@ type CrudParsers struct {
 
 func DefaultErrorHandler(_ http.ResponseWriter, _ []byte) bool {
 	return false
-}
-
-func DefaultUpdateErrorHandler(w http.ResponseWriter, d []byte) bool {
-	var payload crud.CrudUpdate
-	err := json.Unmarshal(d, &payload)
-	if err != nil {
-		http.Error(w, "Updates must follow update format", http.StatusBadRequest)
-		logger.Error(err)
-	}
-	return err != nil
 }
 
 type errorHandler func(http.ResponseWriter, []byte) bool

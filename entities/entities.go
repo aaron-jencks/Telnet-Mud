@@ -89,56 +89,55 @@ type Room struct {
 }
 
 func SetupTables() {
-	var table db.TableDefinition
-	var index map[string][]int64
-
 	// Map
 	logger.Info("Creating map table")
-	table = db.CreateTableIfNotExist("map", []string{
+	db.CreateTableIfNotExist("map", []string{
 		"Room",
 		"Tile",
 		"X",
 		"Y",
 		"Z",
 	}, []string{
-		"integer",
-		"string",
-		"integer",
-		"integer",
-		"integer",
-	}, 0, false)
+		"Room integer references rooms (Id) on delete cascade on update cascade",
+		"Tile text not null",
+		"X integer not null",
+		"Y integer not null",
+		"Z integer not null",
+	}, false)
+	db.RunExec("alter table map add constraint PK_MAPLOC primary key (Room, X, Y, Z);")
 
 	// Variant
 	logger.Info("Creating tile variants table")
-	table = db.CreateTableIfNotExist("variants", []string{
+	db.CreateTableIfNotExist("variants", []string{
 		"Id",
 		"Name",
 		"Icon",
 	}, []string{
-		"integer",
-		"string",
-		"string",
-	}, 0, false)
+		"Id integer primary key",
+		"Name text not null",
+		"Icon text not null",
+	}, false)
+	db.RunExec("alter table variants add constraint PK_VARID primary key (Id, Name);")
 
 	// Tile
 	logger.Info("Creating tiles table")
-	table = db.CreateTableIfNotExist("tiles", []string{
+	db.CreateTableIfNotExist("tiles", []string{
 		"Name",
 		"IconType",
 		"Icon",
 		"BG",
 		"FG",
 	}, []string{
-		"string",
-		"string",
-		"string",
-		"integer",
-		"integer",
-	}, 0, true)
+		"Name text primary key",
+		"IconType text not null",
+		"Icon text not null",
+		"BG integer not null",
+		"FG integer not null",
+	}, false)
 
 	// Loot
 	logger.Info("Creating loot table")
-	table = db.CreateTableIfNotExist("loot", []string{
+	db.CreateTableIfNotExist("loot", []string{
 		"Id",
 		"Room",
 		"Item",
@@ -147,32 +146,28 @@ func SetupTables() {
 		"Y",
 		"Z",
 	}, []string{
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-	}, 0, true)
-	index = db.CreateIndex(table.CSV, "Room")
-	table.Info.Indices["Room"] = index
+		"Id integer primary key autoincrement",
+		"Room integer references rooms (Id) on delete cascade on update cascade",
+		"Item integer references items (Id) on delete cascade on update cascade",
+		"Quantity integer not null",
+		"X integer not null",
+		"Y integer not null",
+		"Z integer not null",
+	}, true)
 
 	// Note
 	logger.Info("Creating notes table")
-	table = db.CreateTableIfNotExist("notes", []string{
+	db.CreateTableIfNotExist("notes", []string{
 		"Id",
 		"Player",
 		"Title",
 		"Contents",
 	}, []string{
-		"integer",
-		"integer",
-		"string",
-		"string",
-	}, 0, true)
-	index = db.CreateIndex(table.CSV, "Player")
-	table.Info.Indices["Player"] = index
+		"Id integer primary key autoincrement",
+		"Player integer references players (Id) on delete cascade on update cascade",
+		"Title text not null",
+		"Contents text not null",
+	}, true)
 
 	// Command
 	logger.Info("Creating commands table")
@@ -181,10 +176,10 @@ func SetupTables() {
 		"ArgCount",
 		"ArgRegex",
 	}, []string{
-		"string",
-		"integer",
-		"string",
-	}, 0, true)
+		"Name text primary key",
+		"ArgCount integer not null",
+		"ArgRegex text not null",
+	}, false)
 
 	// Item
 	logger.Info("Creating items table")
@@ -193,10 +188,10 @@ func SetupTables() {
 		"Name",
 		"Description",
 	}, []string{
-		"integer",
-		"string",
-		"string",
-	}, 0, true)
+		"Id integer primary key autoincrement",
+		"Name text unique",
+		"Description text not null",
+	}, true)
 
 	// Player
 	logger.Info("Creating players table")
@@ -216,37 +211,35 @@ func SetupTables() {
 		"ActionCapacity",
 		"CurrentMode",
 	}, []string{
-		"integer",
-		"string",
-		"string",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-		"string",
-	}, 1, true)
+		"Id integer primary key autoincrement",
+		"Name text unique",
+		"Password text",
+		"Dex integer not null",
+		"Str integer not null",
+		"Int integer not null",
+		"Wis integer not null",
+		"Con integer not null",
+		"Chr integer not null",
+		"Room integer references rooms (Id) on delete no action on update no action",
+		"RoomX integer not null",
+		"RoomY integer not null",
+		"ActionCapacity integer not null",
+		"CurrentMode text not null",
+	}, true)
 
 	// Inventoriy
 	logger.Info("Creating inventory table")
-	table = db.CreateTableIfNotExist("inventory", []string{
+	db.CreateTableIfNotExist("inventory", []string{
 		"Id",
 		"Player",
 		"Item",
 		"Quantity",
 	}, []string{
-		"integer",
-		"integer",
-		"integer",
-		"integer",
-	}, 0, false)
-	index = db.CreateIndex(table.CSV, "Item")
-	table.Info.Indices["Item"] = index
+		"Id integer primary key autoincrement",
+		"Player integer references players (Id) on delete cascade on update cascade",
+		"Item integer references items (Id) on delete cascade on update cascade",
+		"Quantity integer not null",
+	}, true)
 
 	// Room
 	logger.Info("Creating rooms table")
@@ -257,10 +250,10 @@ func SetupTables() {
 		"Height",
 		"Width",
 	}, []string{
-		"integer",
-		"string",
-		"string",
-		"integer",
-		"integer",
-	}, 0, true)
+		"Id integer primary key autoincrement",
+		"Name text not null",
+		"Description text not null",
+		"Height integer not null",
+		"Width integer not null",
+	}, true)
 }
