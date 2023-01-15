@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"mud/utils/io/db"
+	"mud/utils/ui/logger"
+	"reflect"
 )
 
 func CreateCrud(tableName string, selectorFormatter SelectorFormatter, toArrFunc ToArrFunc, scannerFunc db.RowScanner, rowSelector RowSelector, fromArrFunc FromArrFunc, createFunc CreateFunc) Crud {
@@ -54,52 +56,59 @@ func (c Crud) RetrieveAll(args ...interface{}) []interface{} {
 	return nil
 }
 
-func (c Crud) Update(newValue interface{}, selectors ...interface{}) interface{} {
+func (c Crud) Update(newValue interface{}, selectorArgs ...interface{}) interface{} {
 	table := c.FetchTable()
-	oldRows := table.QueryData(fmt.Sprintf("select from %s where %s", c.TableName, c.selectorFormatter(selectors)), c.scannerFunc)
-	if len(oldRows) > 0 {
-		line := oldRows[0][0].(int)
-		table.ModifyRow(line, c.toArrFunc(newValue))
-		return newValue
+	selector := c.selectorFormatter(selectorArgs)
+
+	oldValue := c.Retrieve(selectorArgs...)
+	if oldValue != nil {
+		// Convert to reflect container
+		oldValue := reflect.ValueOf(&oldValue)
+		newValue := reflect.ValueOf(&newValue)
+		oldType := reflect.TypeOf(oldValue)
+		newType := reflect.TypeOf(newValue)
+
+		if oldValue.NumField() == newValue.NumField() {
+			// Extract the struct itself
+			oldStruct := oldValue.Elem()
+			newStruct := newValue.Elem()
+
+			for fi := range make([]int, oldValue.NumField()) {
+				oldField := oldStruct.Field(fi)
+				newField := newStruct.Field(fi)
+
+				// for struct field name
+				oldFieldType := oldType.Field(fi)
+				newFieldType := newType.Field(fi)
+
+				if oldField.Type().Name() == newField.Type().Name() &&
+					oldFieldType.Name == newFieldType.Name {
+					oldField.Set(newField)
+
+					// Now that the field is updated correctly
+					// we can update it in the database
+					table.UpdateData(selector,
+						oldFieldType.Name,
+						newField.Interface())
+				} else {
+					logger.Error("Modifying column type/name is not supported in update statements")
+					return nil
+				}
+			}
+		} else {
+			logger.Error("Adding or Removing columns from a table is not supported for Update actions")
+			return nil
+		}
+	} else {
+		logger.Error("You can't insert a new value using an update statement")
+		return nil
 	}
-	return nil
-}
 
-func (c Crud) UpdateQuery(retrieveValues []interface{}, retrieveColumns []string, newValue interface{}) interface{} {
-	table := c.FetchTable()
-
-	var queryArgs []interface{} = make([]interface{}, len(retrieveColumns)<<1)
-
-	for ai := range retrieveValues {
-		argsIndex := ai << 1
-		queryArgs[argsIndex] = retrieveValues[ai]
-		queryArgs[argsIndex+1] = retrieveColumns[ai]
-	}
-
-	oldRows := table.MultiQuery(queryArgs...)
-	if len(oldRows) > 0 {
-		line := oldRows[0][0].(int)
-		table.ModifyRow(line, c.toArrFunc(newValue))
-		return newValue
-	}
-
-	return nil
+	return c.Retrieve(selectorArgs...)
 }
 
 func (c Crud) Delete(keys ...interface{}) {
 	table := c.FetchTable()
 
-	if len(keys) == 1 {
-		table.DeleteDataByKey(keys[0])
-	} else {
-		lines := table.MultiQuery(keys...)
-
-		var lineNumbers []int64 = make([]int64, len(lines))
-
-		for li, line := range lines {
-			lineNumbers[li] = int64(line[0].(int))
-		}
-
-		table.DeleteLines(lineNumbers)
-	}
+	table.DeleteData(c.selectorFormatter(keys))
 }

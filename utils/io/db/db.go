@@ -8,7 +8,10 @@ import (
 	"mud/utils/ui/logger"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func openDbConnection() *sql.DB {
@@ -64,7 +67,7 @@ func RunInsert(statement string, rows [][]interface{}, args ...interface{}) ([]s
 
 // Determines if the DB_LOCATION folder exists
 func DbDirectoryExists() bool {
-	_, err := os.Stat(path.Dir(utils.DB_LOCATION))
+	_, err := os.Stat(utils.DB_LOCATION)
 	return !os.IsNotExist(err)
 }
 
@@ -123,7 +126,12 @@ func CreateTableIfNotExist(tableName string, columns, columnSpecs []string) Tabl
 
 	if !DbDirectoryExists() {
 		logger.Info("db directory %s did not exist, creating...", utils.DB_LOCATION)
-		err := os.MkdirAll(utils.DB_LOCATION, 0777)
+		dname := filepath.Dir(utils.DB_LOCATION)
+		err := os.MkdirAll(dname, 0777)
+		checkError(err)
+		file, err := os.OpenFile(utils.DB_LOCATION, os.O_RDONLY|os.O_CREATE, 0777)
+		checkError(err)
+		err = file.Close()
 		checkError(err)
 	}
 
@@ -156,6 +164,11 @@ func (td TableDefinition) UpdateJson() {
 
 // Deletes a table if it exists
 func DeleteTable(tableName string) {
+	if !DbDirectoryExists() {
+		logger.Info("db directory %s did not exist, no tables to delete",
+			utils.DB_LOCATION)
+		return
+	}
 	statement := fmt.Sprintf(`delete table if exists %s`, tableName)
 
 	_, err := RunExec(statement)
