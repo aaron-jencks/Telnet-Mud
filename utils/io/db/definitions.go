@@ -11,4 +11,5 @@ type TableDefinition struct {
 	Name        string   // the name of the data table
 	ColumnNames []string // The names of the columns in the table
 	ColumnSpecs []string // The column definitions including the types and any foreign keys/constraints
+	HasAutoPK   bool     // Indicates the the table has a 'primary key autoincrement' column that should be skipped for insertions
 }

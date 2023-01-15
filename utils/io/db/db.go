@@ -100,7 +100,7 @@ func FetchTableDefinition(table string) TableDefinition {
 
 // Either fetches or creates the table
 // If fetched, all arguments aside from the tablename are not used.
-func CreateTableIfNotExist(tableName string, columns, columnSpecs []string) TableDefinition {
+func CreateTableIfNotExist(tableName string, columns, columnSpecs []string, autopk bool) TableDefinition {
 	if TableDefinitionExists(tableName) {
 		oldDef := FetchTableDefinition(tableName)
 
@@ -145,9 +145,12 @@ func CreateTableIfNotExist(tableName string, columns, columnSpecs []string) Tabl
 		tableName,
 		columns,
 		columnSpecs,
+		autopk,
 	}
 
 	table.UpdateJson()
+
+	logger.Info("Created table %s", tableName)
 
 	return table
 }
@@ -169,19 +172,33 @@ func DeleteTable(tableName string) {
 			utils.DB_LOCATION)
 		return
 	}
-	statement := fmt.Sprintf(`delete table if exists %s`, tableName)
+	statement := fmt.Sprintf(`drop table if exists %s`, tableName)
 
 	_, err := RunExec(statement)
 	checkError(err)
+
+	if TableDefinitionExists(tableName) {
+		err = os.Remove(fmt.Sprintf("%s/%s.json",
+			path.Dir(utils.DB_LOCATION), tableName))
+		checkError(err)
+	}
 
 	logger.Warn("Table %s deleted", tableName)
 }
 
 // Adds new data to the data table and returns the number of lines added
 func (td TableDefinition) AddData(data [][]interface{}) ([]int64, int64) {
+	columnNames := td.ColumnNames
+	columnCount := len(td.ColumnNames)
+	if td.HasAutoPK {
+		columnCount--
+		columnNames = td.ColumnNames[1:]
+	}
+
+	insertionString := strings.Join(strings.Split(strings.Repeat("?", columnCount), ""), ",")
 	results, err := RunInsert(fmt.Sprintf(`insert into %s (%s) values (%s)`,
-		td.Name, strings.Join(td.ColumnNames, ","),
-		strings.Join(strings.Split(strings.Repeat("?", len(td.ColumnNames)), ""), ",")), data)
+		td.Name, strings.Join(columnNames, ","),
+		insertionString), data)
 	checkError(err)
 
 	var ids []int64
@@ -210,7 +227,7 @@ func (td TableDefinition) DeleteData(selector string) int64 {
 }
 
 func (td TableDefinition) QueryData(statement string, scanner RowScanner) []interface{} {
-	rows, err := RunQuery(statement)
+	rows, err := RunQuery(fmt.Sprintf("select * from %s where %s", td.Name, statement))
 	checkError(err)
 	defer rows.Close()
 
@@ -227,9 +244,9 @@ func (td TableDefinition) QueryData(statement string, scanner RowScanner) []inte
 	return result
 }
 
-func (td TableDefinition) UpdateData(selector, columns string, replacement interface{}) int64 {
+func (td TableDefinition) UpdateData(selector, column string, replacement interface{}) int64 {
 	result, err := RunExec(fmt.Sprintf("update %s set %s=%v where %s",
-		td.Name, columns, replacement, selector))
+		td.Name, column, replacement, selector))
 	checkError(err)
 
 	rows, err := result.RowsAffected()
