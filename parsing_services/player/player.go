@@ -1,6 +1,8 @@
 package player
 
 import (
+	"database/sql"
+	"fmt"
 	"mud/actions/definitions"
 	"mud/entities"
 	"mud/utils"
@@ -49,47 +51,41 @@ func playerFromArr(data []interface{}) interface{} {
 	}
 }
 
-func playerCreateFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
+func playerCreateFunc(table db.TableDefinition, args ...interface{}) []interface{} {
 	if len(args) > 0 {
-		id := 0
-		if table.CSV.LineCount > 0 {
-			id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
-		}
-
-		result := make([]interface{}, 14)
-		result[0] = id
-		result[1] = args[0]
-		result[2] = args[1]
+		result := make([]interface{}, 13)
+		result[0] = args[0]
+		result[1] = args[1]
 
 		if len(args) >= 7 {
 			for i := 2; i < 8; i++ {
-				result[i+1] = args[i]
+				result[i] = args[i]
 			}
 			if len(args) > 7 {
-				result[9] = args[9]
+				result[8] = args[8]
 			} else {
-				result[9] = 0
+				result[8] = 0
 			}
 		} else {
-			for i := 3; i < 9; i++ {
+			for i := 2; i < 8; i++ {
 				result[i] = 5
 			}
 			if len(args) >= 3 {
-				result[9] = args[2]
+				result[8] = args[2]
 			} else {
-				result[9] = 0
+				result[8] = 0
 			}
 		}
 
 		// room coords
+		result[9] = 0
 		result[10] = 0
-		result[11] = 0
 
 		// action queue limit
-		result[12] = utils.DEFAULT_PLAYER_ACTION_LIMIT
+		result[11] = utils.DEFAULT_PLAYER_ACTION_LIMIT
 
 		// The game mode of the player
-		result[13] = utils.DEFAULT_PLAYER_MODE
+		result[12] = utils.DEFAULT_PLAYER_MODE
 
 		return result
 	}
@@ -97,11 +93,120 @@ func playerCreateFunc(table *db.TableDefinition, args ...interface{}) []interfac
 	return []interface{}{}
 }
 
-var CRUD crud.Crud = crud.CreateCrud("players", playerToArr, playerFromArr, playerCreateFunc)
+func playerSelectorFormatter(args []interface{}) string {
+	if len(args) == 1 {
+		return fmt.Sprintf("Id=%d", args[0].(int64))
+	}
+	return ""
+}
+
+func playerRowScanner(row *sql.Rows) (interface{}, error) {
+	var result entities.Player = entities.Player{}
+	err := row.Scan(&result.Id,
+		&result.Name, &result.Password,
+		&result.Dex, &result.Str, &result.Int, &result.Wis, &result.Con, &result.Chr,
+		&result.Room, &result.RoomX, &result.RoomY,
+		&result.ActionCapacity, &result.CurrentMode)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func playerUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ops := oldValue.(entities.Player)
+	nps := newValue.(entities.Player)
+
+	var result []crud.RowModStruct
+
+	if ops.Name != nps.Name {
+		result = append(result, crud.RowModStruct{
+			Column:   "Name",
+			NewValue: fmt.Sprintf("\"%s\"", nps.Name),
+		})
+	}
+	if ops.Password != nps.Password {
+		result = append(result, crud.RowModStruct{
+			Column:   "Password",
+			NewValue: fmt.Sprintf("\"%s\"", nps.Password),
+		})
+	}
+	if ops.Dex != nps.Dex {
+		result = append(result, crud.RowModStruct{
+			Column:   "Dex",
+			NewValue: nps.Dex,
+		})
+	}
+	if ops.Str != nps.Str {
+		result = append(result, crud.RowModStruct{
+			Column:   "Str",
+			NewValue: nps.Str,
+		})
+	}
+	if ops.Int != nps.Int {
+		result = append(result, crud.RowModStruct{
+			Column:   "Int",
+			NewValue: nps.Int,
+		})
+	}
+	if ops.Wis != nps.Wis {
+		result = append(result, crud.RowModStruct{
+			Column:   "Wis",
+			NewValue: nps.Wis,
+		})
+	}
+	if ops.Con != nps.Con {
+		result = append(result, crud.RowModStruct{
+			Column:   "Con",
+			NewValue: nps.Con,
+		})
+	}
+	if ops.Chr != nps.Chr {
+		result = append(result, crud.RowModStruct{
+			Column:   "Chr",
+			NewValue: nps.Chr,
+		})
+	}
+	if ops.Room != nps.Room {
+		result = append(result, crud.RowModStruct{
+			Column:   "Room",
+			NewValue: nps.Room,
+		})
+	}
+	if ops.RoomX != nps.RoomX {
+		result = append(result, crud.RowModStruct{
+			Column:   "RoomX",
+			NewValue: nps.RoomX,
+		})
+	}
+	if ops.RoomY != nps.RoomY {
+		result = append(result, crud.RowModStruct{
+			Column:   "RoomY",
+			NewValue: nps.RoomY,
+		})
+	}
+	if ops.ActionCapacity != nps.ActionCapacity {
+		result = append(result, crud.RowModStruct{
+			Column:   "ActionCapacity",
+			NewValue: nps.ActionCapacity,
+		})
+	}
+	if ops.CurrentMode != nps.CurrentMode {
+		result = append(result, crud.RowModStruct{
+			Column:   "CurrentMode",
+			NewValue: fmt.Sprintf("\"%s\"", nps.CurrentMode),
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("players",
+	playerSelectorFormatter, playerToArr, playerRowScanner, playerFromArr, playerCreateFunc, playerUpdateFunc)
 
 func PlayerExists(name string) bool {
 	table := CRUD.FetchTable()
-	result := table.Query(name, "Name")
+	result := table.QueryData(fmt.Sprintf("Name=%s", name), playerRowScanner)
 	return len(result) > 0
 }
 
