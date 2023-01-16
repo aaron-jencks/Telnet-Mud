@@ -1,6 +1,8 @@
 package tmap
 
 import (
+	"database/sql"
+	"fmt"
 	"mud/entities"
 	"mud/utils/crud"
 	"mud/utils/io/db"
@@ -35,7 +37,7 @@ func tileFromArr(arr []interface{}) interface{} {
 	}
 }
 
-func createTileFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
+func createTileFunc(table db.TableDefinition, args ...interface{}) []interface{} {
 	result := []interface{}{args[0], args[1], args[2], args[3]}
 
 	if len(args) == 5 {
@@ -43,10 +45,11 @@ func createTileFunc(table *db.TableDefinition, args ...interface{}) []interface{
 	} else {
 		// Place tile on top
 		topZ := -1
-		roomTiles := table.QueryPK(args[0])
+		roomTiles := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d", args[0].(int), args[2].(int), args[3].(int)), mapScanner)
 		for _, tile := range roomTiles {
-			if tile[3] == args[2] && tile[4] == args[3] && tile[5].(int) > topZ {
-				topZ = tile[5].(int)
+			ts := tile.(entities.Map)
+			if ts.Z > topZ {
+				topZ = ts.Z
 			}
 		}
 		result = append(result, topZ+1)
@@ -55,7 +58,63 @@ func createTileFunc(table *db.TableDefinition, args ...interface{}) []interface{
 	return result
 }
 
-var CRUD crud.Crud = crud.CreateCrud("map", tileToArr, tileFromArr, createTileFunc)
+func mapSelector(args []interface{}) string {
+	return fmt.Sprintf("Room=%d and X=%d and Y=%d and Z=%d",
+		args[0].(int), args[1].(int), args[2].(int), args[3].(int))
+}
+
+func mapScanner(row *sql.Rows) (interface{}, error) {
+	result := entities.Map{}
+	err := row.Scan(&result.Room, &result.Tile, &result.X, &result.Y, &result.Z)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func mapUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ois := oldValue.(entities.Map)
+	nis := newValue.(entities.Map)
+
+	var result []crud.RowModStruct
+
+	if ois.Room != nis.Room {
+		result = append(result, crud.RowModStruct{
+			Column:   "Room",
+			NewValue: nis.Room,
+		})
+	}
+	if ois.Tile != nis.Tile {
+		result = append(result, crud.RowModStruct{
+			Column:   "Tile",
+			NewValue: fmt.Sprintf("\"%s\"", nis.Tile),
+		})
+	}
+	if ois.X != nis.X {
+		result = append(result, crud.RowModStruct{
+			Column:   "X",
+			NewValue: nis.X,
+		})
+	}
+	if ois.Y != nis.Y {
+		result = append(result, crud.RowModStruct{
+			Column:   "Y",
+			NewValue: nis.Y,
+		})
+	}
+	if ois.Z != nis.Z {
+		result = append(result, crud.RowModStruct{
+			Column:   "Z",
+			NewValue: nis.Z,
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("map", mapSelector, tileToArr, mapScanner, tileFromArr, createTileFunc, mapUpdateFunc)
+
+// TODO redo these to make use of queries
 
 func GetTilesForRoom(room int) []entities.Map {
 	tiles := CRUD.RetrieveAll(room)

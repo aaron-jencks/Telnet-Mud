@@ -95,7 +95,7 @@ func playerCreateFunc(table db.TableDefinition, args ...interface{}) []interface
 
 func playerSelectorFormatter(args []interface{}) string {
 	if len(args) == 1 {
-		return fmt.Sprintf("Id=%d", args[0].(int64))
+		return fmt.Sprintf("Id=%d", args[0].(int))
 	}
 	return ""
 }

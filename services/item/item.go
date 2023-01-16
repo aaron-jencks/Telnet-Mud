@@ -1,6 +1,8 @@
 package item
 
 import (
+	"database/sql"
+	"fmt"
 	"mud/entities"
 	"mud/utils/crud"
 	"mud/utils/io/db"
@@ -23,12 +25,43 @@ func itemFromArr(arr []interface{}) interface{} {
 	}
 }
 
-func createItemFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
-	id := 0
-	if table.CSV.LineCount > 0 {
-		id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
-	}
-	return []interface{}{id, args[0], args[1]}
+func createItemFunc(table db.TableDefinition, args ...interface{}) []interface{} {
+	return []interface{}{args[0], args[1]}
 }
 
-var CRUD crud.Crud = crud.CreateCrud("items", itemToArr, itemFromArr, createItemFunc)
+func itemSelector(args []interface{}) string {
+	return fmt.Sprintf("Id=%d", args[0].(int))
+}
+
+func itemScanner(row *sql.Rows) (interface{}, error) {
+	result := entities.Item{}
+	err := row.Scan(&result.Id, &result.Name, &result.Description)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func itemUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ois := oldValue.(entities.Item)
+	nis := newValue.(entities.Item)
+
+	var result []crud.RowModStruct
+
+	if ois.Name != nis.Name {
+		result = append(result, crud.RowModStruct{
+			Column:   "Name",
+			NewValue: fmt.Sprintf("\"%s\"", nis.Name),
+		})
+	}
+	if ois.Description != nis.Description {
+		result = append(result, crud.RowModStruct{
+			Column:   "Description",
+			NewValue: fmt.Sprintf("\"%s\"", nis.Description),
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("items", itemSelector, itemToArr, itemScanner, itemFromArr, createItemFunc, itemUpdateFunc)

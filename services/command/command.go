@@ -1,6 +1,9 @@
 package command
 
 import (
+	"database/sql"
+	"fmt"
+	"mud/entities"
 	"mud/utils/crud"
 	"mud/utils/io/db"
 	mstrings "mud/utils/strings"
@@ -30,16 +33,58 @@ func commandFromArr(arr []interface{}) interface{} {
 	}
 }
 
-func createCommandFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
+func createCommandFunc(table db.TableDefinition, args ...interface{}) []interface{} {
 	argsArr := args[1].([]string)
 	return []interface{}{args[0], len(argsArr), FormatRegexFromArr(argsArr)}
 }
 
-var CRUD crud.Crud = crud.CreateCrud("commands", commandToArr, commandFromArr, createCommandFunc)
+func commandSelector(row []interface{}) string {
+	return fmt.Sprintf("Name=\"%s\"", row[0].(string))
+}
+
+func commandScanner(row *sql.Rows) (interface{}, error) {
+	var result entities.Command = entities.Command{}
+	err := row.Scan(&result.Name, &result.ArgCount, &result.ArgRegex)
+	if err != nil {
+		return nil, err
+	}
+	return result, err
+}
+
+func commandUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ocs := oldValue.(entities.Command)
+	ncs := newValue.(entities.Command)
+
+	var result []crud.RowModStruct
+	if ocs.Name != ncs.Name {
+		result = append(result, crud.RowModStruct{
+			Column:   "Name",
+			NewValue: fmt.Sprintf("\"%s\"", ncs.Name),
+		})
+	}
+	if ocs.ArgCount != ncs.ArgCount {
+		result = append(result, crud.RowModStruct{
+			Column:   "ArgCount",
+			NewValue: ncs.ArgCount,
+		})
+	}
+	if ocs.ArgRegex != ncs.ArgRegex {
+		result = append(result, crud.RowModStruct{
+			Column:   "ArgRegex",
+			NewValue: fmt.Sprintf("\"%s\"", ncs.ArgRegex),
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("commands",
+	commandSelector, commandToArr, commandScanner, commandFromArr,
+	createCommandFunc, commandUpdateFunc)
 
 func CommandExists(name string) bool {
 	table := CRUD.FetchTable()
-	result := table.Query(name, "Name")
+	result := table.QueryData(fmt.Sprintf("Name=\"%s\"", name), commandScanner)
 	return len(result) > 0
 }
 

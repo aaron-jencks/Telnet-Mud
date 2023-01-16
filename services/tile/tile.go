@@ -1,6 +1,8 @@
 package tile
 
 import (
+	"database/sql"
+	"fmt"
 	"mud/entities"
 	"mud/utils/crud"
 	"mud/utils/io/db"
@@ -27,7 +29,7 @@ func tileFromArr(arr []interface{}) interface{} {
 	}
 }
 
-func createTileFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
+func createTileFunc(table db.TableDefinition, args ...interface{}) []interface{} {
 	result := []interface{}{args[0], args[1], args[2]}
 
 	if len(result) == 5 {
@@ -39,4 +41,57 @@ func createTileFunc(table *db.TableDefinition, args ...interface{}) []interface{
 	return result
 }
 
-var CRUD crud.Crud = crud.CreateCrud("tiles", tileToArr, tileFromArr, createTileFunc)
+func tileSelector(args []interface{}) string {
+	return fmt.Sprintf("Name=\"%s\"", args[0].(string))
+}
+
+func tileScanner(row *sql.Rows) (interface{}, error) {
+	result := entities.Tile{}
+	err := row.Scan(&result.Name, &result.IconType, &result.Icon, &result.BG, &result.FG)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func tileUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ois := oldValue.(entities.Tile)
+	nis := newValue.(entities.Tile)
+
+	var result []crud.RowModStruct
+
+	if ois.Name != nis.Name {
+		result = append(result, crud.RowModStruct{
+			Column:   "Name",
+			NewValue: fmt.Sprintf("\"%s\"", nis.Name),
+		})
+	}
+	if ois.IconType != nis.IconType {
+		result = append(result, crud.RowModStruct{
+			Column:   "IconType",
+			NewValue: fmt.Sprintf("\"%s\"", nis.IconType),
+		})
+	}
+	if ois.Icon != nis.Icon {
+		result = append(result, crud.RowModStruct{
+			Column:   "Icon",
+			NewValue: fmt.Sprintf("\"%s\"", nis.Icon),
+		})
+	}
+	if ois.BG != nis.BG {
+		result = append(result, crud.RowModStruct{
+			Column:   "BG",
+			NewValue: nis.BG,
+		})
+	}
+	if ois.FG != nis.FG {
+		result = append(result, crud.RowModStruct{
+			Column:   "FG",
+			NewValue: nis.FG,
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("tiles", tileSelector, tileToArr, tileScanner, tileFromArr, createTileFunc, tileUpdateFunc)

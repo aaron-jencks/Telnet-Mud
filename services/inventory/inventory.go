@@ -1,6 +1,8 @@
 package inventory
 
 import (
+	"database/sql"
+	"fmt"
 	"mud/entities"
 	"mud/services/item"
 	"mud/utils/crud"
@@ -26,16 +28,54 @@ func inventoryFromArr(arr []interface{}) interface{} {
 	}
 }
 
-func createInventoryFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
-	id := 0
-	if table.CSV.LineCount > 0 {
-		id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
-	}
-
-	return []interface{}{id, args[0], args[1], args[2]}
+func createInventoryFunc(table db.TableDefinition, args ...interface{}) []interface{} {
+	return []interface{}{args[0], args[1], args[2]}
 }
 
-var CRUD crud.Crud = crud.CreateCrud("inventory", inventoryToArr, inventoryFromArr, createInventoryFunc)
+func inventoryScanner(row *sql.Rows) (interface{}, error) {
+	result := entities.Inventory{}
+	err := row.Scan(&result.Id, &result.Player, &result.Item, &result.Quantity)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func inventorySelector(args []interface{}) string {
+	return fmt.Sprintf("Id=%d", args[0].(int))
+}
+
+func inventoryUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ois := oldValue.(entities.Inventory)
+	nis := newValue.(entities.Inventory)
+
+	var result []crud.RowModStruct
+
+	if ois.Item != nis.Item {
+		result = append(result, crud.RowModStruct{
+			Column:   "Item",
+			NewValue: nis.Item,
+		})
+	}
+	if ois.Player != nis.Player {
+		result = append(result, crud.RowModStruct{
+			Column:   "Player",
+			NewValue: nis.Player,
+		})
+	}
+	if ois.Quantity != nis.Quantity {
+		result = append(result, crud.RowModStruct{
+			Column:   "Quantity",
+			NewValue: nis.Quantity,
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("inventory", inventorySelector,
+	inventoryToArr, inventoryScanner, inventoryFromArr,
+	createInventoryFunc, inventoryUpdateFunc)
 
 type ExpandedInventory struct {
 	Item     entities.Item
@@ -44,13 +84,14 @@ type ExpandedInventory struct {
 
 func GetPlayerInventory(p entities.Player) []ExpandedInventory {
 	table := CRUD.FetchTable()
-	rows := table.Query(p.Id, "Player")
+	rows := table.QueryData(fmt.Sprintf("Player=%d", p.Id), inventoryScanner)
 
 	var result []ExpandedInventory = make([]ExpandedInventory, len(rows))
 
 	for ri, row := range rows {
-		result[ri].Item = item.CRUD.Retrieve(row[3]).(entities.Item)
-		result[ri].Quantity = row[4].(int)
+		rs := row.(entities.Inventory)
+		result[ri].Item = item.CRUD.Retrieve(rs.Item).(entities.Item)
+		result[ri].Quantity = rs.Quantity
 	}
 
 	return result
@@ -58,14 +99,15 @@ func GetPlayerInventory(p entities.Player) []ExpandedInventory {
 
 func AddItemToInventory(p entities.Player, i entities.Item, qty int) int {
 	table := CRUD.FetchTable()
-	rows := table.Query(p.Id, "Player")
+	rows := table.QueryData(fmt.Sprintf("Player=%d", p.Id), inventoryScanner)
 
 	for _, row := range rows {
-		if row[3].(int) == i.Id {
+		rs := row.(entities.Inventory)
+		if rs.Item == i.Id {
 			// We already have some
-			invent := CRUD.Retrieve(row[1]).(entities.Inventory)
+			invent := CRUD.Retrieve(rs.Id).(entities.Inventory)
 			invent.Quantity += qty
-			CRUD.Update(invent.Id, invent)
+			CRUD.Update(invent, invent.Id)
 
 			return invent.Quantity
 		}

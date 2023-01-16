@@ -1,6 +1,8 @@
 package variant
 
 import (
+	"database/sql"
+	"fmt"
 	"mud/entities"
 	"mud/utils/crud"
 	"mud/utils/io/db"
@@ -23,20 +25,59 @@ func variantFromArr(arr []interface{}) interface{} {
 	}
 }
 
-func createVariantFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
+// TODO something will have to be done here to handle using the id
+func createVariantFunc(table db.TableDefinition, args ...interface{}) []interface{} {
 	if len(args) < 3 {
-		id := 0
-		if table.CSV.LineCount > 0 {
-			id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
-		}
-
-		return []interface{}{id, args[0], args[1]}
+		return []interface{}{args[0], args[1]}
 	} else {
 		return []interface{}{args[0], args[1], args[2]}
 	}
 }
 
-var CRUD crud.Crud = crud.CreateCrud("variants", variantToArr, variantFromArr, createVariantFunc)
+func variantSelector(args []interface{}) string {
+	return fmt.Sprintf("Id=%d and Name=\"%s\"", args[0].(int), args[1].(string))
+}
+
+func variantScanner(row *sql.Rows) (interface{}, error) {
+	result := entities.TileVariant{}
+	err := row.Scan(&result.Id, &result.Name, &result.Icon)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func variantUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ois := oldValue.(entities.TileVariant)
+	nis := newValue.(entities.TileVariant)
+
+	var result []crud.RowModStruct
+
+	if ois.Id != nis.Id {
+		result = append(result, crud.RowModStruct{
+			Column:   "Id",
+			NewValue: nis.Id,
+		})
+	}
+	if ois.Name != nis.Name {
+		result = append(result, crud.RowModStruct{
+			Column:   "Name",
+			NewValue: fmt.Sprintf("\"%s\"", nis.Name),
+		})
+	}
+	if ois.Icon != nis.Icon {
+		result = append(result, crud.RowModStruct{
+			Column:   "Icon",
+			NewValue: fmt.Sprintf("\"%s\"", nis.Icon),
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("variants", variantSelector, variantToArr, variantScanner, variantFromArr, createVariantFunc, variantUpdateFunc)
+
+// TODO redo these to make use of queries
 
 func GetAllVariants(vid int) []entities.TileVariant {
 	variants := CRUD.RetrieveAll(vid)

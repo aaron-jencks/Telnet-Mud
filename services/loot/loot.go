@@ -1,6 +1,8 @@
 package loot
 
 import (
+	"database/sql"
+	"fmt"
 	"mud/entities"
 	"mud/services/item"
 	"mud/utils/crud"
@@ -26,18 +28,74 @@ func lootFromArr(arr []interface{}) interface{} {
 	}
 }
 
-func createLootFunc(table *db.TableDefinition, args ...interface{}) []interface{} {
-	id := 0
-	if table.CSV.LineCount > 0 {
-		id = table.RetrieveLine(table.CSV.LineCount - 1)[1].(int) + 1
-	}
-	result := []interface{}{id}
+func createLootFunc(table db.TableDefinition, args ...interface{}) []interface{} {
+	result := []interface{}{}
 	result = append(result, args...)
 
 	return result
 }
 
-var CRUD crud.Crud = crud.CreateCrud("loot", lootToArr, lootFromArr, createLootFunc)
+func lootSelector(args []interface{}) string {
+	return fmt.Sprintf("Id=%d", args[0].(int))
+}
+
+func lootScanner(row *sql.Rows) (interface{}, error) {
+	result := entities.Loot{}
+	err := row.Scan(&result.Id, &result.Room, &result.Item, &result.Quantity,
+		&result.X, &result.Y, &result.Z)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func lootUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
+	ols := oldValue.(entities.Loot)
+	nls := newValue.(entities.Loot)
+
+	var result []crud.RowModStruct
+
+	if ols.Room != nls.Room {
+		result = append(result, crud.RowModStruct{
+			Column:   "Room",
+			NewValue: nls.Room,
+		})
+	}
+	if ols.Item != nls.Item {
+		result = append(result, crud.RowModStruct{
+			Column:   "Item",
+			NewValue: nls.Item,
+		})
+	}
+	if ols.Quantity != nls.Quantity {
+		result = append(result, crud.RowModStruct{
+			Column:   "Quantity",
+			NewValue: nls.Quantity,
+		})
+	}
+	if ols.X != nls.X {
+		result = append(result, crud.RowModStruct{
+			Column:   "X",
+			NewValue: nls.X,
+		})
+	}
+	if ols.Y != nls.Y {
+		result = append(result, crud.RowModStruct{
+			Column:   "Y",
+			NewValue: nls.Y,
+		})
+	}
+	if ols.Z != nls.Z {
+		result = append(result, crud.RowModStruct{
+			Column:   "Z",
+			NewValue: nls.Z,
+		})
+	}
+
+	return result
+}
+
+var CRUD crud.Crud = crud.CreateCrud("loot", lootSelector, lootToArr, lootScanner, lootFromArr, createLootFunc, lootUpdateFunc)
 
 type ExpandedLoot struct {
 	Id       int
@@ -51,19 +109,20 @@ type ExpandedLoot struct {
 
 func GetLootForRoom(r entities.Room) []ExpandedLoot {
 	table := CRUD.FetchTable()
-	rows := table.Query(r.Id, "Room")
+	rows := table.QueryData(fmt.Sprintf("Room=%d", r.Id), lootScanner)
 
 	var loots []ExpandedLoot = make([]ExpandedLoot, len(rows))
 	for ri, row := range rows {
-		loots[ri].Id = row[1].(int)
+		rs := row.(entities.Loot)
+		loots[ri].Id = rs.Id
 		loots[ri].Room = r
 
-		item := item.CRUD.Retrieve(row[3]).(entities.Item)
+		item := item.CRUD.Retrieve(rs.Item).(entities.Item)
 		loots[ri].Item = item
-		loots[ri].Quantity = row[4].(int)
-		loots[ri].X = row[5].(int)
-		loots[ri].Y = row[6].(int)
-		loots[ri].Z = row[7].(int)
+		loots[ri].Quantity = rs.Quantity
+		loots[ri].X = rs.X
+		loots[ri].Y = rs.Y
+		loots[ri].Z = rs.Z
 	}
 
 	return loots
@@ -71,19 +130,20 @@ func GetLootForRoom(r entities.Room) []ExpandedLoot {
 
 func GetLootForPosition(r entities.Room, x, y int) []ExpandedLoot {
 	table := CRUD.FetchTable()
-	rows := table.MultiQuery(r.Id, "Room", x, "X", y, "Y")
+	rows := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d", r.Id, x, y), lootScanner)
 
 	var loots []ExpandedLoot = make([]ExpandedLoot, len(rows))
 	for ri, row := range rows {
-		loots[ri].Id = row[1].(int)
+		rs := row.(entities.Loot)
+		loots[ri].Id = rs.Id
 		loots[ri].Room = r
 
-		item := item.CRUD.Retrieve(row[3]).(entities.Item)
+		item := item.CRUD.Retrieve(rs.Item).(entities.Item)
 		loots[ri].Item = item
-		loots[ri].Quantity = row[4].(int)
-		loots[ri].X = row[5].(int)
-		loots[ri].Y = row[6].(int)
-		loots[ri].Z = row[7].(int)
+		loots[ri].Quantity = rs.Quantity
+		loots[ri].X = rs.X
+		loots[ri].Y = rs.Y
+		loots[ri].Z = rs.Z
 	}
 
 	return loots
