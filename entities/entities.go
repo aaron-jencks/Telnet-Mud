@@ -88,6 +88,42 @@ type Room struct {
 	Width       int
 }
 
+func SetupPlayerTable() {
+	// Player
+	logger.Info("Creating players table")
+	db.CreateTableIfNotExist("players", []string{
+		"Id",
+		"Name",
+		"Password",
+		"Dex",
+		"Str",
+		"Int",
+		"Wis",
+		"Con",
+		"Chr",
+		"Room",
+		"RoomX",
+		"RoomY",
+		"ActionCapacity",
+		"CurrentMode",
+	}, []string{
+		"Id integer primary key autoincrement",
+		"Name text unique",
+		"Password text",
+		"Dex integer not null",
+		"Str integer not null",
+		"Int integer not null",
+		"Wis integer not null",
+		"Con integer not null",
+		"Chr integer not null",
+		"Room integer references rooms (Id) on delete no action on update no action",
+		"RoomX integer not null",
+		"RoomY integer not null",
+		"ActionCapacity integer not null",
+		"CurrentMode text not null",
+	}, true)
+}
+
 func SetupTables() {
 	// Map
 	logger.Info("Creating map table")
@@ -193,39 +229,7 @@ func SetupTables() {
 		"Description text not null",
 	}, true)
 
-	// Player
-	logger.Info("Creating players table")
-	db.CreateTableIfNotExist("players", []string{
-		"Id",
-		"Name",
-		"Password",
-		"Dex",
-		"Str",
-		"Int",
-		"Wis",
-		"Con",
-		"Chr",
-		"Room",
-		"RoomX",
-		"RoomY",
-		"ActionCapacity",
-		"CurrentMode",
-	}, []string{
-		"Id integer primary key autoincrement",
-		"Name text unique",
-		"Password text",
-		"Dex integer not null",
-		"Str integer not null",
-		"Int integer not null",
-		"Wis integer not null",
-		"Con integer not null",
-		"Chr integer not null",
-		"Room integer references rooms (Id) on delete no action on update no action",
-		"RoomX integer not null",
-		"RoomY integer not null",
-		"ActionCapacity integer not null",
-		"CurrentMode text not null",
-	}, true)
+	SetupPlayerTable()
 
 	// Inventoriy
 	logger.Info("Creating inventory table")
