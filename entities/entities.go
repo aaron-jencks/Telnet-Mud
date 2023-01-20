@@ -124,6 +124,36 @@ func SetupPlayerTable() {
 	}, true)
 }
 
+func SetupInventoryTable() {
+	// Inventoriy
+	logger.Info("Creating inventory table")
+	db.CreateTableIfNotExist("inventory", []string{
+		"Id",
+		"Player",
+		"Item",
+		"Quantity",
+	}, []string{
+		"Id integer primary key autoincrement",
+		"Player integer references players (Id) on delete cascade on update cascade",
+		"Item integer references items (Id) on delete cascade on update cascade",
+		"Quantity integer not null",
+	}, true)
+}
+
+func SetupItemTable() {
+	// Item
+	logger.Info("Creating items table")
+	db.CreateTableIfNotExist("items", []string{
+		"Id",
+		"Name",
+		"Description",
+	}, []string{
+		"Id integer primary key autoincrement",
+		"Name text unique",
+		"Description text not null",
+	}, true)
+}
+
 func SetupTables() {
 	// Map
 	logger.Info("Creating map table")
@@ -205,45 +235,26 @@ func SetupTables() {
 		"Contents text not null",
 	}, true)
 
-	// Command
-	logger.Info("Creating commands table")
-	db.CreateTableIfNotExist("commands", []string{
-		"Name",
-		"ArgCount",
-		"ArgRegex",
-	}, []string{
-		"Name text primary key",
-		"ArgCount integer not null",
-		"ArgRegex text not null",
-	}, false)
+	// // Command
+	// logger.Info("Creating commands table")
+	// db.CreateTableIfNotExist("commands", []string{
+	// 	"Name",
+	// 	"ArgCount",
+	// 	"ArgRegex",
+	// }, []string{
+	// 	"Name text primary key",
+	// 	"ArgCount integer not null",
+	// 	"ArgRegex text not null",
+	// }, false)
 
 	// Item
-	logger.Info("Creating items table")
-	db.CreateTableIfNotExist("items", []string{
-		"Id",
-		"Name",
-		"Description",
-	}, []string{
-		"Id integer primary key autoincrement",
-		"Name text unique",
-		"Description text not null",
-	}, true)
+	SetupItemTable()
 
+	// Player
 	SetupPlayerTable()
 
 	// Inventoriy
-	logger.Info("Creating inventory table")
-	db.CreateTableIfNotExist("inventory", []string{
-		"Id",
-		"Player",
-		"Item",
-		"Quantity",
-	}, []string{
-		"Id integer primary key autoincrement",
-		"Player integer references players (Id) on delete cascade on update cascade",
-		"Item integer references items (Id) on delete cascade on update cascade",
-		"Quantity integer not null",
-	}, true)
+	SetupInventoryTable()
 
 	// Room
 	logger.Info("Creating rooms table")
