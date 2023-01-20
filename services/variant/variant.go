@@ -27,11 +27,7 @@ func variantFromArr(arr []interface{}) interface{} {
 
 // TODO something will have to be done here to handle using the id
 func createVariantFunc(table db.TableDefinition, args ...interface{}) []interface{} {
-	if len(args) < 3 {
-		return []interface{}{args[0], args[1]}
-	} else {
-		return []interface{}{args[0], args[1], args[2]}
-	}
+	return []interface{}{args[0], args[1], args[2]}
 }
 
 func variantSelector(args []interface{}) string {
@@ -80,7 +76,8 @@ var CRUD crud.Crud = crud.CreateCrud("variants", variantSelector, variantToArr, 
 // TODO redo these to make use of queries
 
 func GetAllVariants(vid int) []entities.TileVariant {
-	variants := CRUD.RetrieveAll(vid)
+	table := CRUD.FetchTable()
+	variants := table.QueryData(fmt.Sprintf("Id=%d", vid), variantScanner)
 
 	var result []entities.TileVariant = make([]entities.TileVariant, len(variants))
 	for vi, variant := range variants {
@@ -88,18 +85,4 @@ func GetAllVariants(vid int) []entities.TileVariant {
 	}
 
 	return result
-}
-
-func GetSpecificVariant(vid int, name string) entities.TileVariant {
-	variants := GetAllVariants(vid)
-	for _, variant := range variants {
-		if variant.Name == name {
-			return variant
-		}
-	}
-
-	return entities.TileVariant{
-		Id:   -1,
-		Name: "Not Found",
-	}
 }

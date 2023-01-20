@@ -190,6 +190,21 @@ func SetupTileTable() {
 	}, false)
 }
 
+func SetupVariantTable() {
+	// Variant
+	logger.Info("Creating tile variants table")
+	db.CreateTableIfNotExist("variants", []string{
+		"Id",
+		"Name",
+		"Icon",
+	}, []string{
+		"Id integer not null",
+		"Name text not null",
+		"Icon text not null",
+	}, false)
+	db.RunExec("alter table variants add constraint PK_VARID primary key (Id, Name);")
+}
+
 func SetupTables() {
 	// Map
 	logger.Info("Creating map table")
@@ -208,21 +223,11 @@ func SetupTables() {
 	}, false)
 	db.RunExec("alter table map add constraint PK_MAPLOC primary key (Room, X, Y, Z);")
 
-	// Variant
-	logger.Info("Creating tile variants table")
-	db.CreateTableIfNotExist("variants", []string{
-		"Id",
-		"Name",
-		"Icon",
-	}, []string{
-		"Id integer primary key",
-		"Name text not null",
-		"Icon text not null",
-	}, false)
-	db.RunExec("alter table variants add constraint PK_VARID primary key (Id, Name);")
-
 	// Tile
 	SetupTileTable()
+
+	// Variant
+	SetupVariantTable()
 
 	// Loot
 	logger.Info("Creating loot table")
