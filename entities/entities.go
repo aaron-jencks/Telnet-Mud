@@ -154,6 +154,42 @@ func SetupItemTable() {
 	}, true)
 }
 
+func SetupRoomTable() {
+	// Room
+	logger.Info("Creating rooms table")
+	db.CreateTableIfNotExist("rooms", []string{
+		"Id",
+		"Name",
+		"Description",
+		"Height",
+		"Width",
+	}, []string{
+		"Id integer primary key autoincrement",
+		"Name text not null",
+		"Description text not null",
+		"Height integer not null",
+		"Width integer not null",
+	}, true)
+}
+
+func SetupTileTable() {
+	// Tile
+	logger.Info("Creating tiles table")
+	db.CreateTableIfNotExist("tiles", []string{
+		"Name",
+		"IconType",
+		"Icon",
+		"BG",
+		"FG",
+	}, []string{
+		"Name text primary key",
+		"IconType text not null",
+		"Icon text not null",
+		"BG integer not null",
+		"FG integer not null",
+	}, false)
+}
+
 func SetupTables() {
 	// Map
 	logger.Info("Creating map table")
@@ -186,20 +222,7 @@ func SetupTables() {
 	db.RunExec("alter table variants add constraint PK_VARID primary key (Id, Name);")
 
 	// Tile
-	logger.Info("Creating tiles table")
-	db.CreateTableIfNotExist("tiles", []string{
-		"Name",
-		"IconType",
-		"Icon",
-		"BG",
-		"FG",
-	}, []string{
-		"Name text primary key",
-		"IconType text not null",
-		"Icon text not null",
-		"BG integer not null",
-		"FG integer not null",
-	}, false)
+	SetupTileTable()
 
 	// Loot
 	logger.Info("Creating loot table")
@@ -247,6 +270,9 @@ func SetupTables() {
 	// 	"ArgRegex text not null",
 	// }, false)
 
+	// Room
+	SetupRoomTable()
+
 	// Item
 	SetupItemTable()
 
@@ -255,20 +281,4 @@ func SetupTables() {
 
 	// Inventoriy
 	SetupInventoryTable()
-
-	// Room
-	logger.Info("Creating rooms table")
-	db.CreateTableIfNotExist("rooms", []string{
-		"Id",
-		"Name",
-		"Description",
-		"Height",
-		"Width",
-	}, []string{
-		"Id integer primary key autoincrement",
-		"Name text not null",
-		"Description text not null",
-		"Height integer not null",
-		"Width integer not null",
-	}, true)
 }
