@@ -32,7 +32,7 @@ func tileFromArr(arr []interface{}) interface{} {
 func createTileFunc(table db.TableDefinition, args ...interface{}) []interface{} {
 	result := []interface{}{args[0], args[1], args[2]}
 
-	if len(result) == 5 {
+	if len(args) == 5 {
 		result = append(result, args[3], args[4])
 	} else {
 		result = append(result, 0, 30)
