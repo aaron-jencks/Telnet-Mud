@@ -34,20 +34,20 @@ func playerToArr(ps interface{}) []interface{} {
 
 func playerFromArr(data []interface{}) interface{} {
 	return entities.Player{
-		Id:             data[1].(int),
-		Name:           data[2].(string),
-		Password:       data[3].(string),
-		Dex:            data[4].(int),
-		Str:            data[5].(int),
-		Int:            data[6].(int),
-		Wis:            data[7].(int),
-		Con:            data[8].(int),
-		Chr:            data[9].(int),
-		Room:           data[10].(int),
-		RoomX:          data[11].(int),
-		RoomY:          data[12].(int),
-		ActionCapacity: data[13].(int),
-		CurrentMode:    data[14].(string),
+		Id:             data[0].(int),
+		Name:           data[1].(string),
+		Password:       data[2].(string),
+		Dex:            data[3].(int),
+		Str:            data[4].(int),
+		Int:            data[5].(int),
+		Wis:            data[6].(int),
+		Con:            data[7].(int),
+		Chr:            data[8].(int),
+		Room:           data[9].(int),
+		RoomX:          data[10].(int),
+		RoomY:          data[11].(int),
+		ActionCapacity: data[12].(int),
+		CurrentMode:    data[13].(string),
 	}
 }
 
@@ -204,9 +204,18 @@ func playerUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
 var CRUD crud.Crud = crud.CreateCrud("players",
 	playerSelectorFormatter, playerToArr, playerRowScanner, playerFromArr, playerCreateFunc, playerUpdateFunc)
 
+func FetchPlayerByName(name string) entities.Player {
+	if PlayerExists(name) {
+		table := CRUD.FetchTable()
+		result := table.QueryData(fmt.Sprintf("Name=\"%s\"", name), playerRowScanner)
+		return result[0].(entities.Player)
+	}
+	return entities.Player{}
+}
+
 func PlayerExists(name string) bool {
 	table := CRUD.FetchTable()
-	result := table.QueryData(fmt.Sprintf("Name=%s", name), playerRowScanner)
+	result := table.QueryData(fmt.Sprintf("Name=\"%s\"", name), playerRowScanner)
 	return len(result) > 0
 }
 
@@ -229,14 +238,14 @@ func CreateAnonymousHandler(username string) {
 }
 
 func LoginPlayer(name string, password string, conn net.Conn) bool {
-	if PlayerExists(name) && CRUD.Retrieve(name).(entities.Player).Password == password {
+	if PlayerExists(name) && FetchPlayerByName(name).Password == password {
 		PlayerRegistrationLock.Lock()
 		defer PlayerRegistrationLock.Unlock()
 		_, ok := LoggedInPlayerMap[name]
 		if !ok {
 			LoggedInPlayerMap[name] = conn
 			PlayerQueueMapLock.Lock()
-			PlayerQueueMap[name] = definitions.CreateActionQueue(CRUD.Retrieve(name).(entities.Player).ActionCapacity)
+			PlayerQueueMap[name] = definitions.CreateActionQueue(FetchPlayerByName(name).ActionCapacity)
 			PlayerQueueMapLock.Unlock()
 			PlayerConnectionMap[conn] = name
 

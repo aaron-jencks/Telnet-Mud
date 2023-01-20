@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -54,6 +55,7 @@ func TestMain(m *testing.M) {
 
 func TestTableCreateDelete(t *testing.T) {
 	setupTestTable()
+	rand.Seed(time.Now().Unix())
 
 	DeleteTable("TestTable")
 
