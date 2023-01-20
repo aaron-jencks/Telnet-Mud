@@ -205,7 +205,7 @@ func SetupVariantTable() {
 	db.RunExec("alter table variants add constraint PK_VARID primary key (Id, Name);")
 }
 
-func SetupTables() {
+func SetupMapTable() {
 	// Map
 	logger.Info("Creating map table")
 	db.CreateTableIfNotExist("map", []string{
@@ -216,13 +216,15 @@ func SetupTables() {
 		"Z",
 	}, []string{
 		"Room integer references rooms (Id) on delete cascade on update cascade",
-		"Tile text not null",
+		"Tile text  not null references tiles (Name) on delete cascade on update cascade",
 		"X integer not null",
 		"Y integer not null",
 		"Z integer not null",
 	}, false)
 	db.RunExec("alter table map add constraint PK_MAPLOC primary key (Room, X, Y, Z);")
+}
 
+func SetupTables() {
 	// Tile
 	SetupTileTable()
 
@@ -277,6 +279,9 @@ func SetupTables() {
 
 	// Room
 	SetupRoomTable()
+
+	// Map
+	SetupMapTable()
 
 	// Item
 	SetupItemTable()

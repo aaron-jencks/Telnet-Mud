@@ -116,8 +116,22 @@ var CRUD crud.Crud = crud.CreateCrud("map", mapSelector, tileToArr, mapScanner, 
 
 // TODO redo these to make use of queries
 
+func GetCurrentTilesForCoordWithType(room, x, y int, tile string) []entities.Map {
+	table := CRUD.FetchTable()
+	rows := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d and Tile=\"%s\"", room, x, y, tile), mapScanner)
+
+	var result []entities.Map = make([]entities.Map, len(rows))
+
+	for ri := range rows {
+		result[ri] = rows[ri].(entities.Map)
+	}
+
+	return result
+}
+
 func GetTilesForRoom(room int) []entities.Map {
-	tiles := CRUD.RetrieveAll(room)
+	table := CRUD.FetchTable()
+	tiles := table.QueryData(fmt.Sprintf("Room=%d", room), mapScanner)
 
 	var result []entities.Map = make([]entities.Map, len(tiles))
 	for ti, tile := range tiles {
@@ -128,51 +142,39 @@ func GetTilesForRoom(room int) []entities.Map {
 }
 
 func GetCurrentTilesForCoord(room, x, y int) []entities.Map {
-	roomTiles := GetTilesForRoom(room)
+	table := CRUD.FetchTable()
+	roomTiles := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d", room, x, y), mapScanner)
 
 	var result []entities.Map
 	for _, tile := range roomTiles {
-		if tile.X == x && tile.Y == y {
-			result = append(result, tile)
-		}
+		result = append(result, tile.(entities.Map))
 	}
 
 	return result
 }
 
-func GetTileForCoord(room, x, y, z int) entities.Map {
-	roomTiles := GetTilesForRoom(room)
-
-	for _, tile := range roomTiles {
-		if tile.X == x && tile.Y == y && tile.Z == z {
-			return tile
-		}
-	}
-
-	return TILENOTFOUND
-}
-
 func GetTopMostTile(room, x, y int) entities.Map {
-	tiles := GetCurrentTilesForCoord(room, x, y)
+	table := CRUD.FetchTable()
+	tiles := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d order by Z desc limit 1", room, x, y), mapScanner)
 
-	var maxT entities.Map
-	for _, tile := range tiles {
-		if tile.Z > maxT.Z {
-			maxT = tile
-		}
+	if len(tiles) > 0 {
+		return tiles[0].(entities.Map)
 	}
 
-	return maxT
+	return entities.Map{}
 }
 
 func GetTilesForRegion(room, trX, trY, blX, blY int) []entities.Map {
-	roomTiles := GetTilesForRoom(room)
+	table := CRUD.FetchTable()
+	roomTiles := table.QueryData(
+		fmt.Sprintf("Room=%d and X>%d and X<%d and Y>%d and Y<%d order by Z desc",
+			room, trX, blX, trY, blY),
+		mapScanner,
+	)
 
 	var regionTiles []entities.Map
 	for _, tile := range roomTiles {
-		if tile.X >= trX && tile.X <= blX && tile.Y >= trY && tile.Y <= blY {
-			regionTiles = append(regionTiles, tile)
-		}
+		regionTiles = append(regionTiles, tile.(entities.Map))
 	}
 
 	return regionTiles
