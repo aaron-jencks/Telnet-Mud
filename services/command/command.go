@@ -48,12 +48,21 @@ func commandScanner(row *sql.Rows) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return result, err
+	parsedArgs := FormatRegexToArr(result.ArgRegex)
+	return ExpandedCommand{
+		Name: result.Name,
+		Args: parsedArgs,
+	}, err
 }
 
 func commandUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
 	ocs := oldValue.(entities.Command)
-	ncs := newValue.(entities.Command)
+	necs := newValue.(ExpandedCommand)
+	ncs := entities.Command{
+		Name:     necs.Name,
+		ArgCount: len(necs.Args),
+		ArgRegex: FormatRegexFromArr(necs.Args),
+	}
 
 	var result []crud.RowModStruct
 	if ocs.Name != ncs.Name {
