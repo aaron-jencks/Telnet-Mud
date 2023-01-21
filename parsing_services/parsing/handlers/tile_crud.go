@@ -15,18 +15,28 @@ import (
 
 var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	"tile",
-	"Usage: tile create \"name\" \"type\" \"icon\" [bg fg]",
+	"Usage: tile create \"name\" \"type\" \"icon\" [bg fg] [solid]",
 	"Usage: tile retrieve \"name\"",
-	"Usage: tile update \"name\" (name|type|icon|bg|fg) \"newValue\"",
+	"Usage: tile update \"name\" (name|type|icon|bg|fg|solid) \"newValue\"",
 	"Usage: tile delete \"name\"",
 	4, 2, 4, 2,
 	func(c net.Conn, s []string) bool {
-		usageString := "Usage: tile create \"name\" \"type\" \"icon\" [bg fg]"
-		if len(s) == 6 {
+		usageString := "Usage: tile create \"name\" \"type\" \"icon\" [bg fg] [solid]"
+		if len(s) >= 6 {
 			bgParsed, _ := crud.ParseIntegerCheck(c, s[4], usageString, "bg")
 			fgParsed, _ := crud.ParseIntegerCheck(c, s[5], usageString, "fg")
 
+			if len(s) == 7 {
+				sParsed, _ := crud.ParseBooleanCheck(c, s[6], usageString, "solid")
+
+				return bgParsed && fgParsed && sParsed
+			}
+
 			return bgParsed && fgParsed
+		} else if len(s) == 5 {
+			sParsed, _ := crud.ParseBooleanCheck(c, s[4], usageString, "solid")
+
+			return sParsed
 		}
 		return true
 	},
@@ -44,11 +54,22 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		name := strings.StripQuotes(s[0])
 		itype := strings.StripQuotes(s[1])
 		icon := parsing.ParseIconString(strings.StripQuotes(s[2]))
-		if len(s) == 5 {
+		if len(s) >= 5 {
 			var fg, bg int
 			fmt.Sscanf(s[3], "%d", &bg)
 			fmt.Sscanf(s[4], "%d", &fg)
+
+			if len(s) == 6 {
+				var solid bool
+				fmt.Sscanf(s[5], "%t", &solid)
+				return []interface{}{name, itype, icon, bg, fg, solid}
+			}
+
 			return []interface{}{name, itype, icon, bg, fg}
+		} else if len(s) == 4 {
+			var solid bool
+			fmt.Sscanf(s[3], "%t", &solid)
+			return []interface{}{name, itype, icon, solid}
 		}
 		return []interface{}{name, itype, icon}
 	},
@@ -79,12 +100,11 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		player.EnqueueAction(username, defined.CreateGlobalMapRepaint(c))
 	},
 	func(c net.Conn) {},
-	[]string{"name", "type", "icon", "bg", "fg"}, 2,
+	[]string{"name", "type", "icon", "bg", "fg", "solid"}, 2,
 	func(i interface{}, s1 string, s2 []string) interface{} {
 		r := i.(entities.Tile)
 
 		var newValue int
-		fmt.Sscanf(s2[0], "%d", &newValue)
 
 		nv := strings.StripQuotes(s2[0])
 		switch s1 {
@@ -102,6 +122,10 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 			fmt.Sscanf(nv, "%d", &newValue)
 
 			r.FG = newValue
+		case "solid":
+			var bv bool
+			fmt.Sscanf(nv, "%t", &bv)
+			r.Solid = bv
 		}
 
 		return r

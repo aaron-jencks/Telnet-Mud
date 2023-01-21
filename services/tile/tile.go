@@ -6,6 +6,7 @@ import (
 	"mud/entities"
 	"mud/utils/crud"
 	"mud/utils/io/db"
+	"strings"
 )
 
 func tileToArr(rs interface{}) []interface{} {
@@ -32,10 +33,15 @@ func tileFromArr(arr []interface{}) interface{} {
 func createTileFunc(table db.TableDefinition, args ...interface{}) []interface{} {
 	result := []interface{}{args[0], args[1], args[2]}
 
-	if len(args) == 5 {
-		result = append(result, args[3], args[4])
+	if len(args) >= 5 {
+		result = append(result, args[3:]...)
 	} else {
 		result = append(result, 0, 30)
+		if len(args) == 4 {
+			result = append(result, args[3])
+		} else {
+			result = append(result, false)
+		}
 	}
 
 	return result
@@ -47,7 +53,7 @@ func tileSelector(args []interface{}) string {
 
 func tileScanner(row *sql.Rows) (interface{}, error) {
 	result := entities.Tile{}
-	err := row.Scan(&result.Name, &result.IconType, &result.Icon, &result.BG, &result.FG)
+	err := row.Scan(&result.Name, &result.IconType, &result.Icon, &result.BG, &result.FG, &result.Solid)
 	if err != nil {
 		return nil, err
 	}
@@ -88,6 +94,12 @@ func tileUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
 		result = append(result, crud.RowModStruct{
 			Column:   "FG",
 			NewValue: nis.FG,
+		})
+	}
+	if ois.Solid != nis.Solid {
+		result = append(result, crud.RowModStruct{
+			Column:   "Solid",
+			NewValue: strings.ToUpper(fmt.Sprintf("%t", nis.Solid)),
 		})
 	}
 

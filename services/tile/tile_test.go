@@ -41,6 +41,7 @@ func TestCreate(t *testing.T) {
 	picon := mtesting.GenerateRandomAsciiString(rand.Intn(64) + 1)
 	bg := rand.Int()
 	fg := rand.Int()
+	solid := (rand.Int() % 2) == 1
 
 	args := []interface{}{
 		pname,
@@ -48,6 +49,7 @@ func TestCreate(t *testing.T) {
 		picon,
 		bg,
 		fg,
+		solid,
 	}
 
 	CRUD.Create(args...)
@@ -84,6 +86,15 @@ func TestUpdate(t *testing.T) {
 	nps := CRUD.Update(ps, ps.Name).(entities.Tile)
 
 	assert.Equal(t, newIconType, nps.IconType, "Icon type should've been updated")
+}
+
+func TestUpdateSolid(t *testing.T) {
+	ps := createRandomTestTile()
+	ps.Solid = !ps.Solid
+
+	nps := CRUD.Update(ps, ps.Name).(entities.Tile)
+
+	assert.Equal(t, ps.Solid, nps.Solid, "Solid should've been updated")
 }
 
 func TestDelete(t *testing.T) {

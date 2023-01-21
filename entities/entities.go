@@ -25,6 +25,7 @@ type Tile struct {
 	Icon     string
 	BG       int
 	FG       int
+	Solid    bool
 }
 
 type Loot struct {
@@ -181,12 +182,14 @@ func SetupTileTable() {
 		"Icon",
 		"BG",
 		"FG",
+		"Solid",
 	}, []string{
 		"Name text primary key",
 		"IconType text not null",
 		"Icon text not null",
 		"BG integer not null",
 		"FG integer not null",
+		"Solid integer not null",
 	}, false)
 }
 
