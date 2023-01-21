@@ -130,7 +130,7 @@ func GetLootForRoom(r entities.Room) []ExpandedLoot {
 
 func GetLootForPosition(r entities.Room, x, y int) []ExpandedLoot {
 	table := CRUD.FetchTable()
-	rows := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d", r.Id, x, y), lootScanner)
+	rows := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d order by Z desc", r.Id, x, y), lootScanner)
 
 	var loots []ExpandedLoot = make([]ExpandedLoot, len(rows))
 	for ri, row := range rows {

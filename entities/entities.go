@@ -240,13 +240,7 @@ func SetupNoteTable() {
 	}, true)
 }
 
-func SetupTables() {
-	// Tile
-	SetupTileTable()
-
-	// Variant
-	SetupVariantTable()
-
+func SetupLootTable() {
 	// Loot
 	logger.Info("Creating loot table")
 	db.CreateTableIfNotExist("loot", []string{
@@ -266,6 +260,14 @@ func SetupTables() {
 		"Y integer not null",
 		"Z integer not null",
 	}, true)
+}
+
+func SetupTables() {
+	// Tile
+	SetupTileTable()
+
+	// Variant
+	SetupVariantTable()
 
 	// // Command
 	// logger.Info("Creating commands table")
@@ -287,6 +289,9 @@ func SetupTables() {
 
 	// Item
 	SetupItemTable()
+
+	// Loot
+	SetupLootTable()
 
 	// Player
 	SetupPlayerTable()
