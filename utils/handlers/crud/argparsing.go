@@ -71,3 +71,15 @@ func CheckStringOptions(conn net.Conn, s string, options []string, usageString, 
 	}
 	return false
 }
+
+func ParseBooleanCheck(conn net.Conn, s string, usageString string, paramName string) (bool, bool) {
+	username := player.GetConnUsername(conn)
+
+	var id bool
+	_, err := fmt.Sscanf(s, "%t", &id)
+	if err != nil {
+		player.EnqueueAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is an integer)", usageString, paramName)))
+		return false, false
+	}
+	return true, id
+}
