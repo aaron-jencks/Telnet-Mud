@@ -45,12 +45,9 @@ func createTileFunc(table db.TableDefinition, args ...interface{}) []interface{}
 	} else {
 		// Place tile on top
 		topZ := -1
-		roomTiles := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d", args[0].(int), args[2].(int), args[3].(int)), mapScanner)
-		for _, tile := range roomTiles {
-			ts := tile.(entities.Map)
-			if ts.Z > topZ {
-				topZ = ts.Z
-			}
+		roomTiles := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d order by Z desc limit 1", args[0].(int), args[2].(int), args[3].(int)), mapScanner)
+		if len(roomTiles) > 0 {
+			topZ = roomTiles[0].(entities.Map).Z
 		}
 		result = append(result, topZ+1)
 	}
@@ -118,7 +115,7 @@ var CRUD crud.Crud = crud.CreateCrud("map", mapSelector, tileToArr, mapScanner, 
 
 func GetCurrentTilesForCoordWithType(room, x, y int, tile string) []entities.Map {
 	table := CRUD.FetchTable()
-	rows := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d and Tile=\"%s\"", room, x, y, tile), mapScanner)
+	rows := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d and Tile=\"%s\" order by Z desc", room, x, y, tile), mapScanner)
 
 	var result []entities.Map = make([]entities.Map, len(rows))
 
@@ -143,7 +140,7 @@ func GetTilesForRoom(room int) []entities.Map {
 
 func GetCurrentTilesForCoord(room, x, y int) []entities.Map {
 	table := CRUD.FetchTable()
-	roomTiles := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d", room, x, y), mapScanner)
+	roomTiles := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d order by Z desc", room, x, y), mapScanner)
 
 	var result []entities.Map
 	for _, tile := range roomTiles {
@@ -164,11 +161,11 @@ func GetTopMostTile(room, x, y int) entities.Map {
 	return entities.Map{}
 }
 
-func GetTilesForRegion(room, trX, trY, blX, blY int) []entities.Map {
+func GetTilesForRegion(room, tlX, tlY, brX, brY int) []entities.Map {
 	table := CRUD.FetchTable()
 	roomTiles := table.QueryData(
-		fmt.Sprintf("Room=%d and X>%d and X<%d and Y>%d and Y<%d order by Z desc",
-			room, trX, blX, trY, blY),
+		fmt.Sprintf("Room=%d and X between %d and %d and Y between %d and %d order by Z desc",
+			room, tlX, brX, tlY, brY),
 		mapScanner,
 	)
 
