@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"mud/entities"
 	"mud/parsing_services/parsing"
 	"mud/parsing_services/player"
 	"net"
@@ -18,7 +17,7 @@ func GetDefaultCommandResponse(conn net.Conn) parsing.CommandResponse {
 	}
 
 	if loggedIn {
-		result.Player = player.CRUD.Retrieve(username).(entities.Player)
+		result.Player = player.FetchPlayerByName(username)
 	}
 
 	return result

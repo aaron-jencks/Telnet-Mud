@@ -2,7 +2,6 @@ package defined
 
 import (
 	"mud/actions/definitions"
-	"mud/entities"
 	"mud/parsing_services/parsing"
 	"mud/parsing_services/parsing/utils"
 	"mud/parsing_services/player"
@@ -25,7 +24,7 @@ func CreateLoginAction(conn net.Conn, username, password string) definitions.Act
 				player.EnqueueAction(username, CreateInfoAction(conn, "Sorry, either that account doesn't exist or the password is incorrect"))
 				result.Info = true
 			} else {
-				p := player.CRUD.Retrieve(username).(entities.Player)
+				p := player.FetchPlayerByName(username)
 				terminal.LoadPlayer(conn, p)
 				player.EnqueueAction(username, CreateInfoAction(conn, "Welcome! Please be respectful."))
 				result = utils.GetDefaultRepaintCommandResponse(conn)
