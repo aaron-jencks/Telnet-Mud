@@ -224,6 +224,22 @@ func SetupMapTable() {
 	db.RunExec("alter table map add constraint PK_MAPLOC primary key (Room, X, Y, Z);")
 }
 
+func SetupNoteTable() {
+	// Note
+	logger.Info("Creating notes table")
+	db.CreateTableIfNotExist("notes", []string{
+		"Id",
+		"Player",
+		"Title",
+		"Contents",
+	}, []string{
+		"Id integer primary key autoincrement",
+		"Player integer references players (Id) on delete cascade on update cascade",
+		"Title text not null",
+		"Contents text not null",
+	}, true)
+}
+
 func SetupTables() {
 	// Tile
 	SetupTileTable()
@@ -251,20 +267,6 @@ func SetupTables() {
 		"Z integer not null",
 	}, true)
 
-	// Note
-	logger.Info("Creating notes table")
-	db.CreateTableIfNotExist("notes", []string{
-		"Id",
-		"Player",
-		"Title",
-		"Contents",
-	}, []string{
-		"Id integer primary key autoincrement",
-		"Player integer references players (Id) on delete cascade on update cascade",
-		"Title text not null",
-		"Contents text not null",
-	}, true)
-
 	// // Command
 	// logger.Info("Creating commands table")
 	// db.CreateTableIfNotExist("commands", []string{
@@ -288,6 +290,9 @@ func SetupTables() {
 
 	// Player
 	SetupPlayerTable()
+
+	// Note
+	SetupNoteTable()
 
 	// Inventoriy
 	SetupInventoryTable()
