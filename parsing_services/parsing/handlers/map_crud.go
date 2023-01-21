@@ -75,7 +75,7 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 		y = args[4].(int)
 		if len(args) == 4 {
 			z = args[6].(int)
-			return tmap.GetTileForCoord(rid, x, y, z)
+			return tmap.CRUD.Retrieve(rid, x, y, z)
 		}
 		return tmap.GetTopMostTile(rid, x, y)
 	},

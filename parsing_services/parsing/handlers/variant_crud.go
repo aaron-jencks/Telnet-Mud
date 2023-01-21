@@ -50,7 +50,7 @@ var VariantCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetri
 		return []interface{}{id, strings.StripQuotes(s[1])}
 	},
 	func(c net.Conn, i []interface{}) interface{} {
-		return variant.GetSpecificVariant(i[0].(int), i[1].(string))
+		return variant.CRUD.Retrieve(i[0].(int), i[1].(string))
 	},
 	func(i interface{}) string {
 		nr := i.(entities.TileVariant)
