@@ -64,7 +64,7 @@ func playerCreateFunc(table db.TableDefinition, args ...interface{}) []interface
 			if len(args) > 7 {
 				result[8] = args[8]
 			} else {
-				result[8] = 0
+				result[8] = 1
 			}
 		} else {
 			for i := 2; i < 8; i++ {
@@ -73,7 +73,7 @@ func playerCreateFunc(table db.TableDefinition, args ...interface{}) []interface
 			if len(args) >= 3 {
 				result[8] = args[2]
 			} else {
-				result[8] = 0
+				result[8] = 1
 			}
 		}
 
