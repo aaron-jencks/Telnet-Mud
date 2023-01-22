@@ -58,7 +58,7 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return id
 	},
 	func(i interface{}) string {
-		nv := room.CRUD.Retrieve(i.(int)).(entities.Room)
+		nv := room.CRUD.Retrieve(int(i.(int64))).(entities.Room)
 		return fmt.Sprintf("Room %d(%s) created!", nv.Id, nv.Name)
 	},
 	func(i interface{}) string {

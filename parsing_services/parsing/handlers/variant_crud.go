@@ -53,16 +53,25 @@ var VariantCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetri
 		return variant.CRUD.Retrieve(i[0].(int), i[1].(string))
 	},
 	func(i interface{}) string {
-		nr := i.(entities.TileVariant)
+		if i == nil {
+			return "That Variant does not exist"
+		}
+		nr := variant.CRUD.Retrieve(int(i.(int64))).(entities.TileVariant)
 		return fmt.Sprintf("Variant %d(%s) created!", nr.Id, nr.Name)
 	},
 	func(i interface{}) string {
-		r := i.(entities.TileVariant)
+		if i == nil {
+			return "That Variant does not exist"
+		}
+		r := variant.CRUD.Retrieve(int(i.(int64))).(entities.TileVariant)
 		return fmt.Sprintf("Variant:\nId: %d\nName: \"%s\"\nIcon: \"%s\"",
 			r.Id, r.Name, r.Icon)
 	},
 	func(i interface{}) string {
-		nr := i.(entities.TileVariant)
+		if i == nil {
+			return "That Variant does not exist"
+		}
+		nr := variant.CRUD.Retrieve(int(i.(int64))).(entities.TileVariant)
 		return fmt.Sprintf("Variant %d(%s) deleted!", nr.Id, nr.Name)
 	},
 	func(c net.Conn) {},
