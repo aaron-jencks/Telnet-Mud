@@ -58,21 +58,33 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return id
 	},
 	func(i interface{}) string {
-		nv := i.(entities.Room)
+		nv := room.CRUD.Retrieve(i.(int)).(entities.Room)
 		return fmt.Sprintf("Room %d(%s) created!", nv.Id, nv.Name)
 	},
 	func(i interface{}) string {
-		r := i.(entities.Room)
-		return fmt.Sprintf("Room %d:\nName: \"%s\"\nDescription: \"%s\"",
-			r.Id, r.Name, r.Description)
+		if i != nil {
+			r := i.(entities.Room)
+			return fmt.Sprintf("Room %d:\nName: \"%s\"\nDescription: \"%s\"",
+				r.Id, r.Name, r.Description)
+		} else {
+			return "That room did not exist!"
+		}
 	},
 	func(i interface{}) string {
-		nv := i.(entities.Room)
-		return fmt.Sprintf("Room %d(%s) updated!", nv.Id, nv.Name)
+		if i != nil {
+			nv := i.(entities.Room)
+			return fmt.Sprintf("Room %d(%s) updated!", nv.Id, nv.Name)
+		} else {
+			return "That room did not exist!"
+		}
 	},
 	func(i interface{}) string {
-		nv := i.(entities.Room)
-		return fmt.Sprintf("Room %d(%s) deleted!", nv.Id, nv.Name)
+		if i != nil {
+			nv := i.(entities.Room)
+			return fmt.Sprintf("Room %d(%s) deleted!", nv.Id, nv.Name)
+		} else {
+			return "That room did not exist!"
+		}
 	},
 	func(c net.Conn) {},
 	func(c net.Conn) {},

@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"mud/utils"
 	"net"
+	"strings"
 )
 
 var namesCurrentlyInUse map[string]net.Conn = make(map[string]net.Conn)
@@ -20,7 +21,7 @@ func GenerateRandomUsername(conn net.Conn) string {
 			result[ri] = byte(rand.Int()%94) + 33
 		}
 
-		sResult := "Anon." + string(result)
+		sResult := "Anon." + strings.ReplaceAll(string(result), "\"", "\\\"")
 
 		_, ok := namesCurrentlyInUse[sResult]
 		if !ok && !PlayerExists(sResult) {

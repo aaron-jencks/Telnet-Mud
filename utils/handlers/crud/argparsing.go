@@ -24,9 +24,9 @@ func CheckMinArgs(conn net.Conn, args []string, target int, message string) bool
 
 	if len(args) < target {
 		player.EnqueueAction(username, defined.CreateInfoAction(conn, message))
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 func RequiresLoggedIn(conn net.Conn) bool {
@@ -41,7 +41,7 @@ func RequiresLoggedIn(conn net.Conn) bool {
 
 func CrudChecks(conn net.Conn, crudName string, args []string) bool {
 	if RequiresLoggedIn(conn) ||
-		CheckMinArgs(conn, args, 1,
+		!CheckMinArgs(conn, args, 1,
 			fmt.Sprintf("Usage: %s (create|retrieve|update|delete) ...", crudName)) ||
 		CheckStringOptions(conn, args[0], []string{"create", "retrieve", "update", "delete"},
 			fmt.Sprintf("Usage: %s operation ...", crudName), "operation") {

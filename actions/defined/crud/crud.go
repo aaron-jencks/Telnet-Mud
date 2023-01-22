@@ -47,7 +47,7 @@ func CreateCreateAction(conn net.Conn, args []string,
 
 	return createCrudAction(conn, args, name, "create",
 		func(s []string) bool {
-			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
+			return crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args)
 		}, func() interface{} {
 			return crudObj.Create(argFmt(conn, args[1:])...)
 		}, func(i interface{}) {
@@ -65,7 +65,7 @@ func CreateRetrieveAction(conn net.Conn, args []string,
 
 	return createCrudAction(conn, args, name, "retrieve",
 		func(s []string) bool {
-			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
+			return crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args)
 		}, func() interface{} {
 			return crudObj.Retrieve(argFmt(conn, args[1:]))
 		}, func(i interface{}) {
@@ -85,7 +85,7 @@ func CreateMultiRetrieveAction(conn net.Conn, args []string,
 
 	return createCrudAction(conn, args, name, "retrieve",
 		func(s []string) bool {
-			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
+			return crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args)
 		}, func() interface{} {
 			return executor(conn, argFmt(conn, args[1:]))
 		}, func(i interface{}) {
@@ -107,8 +107,8 @@ func CreateUpdateAction(conn net.Conn, args []string,
 
 	return createCrudAction(conn, args, name, "update",
 		func(s []string) bool {
-			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args) &&
-				crud.CheckStringOptions(conn, args[propertyIndex], validPropertyNames, usageString, "property"))
+			return crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args) &&
+				crud.CheckStringOptions(conn, args[propertyIndex], validPropertyNames, usageString, "property")
 		}, func() interface{} {
 			ov := crudObj.Retrieve(argFmt(conn, args[1:]))
 			nv := valueUpdater(ov, args[propertyIndex], args[propertyIndex+1:])
@@ -128,7 +128,7 @@ func CreateDeleteAction(conn net.Conn, args []string,
 
 	return createCrudAction(conn, args, name, "delete",
 		func(s []string) bool {
-			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
+			return crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args)
 		}, func() interface{} {
 			ov := crudObj.Retrieve(argFmt(conn, args[1:]))
 			crudObj.Delete(argFmt(conn, args[1:]))
@@ -149,7 +149,7 @@ func CreateMultiKeyDeleteAction(conn net.Conn, args []string,
 
 	return createCrudAction(conn, args, name, "delete",
 		func(s []string) bool {
-			return !(crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args))
+			return crud.CheckMinArgs(conn, args, minArgs, usageString) && validator(conn, args)
 		}, func() interface{} {
 			ov := retriever(conn, argFmt(conn, args[1:]))
 			crudObj.Delete(argFmt(conn, args[1:])...)
