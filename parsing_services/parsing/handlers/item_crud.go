@@ -40,20 +40,29 @@ var ItemCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return id
 	},
 	func(i interface{}) string {
-		nv := i.(entities.Item)
+		nv := item.CRUD.Retrieve(int(i.(int64))).(entities.Item)
 		return fmt.Sprintf("Item %d(%s) created!", nv.Id, nv.Name)
 	},
 	func(i interface{}) string {
-		r := i.(entities.Item)
+		if i == nil {
+			return "That item does not exist!"
+		}
+		r := item.CRUD.Retrieve(int(i.(int64))).(entities.Item)
 		return fmt.Sprintf("Item %d:\nName: \"%s\"\nDescription: \"%s\"",
 			r.Id, r.Name, r.Description)
 	},
 	func(i interface{}) string {
-		nv := i.(entities.Item)
+		if i == nil {
+			return "That item does not exist!"
+		}
+		nv := item.CRUD.Retrieve(int(i.(int64))).(entities.Item)
 		return fmt.Sprintf("Item %d(%s) updated!", nv.Id, nv.Name)
 	},
 	func(i interface{}) string {
-		nv := i.(entities.Item)
+		if i == nil {
+			return "That item does not exist!"
+		}
+		nv := item.CRUD.Retrieve(int(i.(int64))).(entities.Item)
 		return fmt.Sprintf("Item %d(%s) deleted!", nv.Id, nv.Name)
 	},
 	func(c net.Conn) {},
