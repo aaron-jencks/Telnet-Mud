@@ -18,7 +18,7 @@ func CreateMoveUpAction(conn net.Conn) definitions.Action {
 		ValidModes: []string{"Logged In"},
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
-			p := player.CRUD.Retrieve(username).(entities.Player)
+			p := player.FetchPlayerByName(username)
 
 			if p.RoomY > 0 {
 				p.RoomY--
@@ -41,7 +41,7 @@ func CreateMoveLeftAction(conn net.Conn) definitions.Action {
 		ValidModes: []string{"Logged In"},
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
-			p := player.CRUD.Retrieve(username).(entities.Player)
+			p := player.FetchPlayerByName(username)
 
 			if p.RoomX > 0 {
 				p.RoomX--
@@ -64,7 +64,7 @@ func CreateMoveRightAction(conn net.Conn) definitions.Action {
 		ValidModes: []string{"Logged In"},
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
-			p := player.CRUD.Retrieve(username).(entities.Player)
+			p := player.FetchPlayerByName(username)
 			r := room.CRUD.Retrieve(p.Room).(entities.Room)
 
 			if p.RoomX < r.Width-1 {
@@ -88,7 +88,7 @@ func CreateMoveDownAction(conn net.Conn) definitions.Action {
 		ValidModes: []string{"Logged In"},
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
-			p := player.CRUD.Retrieve(username).(entities.Player)
+			p := player.FetchPlayerByName(username)
 			r := room.CRUD.Retrieve(p.Room).(entities.Room)
 
 			if p.RoomY < r.Height-1 {
