@@ -40,19 +40,31 @@ var NoteCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return id
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That note didn't exist!"
+		}
 		nv := i.(entities.Note)
 		return fmt.Sprintf("Note %d(%s) created!", nv.Id, nv.Title)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That note didn't exist!"
+		}
 		r := i.(entities.Note)
 		return fmt.Sprintf("Note %d:\nName: \"%s\"\nDescription: \"%s\"",
 			r.Id, r.Title, r.Contents)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That note didn't exist!"
+		}
 		nv := i.(entities.Note)
 		return fmt.Sprintf("Note %d(%s) updated!", nv.Id, nv.Title)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That note didn't exist!"
+		}
 		nv := i.(entities.Note)
 		return fmt.Sprintf("Note %d(%s) deleted!", nv.Id, nv.Title)
 	},

@@ -80,16 +80,25 @@ var MapCrudHandler parsing.CommandHandler = acrud.CreateCrudParserMultiRetrieve(
 		return tmap.GetTopMostTile(rid, x, y)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That map entry didn't exist!"
+		}
 		nr := i.(entities.Map)
 		return fmt.Sprintf("Tile %s placed at (Room: %d, X: %d, Y: %d, Z: %d) created!",
 			nr.Tile, nr.Room, nr.X, nr.Y, nr.Z)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That map entry didn't exist!"
+		}
 		r := i.(entities.Map)
 		return fmt.Sprintf("Map:\nRoom: %d\nCoord: (%d, %d, %d)\nTile: \"%s\"",
 			r.Room, r.X, r.Y, r.Z, r.Tile)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That map entry didn't exist!"
+		}
 		nv := i.(entities.Map)
 		return fmt.Sprintf("Map (%d, %d, %d, %d) deleted!", nv.Room, nv.X, nv.Y, nv.Z)
 	},

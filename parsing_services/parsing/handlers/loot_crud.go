@@ -84,19 +84,31 @@ var LootCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return id
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That loot entry didn't exist!"
+		}
 		nv := i.(entities.Loot)
 		return fmt.Sprintf("Loot %d created!", nv.Id)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That loot entry didn't exist!"
+		}
 		r := i.(entities.Loot)
 		return fmt.Sprintf("Loot %d:\nRoom: %d\nItem: %d\nQuantity: %d",
 			r.Id, r.Room, r.Item, r.Quantity)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That loot entry didn't exist!"
+		}
 		nv := i.(entities.Loot)
 		return fmt.Sprintf("Loot %d updated!", nv.Id)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That loot entry didn't exist!"
+		}
 		nv := i.(entities.Loot)
 		return fmt.Sprintf("Loot %d deleted!", nv.Id)
 	},

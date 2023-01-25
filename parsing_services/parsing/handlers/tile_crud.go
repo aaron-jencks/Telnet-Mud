@@ -81,15 +81,24 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return fmt.Sprintf("Tile %s created!", nv.Name)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That tile didn't exist!"
+		}
 		r := i.(entities.Tile)
 		return fmt.Sprintf("Tile:\nName: \"%s\"\nType: \"%s\"\nIcon: \"\033[%dm\033%dm%s\033[0m\"",
 			r.Name, r.IconType, r.BG, r.FG, r.Icon)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That tile didn't exist!"
+		}
 		nv := i.(entities.Tile)
 		return fmt.Sprintf("Tile %s updated!", nv.Name)
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That tile didn't exist!"
+		}
 		nv := i.(entities.Tile)
 		return fmt.Sprintf("Tile %s deleted!", nv.Name)
 	},

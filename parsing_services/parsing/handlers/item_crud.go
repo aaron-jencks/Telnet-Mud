@@ -40,6 +40,9 @@ var ItemCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return id
 	},
 	func(i interface{}) string {
+		if i == nil {
+			return "That item does not exist!"
+		}
 		nv := i.(entities.Item)
 		return fmt.Sprintf("Item %d(%s) created!", nv.Id, nv.Name)
 	},
