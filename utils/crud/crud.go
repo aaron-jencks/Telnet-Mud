@@ -2,6 +2,7 @@ package crud
 
 import (
 	"errors"
+	"fmt"
 	"mud/utils/io/db"
 	"mud/utils/ui/logger"
 )
@@ -20,7 +21,7 @@ func (c Crud) FetchTable() db.TableDefinition {
 	return tableMap[c.TableName]
 }
 
-func (c Crud) Create(args ...interface{}) int64 {
+func (c Crud) Create(args ...interface{}) interface{} {
 	table := c.FetchTable()
 	newValue := c.createFunction(table, args...)
 	rid, rc := table.AddData([][]interface{}{
@@ -31,7 +32,12 @@ func (c Crud) Create(args ...interface{}) int64 {
 		panic(errors.New("Create function for CRUD didn't insert a new row, or inserted too many"))
 	}
 
-	return rid[0]
+	if !table.HasAutoPK {
+		rows := table.QueryData(fmt.Sprintf("ROWID=%d", rid[0]), c.scannerFunc)
+		return rows[0]
+	} else {
+		return c.Retrieve(int(rid[0]))
+	}
 }
 
 func (c Crud) Retrieve(args ...interface{}) interface{} {

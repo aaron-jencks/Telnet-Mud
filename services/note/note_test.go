@@ -47,7 +47,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	nid := CRUD.Create(args...)
-	is := CRUD.Retrieve(int(nid)).(entities.Note)
+	is := nid.(entities.Note)
 
 	assert.Equal(t, pid, is.Player, "Created note should have the right player id")
 	assert.Equal(t, ntitle, is.Title, "Created note should have the right title")
@@ -67,7 +67,7 @@ func createRandomTestNote() entities.Note {
 	}
 
 	nid := CRUD.Create(args...)
-	return CRUD.Retrieve(int(nid)).(entities.Note)
+	return nid.(entities.Note)
 }
 
 func TestUpdate(t *testing.T) {

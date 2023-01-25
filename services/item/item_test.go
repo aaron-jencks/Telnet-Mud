@@ -46,7 +46,7 @@ func TestCreate(t *testing.T) {
 
 	inid := CRUD.Create(args...)
 
-	is := CRUD.Retrieve(int(inid)).(entities.Item)
+	is := inid.(entities.Item)
 
 	assert.Equal(t, pname, is.Name, "Created item should have the right name")
 	assert.Equal(t, pdescription, is.Description, "Created item should have the right description")
@@ -62,7 +62,7 @@ func createRandomTestItem() entities.Item {
 		pdescription,
 	}
 
-	return CRUD.Retrieve(int(CRUD.Create(args...))).(entities.Item)
+	return CRUD.Create(args...).(entities.Item)
 }
 
 func TestUpdate(t *testing.T) {

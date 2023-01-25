@@ -56,7 +56,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	nid := CRUD.Create(args...)
-	is := CRUD.Retrieve(int(nid)).(entities.Loot)
+	is := nid.(entities.Loot)
 
 	assert.Equal(t, rid, is.Room, "Created loot should have the right room id")
 	assert.Equal(t, iid, is.Item, "Created loot should have the right item id")
@@ -84,7 +84,7 @@ func createRandomTestLoot() entities.Loot {
 	}
 
 	nid := CRUD.Create(args...)
-	return CRUD.Retrieve(int(nid)).(entities.Loot)
+	return nid.(entities.Loot)
 }
 
 func createRandomTestRoom() entities.Room {
@@ -101,7 +101,7 @@ func createRandomTestRoom() entities.Room {
 		width,
 	}
 
-	return room.CRUD.Retrieve(int(room.CRUD.Create(args...))).(entities.Room)
+	return room.CRUD.Create(args...).(entities.Room)
 }
 
 func createRandomTestItem() entities.Item {
@@ -114,7 +114,7 @@ func createRandomTestItem() entities.Item {
 		pdescription,
 	}
 
-	return item.CRUD.Retrieve(int(item.CRUD.Create(args...))).(entities.Item)
+	return item.CRUD.Create(args...).(entities.Item)
 }
 
 func TestUpdate(t *testing.T) {

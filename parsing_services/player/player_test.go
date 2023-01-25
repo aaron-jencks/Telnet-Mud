@@ -76,12 +76,12 @@ func TestFullCreate(t *testing.T) {
 
 	pid := CRUD.Create(args...)
 
-	ps := CRUD.Retrieve(int(pid)).(entities.Player)
+	ps := pid.(entities.Player)
 
 	parr := playerToArr(ps)
 
 	assert.Greater(t, len(parr), len(args), "Player array should include the ID in it")
-	assert.Equal(t, int(pid), parr[0], "Created player should have the correct ID")
+	assert.Equal(t, ps.Id, parr[0], "Created player should have the correct ID")
 
 	for pi := range args {
 		assert.Equal(t, args[pi], parr[pi+1], "Created player should have the correct attributes applied for %s", attNames[pi])
@@ -107,12 +107,12 @@ func TestPartialCreate(t *testing.T) {
 
 	pid := CRUD.Create(args...)
 
-	ps := CRUD.Retrieve(int(pid)).(entities.Player)
+	ps := pid.(entities.Player)
 
 	parr := playerToArr(ps)
 
 	assert.Greater(t, len(parr), len(args), "Player array should include the ID in it")
-	assert.Equal(t, int(pid), parr[0], "Created player should have the correct ID")
+	assert.Equal(t, ps.Id, parr[0], "Created player should have the correct ID")
 
 	for pi := range args {
 		assert.Equal(t, args[pi], parr[pi+1],
@@ -148,12 +148,12 @@ func TestPartialRoomCreate(t *testing.T) {
 
 	pid := CRUD.Create(args...)
 
-	ps := CRUD.Retrieve(int(pid)).(entities.Player)
+	ps := pid.(entities.Player)
 
 	parr := playerToArr(ps)
 
 	assert.Greater(t, len(parr), len(args), "Player array should include the ID in it")
-	assert.Equal(t, int(pid), parr[0], "Created player should have the correct ID")
+	assert.Equal(t, ps.Id, parr[0], "Created player should have the correct ID")
 
 	assert.Equal(t, pname, ps.Name, "Created player should have correct username")
 	assert.Equal(t, pass, ps.Password, "Created player should have correct password")
@@ -183,7 +183,7 @@ func createRandomTestUser() entities.Player {
 		pass,
 	}
 
-	return CRUD.Retrieve(int(CRUD.Create(args...))).(entities.Player)
+	return CRUD.Create(args...).(entities.Player)
 }
 
 func TestUpdate(t *testing.T) {

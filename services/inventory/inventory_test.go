@@ -51,7 +51,7 @@ func TestCreate(t *testing.T) {
 
 	inid := CRUD.Create(args...)
 
-	is := CRUD.Retrieve(int(inid)).(entities.Inventory)
+	is := inid.(entities.Inventory)
 
 	assert.Equal(t, pid, is.Player, "Created inventory item should have correct player id")
 	assert.Equal(t, iid, is.Item, "Created inventory item should have correct item id")
@@ -68,7 +68,7 @@ func createRandomTestUser() entities.Player {
 		pass,
 	}
 
-	return player.CRUD.Retrieve(int(player.CRUD.Create(args...))).(entities.Player)
+	return player.CRUD.Create(args...).(entities.Player)
 }
 
 func createRandomTestItem() entities.Item {
@@ -81,7 +81,7 @@ func createRandomTestItem() entities.Item {
 		pdescription,
 	}
 
-	return item.CRUD.Retrieve(int(item.CRUD.Create(args...))).(entities.Item)
+	return item.CRUD.Create(args...).(entities.Item)
 }
 
 func createRandomTestInventory(p entities.Player, i entities.Item) entities.Inventory {
@@ -91,7 +91,7 @@ func createRandomTestInventory(p entities.Player, i entities.Item) entities.Inve
 		rand.Int(),
 	}
 
-	return CRUD.Retrieve(int(CRUD.Create(args...))).(entities.Inventory)
+	return CRUD.Create(args...).(entities.Inventory)
 }
 
 func TestUpdate(t *testing.T) {
