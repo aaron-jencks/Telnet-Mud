@@ -17,63 +17,61 @@ func GetMapPortCoords(roomId, roomX, roomY int) (int, int, int, int) {
 	if rint != nil {
 		r := rint.(entities.Room)
 
-		portRangeX := utils.MAP_W - 2>>1
-		portRangeY := utils.MAP_H - 2>>1
+		// The view distance of the player
+		portRangeX := (utils.MAP_W - 2) >> 1
+		portRangeY := (utils.MAP_H - 2) >> 1
+
 		smallWidth := utils.MAP_W-2 > r.Width
 		smallHeight := utils.MAP_H-2 > r.Height
+		if smallWidth {
+			portRangeX = r.Width >> 1
+		}
+		if smallHeight {
+			portRangeY = r.Height >> 1
+		}
+
 		nearLeft := roomX < portRangeX
 		nearTop := roomY < portRangeY
 		nearBottom := roomY >= r.Height-portRangeY
 		nearRight := roomX >= r.Width-portRangeX
 
 		// Setup view port
-		trX := roomX - portRangeX
-		if nearLeft {
-			trX = 0
-		}
 
-		trY := roomY - portRangeY
-		if nearTop {
-			trY = 0
-		}
+		var tlX, tlY, brX, brY int
 
-		blX := roomX + portRangeX - 1
-		if nearLeft {
-			blX = utils.MAP_W - 2 - 1
+		// X
+		if nearLeft || smallWidth {
+			tlX = 0
+			if smallWidth {
+				brX = r.Width - 1
+			} else {
+				brX = utils.MAP_W - 3
+			}
 		} else if nearRight {
-			blX = r.Width - 1
+			tlX = r.Width - 1 - portRangeX
+			brX = r.Width - 1
+		} else {
+			tlX = roomX - portRangeX
+			brX = roomX + portRangeX - 1
 		}
 
-		blY := roomY + portRangeY - 1
-		if nearTop {
-			blY = utils.MAP_H - 2 - 1
+		// Y
+		if nearTop || smallHeight {
+			tlY = 0
+			if smallHeight {
+				brY = r.Height - 1
+			} else {
+				brY = utils.MAP_H - 3
+			}
 		} else if nearBottom {
-			blY = r.Height - 1
+			tlY = r.Height - 1 - portRangeY
+			brY = r.Height - 1
+		} else {
+			tlY = roomY - portRangeY
+			brY = roomY + portRangeY - 1
 		}
 
-		if smallWidth {
-			diffX := utils.MAP_W - 2 - r.Width
-			trX = -(diffX >> 1)
-			blX = r.Width + diffX>>1
-			if diffX%2 == 1 {
-				blX++
-			} else {
-				blX--
-			}
-		}
-
-		if smallHeight {
-			diffY := utils.MAP_W - 2 - r.Width
-			trY = -(diffY >> 1)
-			blY = r.Width + diffY>>1
-			if diffY%2 == 1 {
-				blY++
-			} else {
-				blY--
-			}
-		}
-
-		return trX, trY, blX, blY
+		return tlX, tlY, brX, brY
 	}
 
 	return 0, 0, utils.MAP_W - 2 - 1, utils.MAP_H - 2 - 1
@@ -92,9 +90,17 @@ func (ti TileInfo) ToString() string {
 }
 
 func GetMapWindow(p entities.Player) string {
-	trx, try, blx, bly := GetMapPortCoords(p.Room, p.RoomX, p.RoomY)
+	tlx, tly, brx, bry := GetMapPortCoords(p.Room, p.RoomX, p.RoomY)
 
-	tiles := tmap.GetTilesForRegion(p.Room, trx, try, blx, bly)
+	var xoffset, yoffset int
+	if utils.MAP_W-2 > (brx - tlx) {
+		xoffset = (utils.MAP_W - 2 - (brx - tlx)) >> 1
+	}
+	if utils.MAP_H-2 > (bry - tly) {
+		yoffset = (utils.MAP_H - 2 - (bry - tly)) >> 1
+	}
+
+	tiles := tmap.GetTilesForRegion(p.Room, tlx, tly, brx, bry)
 
 	var currentPort [][]TileInfo = make([][]TileInfo, utils.MAP_H-2)
 	for row := 0; row < utils.MAP_H-2; row++ {
@@ -113,14 +119,8 @@ func GetMapWindow(p entities.Player) string {
 	for _, mtile := range tiles {
 		tilent := tile.CRUD.Retrieve(mtile.Tile).(entities.Tile)
 
-		yindex := mtile.Y
-		if try < 0 {
-			yindex -= try
-		}
-		xindex := mtile.X
-		if trx < 0 {
-			xindex -= trx
-		}
+		yindex := mtile.Y - tly + yoffset
+		xindex := mtile.X - tlx + xoffset
 
 		if mtile.Z > currentPort[yindex][xindex].IconZ {
 			// TODO add variant parsing here
@@ -136,14 +136,8 @@ func GetMapWindow(p entities.Player) string {
 		}
 	}
 
-	pyindex := p.RoomY
-	if try < 0 {
-		pyindex -= try
-	}
-	pxindex := p.RoomX
-	if trx < 0 {
-		pxindex -= trx
-	}
+	pyindex := p.RoomY - tly + yoffset
+	pxindex := p.RoomX - tlx + xoffset
 
 	currentPort[pyindex][pxindex].Icon = utils.PLAYER_ICON
 	currentPort[pyindex][pxindex].FG = utils.PLAYER_ICON_COLOR

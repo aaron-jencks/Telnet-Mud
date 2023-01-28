@@ -35,6 +35,9 @@ func createTileFunc(table db.TableDefinition, args ...interface{}) []interface{}
 
 	if len(args) >= 5 {
 		result = append(result, args[3:]...)
+		if len(args) == 5 {
+			result = append(result, false)
+		}
 	} else {
 		result = append(result, 0, 30)
 		if len(args) == 4 {

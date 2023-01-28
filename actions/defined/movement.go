@@ -22,7 +22,7 @@ func CreateMoveUpAction(conn net.Conn) definitions.Action {
 
 			if p.RoomY > 0 {
 				p.RoomY--
-				player.CRUD.Update(username, p)
+				player.CRUD.Update(p, p.Id)
 
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
@@ -45,7 +45,7 @@ func CreateMoveLeftAction(conn net.Conn) definitions.Action {
 
 			if p.RoomX > 0 {
 				p.RoomX--
-				player.CRUD.Update(username, p)
+				player.CRUD.Update(p, p.Id)
 
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
@@ -69,7 +69,7 @@ func CreateMoveRightAction(conn net.Conn) definitions.Action {
 
 			if p.RoomX < r.Width-1 {
 				p.RoomX++
-				player.CRUD.Update(username, p)
+				player.CRUD.Update(p, p.Id)
 
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
@@ -93,7 +93,7 @@ func CreateMoveDownAction(conn net.Conn) definitions.Action {
 
 			if p.RoomY < r.Height-1 {
 				p.RoomY++
-				player.CRUD.Update(username, p)
+				player.CRUD.Update(p, p.Id)
 
 				return utils.GetDefaultMapCommandResponse(conn)
 			}
