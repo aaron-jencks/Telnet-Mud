@@ -48,7 +48,7 @@ func CreatePickupItemAction(conn net.Conn, p entities.Player, targetItem string,
 		Handler: func() parsing.CommandResponse {
 			var result parsing.CommandResponse = utils.GetDefaultInfoCommandResponse(conn)
 
-			r := room.CRUD.Retrieve(p.Room).(entities.Room)
+			r := room.CRUD.Retrieve(p.Room).(room.ExpandedRoom)
 			roomLoot := loot.GetLootForRoom(r)
 
 			for _, loot := range roomLoot {
@@ -76,7 +76,7 @@ func CreateListLootAction(conn net.Conn) definitions.Action {
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
 			p := player.CRUD.Retrieve(username).(entities.Player)
-			r := room.CRUD.Retrieve(p.Room).(entities.Room)
+			r := room.CRUD.Retrieve(p.Room).(room.ExpandedRoom)
 			roomLoot := loot.GetLootForPosition(r, p.RoomX, p.RoomY)
 
 			var displayList []string
