@@ -16,13 +16,13 @@ import (
 
 var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	"room",
-	"Usage: room create \"name\" \"description\" height width",
+	"Usage: room create \"name\" \"description\" height width \"background tile\"",
 	"Usage: room retrieve id",
-	"Usage: room update id property:(name|description|height|width) \"newValue\"",
+	"Usage: room update id property:(name|description|height|width|background) \"newValue\"",
 	"Usage: room delete id",
-	5, 2, 4, 2,
+	6, 2, 4, 2,
 	func(c net.Conn, s []string) bool {
-		usageString := "Usage: room create \"name\" \"description\" height width"
+		usageString := "Usage: room create \"name\" \"description\" height width \"background tile\""
 
 		hParsable, _ := crud.ParseIntegerCheck(c, s[3], usageString, "height")
 		wParsable, _ := crud.ParseIntegerCheck(c, s[4], usageString, "width")
@@ -34,7 +34,7 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return parsable
 	},
 	func(c net.Conn, s []string) bool {
-		usageString := "Usage: room update id property:(name|description) \"newValue\""
+		usageString := "Usage: room update id property:(name|description|height|width|background) \"newValue\""
 		parsable, _ := crud.ParseIntegerCheck(c, s[1], usageString, "id")
 		if s[2] == "height" || s[2] == "width" {
 			dimParsable, _ := crud.ParseIntegerCheck(c, strings.StripQuotes(s[3]), usageString, "newValue")
@@ -50,7 +50,8 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		var height, width int
 		fmt.Sscanf(s[2], "%d", &height)
 		fmt.Sscanf(s[3], "%d", &width)
-		return []interface{}{strings.StripQuotes(s[0]), strings.StripQuotes(s[1]), height, width}
+		return []interface{}{strings.StripQuotes(s[0]), strings.StripQuotes(s[1]),
+			height, width, strings.StripQuotes(s[4])}
 	},
 	func(c net.Conn, s []string) interface{} {
 		var id int
@@ -93,9 +94,9 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		player.EnqueueAction(username, defined.CreateGlobalMapRepaint(c))
 	},
 	func(c net.Conn) {},
-	[]string{"name", "description", "height", "width"}, 2,
+	[]string{"name", "description", "height", "width", "background"}, 2,
 	func(i interface{}, s1 string, s2 []string) interface{} {
-		c := i.(entities.Room)
+		c := i.(room.ExpandedRoom)
 
 		var inv int
 
@@ -111,6 +112,8 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		case "width":
 			fmt.Sscanf(nv, "%d", &inv)
 			c.Width = inv
+		case "background":
+			c.BackgroundTile.Name = nv
 		}
 
 		return c
