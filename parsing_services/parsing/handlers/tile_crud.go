@@ -85,7 +85,7 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 			return "That tile didn't exist!"
 		}
 		r := i.(entities.Tile)
-		return fmt.Sprintf("Tile:\nName: \"%s\"\nType: \"%s\"\nIcon: \"\033[%dm\033%dm%s\033[0m\"",
+		return fmt.Sprintf("Tile:\nName: \"%s\"\nType: \"%s\"\nIcon: \"\033[%dm\033[%dm%s\033[0m\"",
 			r.Name, r.IconType, r.BG, r.FG, r.Icon)
 	},
 	func(i interface{}) string {
