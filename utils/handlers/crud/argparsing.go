@@ -43,7 +43,7 @@ func CrudChecks(conn net.Conn, crudName string, args []string) bool {
 	if RequiresLoggedIn(conn) ||
 		!CheckMinArgs(conn, args, 1,
 			fmt.Sprintf("Usage: %s (create|retrieve|update|delete) ...", crudName)) ||
-		CheckStringOptions(conn, args[0], []string{"create", "retrieve", "update", "delete"},
+		!CheckStringOptions(conn, args[0], []string{"create", "retrieve", "update", "delete"},
 			fmt.Sprintf("Usage: %s operation ...", crudName), "operation") {
 		return true
 	}
@@ -67,9 +67,9 @@ func CheckStringOptions(conn net.Conn, s string, options []string, usageString, 
 
 	if !mstrings.StringContains(options, s) {
 		player.EnqueueAction(username, defined.CreateInfoAction(conn, fmt.Sprintf("%s (%s is one of (%s)", usageString, paramName, strings.Join(options, "|"))))
-		return true
+		return false
 	}
-	return false
+	return true
 }
 
 func ParseBooleanCheck(conn net.Conn, s string, usageString string, paramName string) (bool, bool) {

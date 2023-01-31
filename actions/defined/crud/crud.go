@@ -112,7 +112,7 @@ func CreateUpdateAction(conn net.Conn, args []string,
 		}, func() interface{} {
 			ov := crudObj.Retrieve(argFmt(conn, args[1:]))
 			nv := valueUpdater(ov, args[propertyIndex], args[propertyIndex+1:])
-			return crudObj.Update(argFmt(conn, args[1:]), nv)
+			return crudObj.Update(nv, argFmt(conn, args[1:]))
 		}, func(i interface{}) {
 			player.EnqueueAction(username, defined.CreateInfoAction(conn, respFmt(i)))
 		}, miscUpdate, reqModes)

@@ -44,7 +44,7 @@ var TileCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	func(c net.Conn, s []string) bool {
 		if s[2] == "bg" || s[2] == "fg" {
 			nv := strings.StripQuotes(s[3])
-			parsable, _ := crud.ParseIntegerCheck(c, nv, "Usage: tile update \"name\" (name|type|icon|bg|fg) \"newValue\"", "newValue")
+			parsable, _ := crud.ParseIntegerCheck(c, nv, "Usage: tile update \"name\" (name|type|icon|bg|fg|solid) \"newValue\"", "newValue")
 			return parsable
 		}
 		return true
