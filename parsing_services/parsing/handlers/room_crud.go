@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"mud/actions/defined"
 	acrud "mud/actions/defined/crud"
-	"mud/entities"
 	"mud/parsing_services/parsing"
 	"mud/parsing_services/player"
 	"mud/services/room"
@@ -59,21 +58,22 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 		return id
 	},
 	func(i interface{}) string {
-		nv := i.(entities.Room)
+		nv := i.(room.ExpandedRoom)
 		return fmt.Sprintf("Room %d(%s) created!", nv.Id, nv.Name)
 	},
 	func(i interface{}) string {
 		if i != nil {
-			r := i.(entities.Room)
-			return fmt.Sprintf("Room %d:\nName: \"%s\"\nDescription: \"%s\"",
-				r.Id, r.Name, r.Description)
+			r := i.(room.ExpandedRoom)
+			return fmt.Sprintf("Room %d:\nName: \"%s\"\nDescription: \"%s\"\nSize: (%d, %d)\nBackground: \"\033[%dm\033[%dm%s\033[0m\"",
+				r.Id, r.Name, r.Description, r.Width, r.Height,
+				r.BackgroundTile.BG, r.BackgroundTile.FG, r.BackgroundTile.Icon)
 		} else {
 			return "That room did not exist!"
 		}
 	},
 	func(i interface{}) string {
 		if i != nil {
-			nv := i.(entities.Room)
+			nv := i.(room.ExpandedRoom)
 			return fmt.Sprintf("Room %d(%s) updated!", nv.Id, nv.Name)
 		} else {
 			return "That room did not exist!"
@@ -81,7 +81,7 @@ var RoomCrudHandler parsing.CommandHandler = acrud.CreateCrudParser(
 	},
 	func(i interface{}) string {
 		if i != nil {
-			nv := i.(entities.Room)
+			nv := i.(room.ExpandedRoom)
 			return fmt.Sprintf("Room %d(%s) deleted!", nv.Id, nv.Name)
 		} else {
 			return "That room did not exist!"

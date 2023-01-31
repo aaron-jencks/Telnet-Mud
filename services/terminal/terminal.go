@@ -7,7 +7,7 @@ import (
 )
 
 type Terminal struct {
-	Room   entities.Room
+	Room   room.ExpandedRoom
 	Buffer []string
 }
 
@@ -25,7 +25,7 @@ func LoadPlayer(conn net.Conn, p entities.Player) {
 	rint := room.CRUD.Retrieve(p.Room)
 
 	if rint != nil {
-		r := rint.(entities.Room)
+		r := rint.(room.ExpandedRoom)
 		TerminalMap[conn] = &Terminal{
 			Room: r,
 		}
@@ -37,11 +37,11 @@ func AppendGameMessage(conn net.Conn, m string) {
 	TerminalMap[conn].Buffer = append(TerminalMap[conn].Buffer, m)
 }
 
-func EnterRoom(conn net.Conn, r entities.Room) {
+func EnterRoom(conn net.Conn, r room.ExpandedRoom) {
 	AppendGameMessage(conn, r.Description)
 }
 
-func ChangeRoom(conn net.Conn, r entities.Room) {
+func ChangeRoom(conn net.Conn, r room.ExpandedRoom) {
 	TerminalMap[conn].Room = r
 	EnterRoom(conn, r)
 }

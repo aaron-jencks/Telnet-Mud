@@ -2,7 +2,6 @@ package defined
 
 import (
 	"mud/actions/definitions"
-	"mud/entities"
 	"mud/parsing_services/parsing"
 	"mud/parsing_services/parsing/utils"
 	"mud/parsing_services/player"
@@ -65,7 +64,7 @@ func CreateMoveRightAction(conn net.Conn) definitions.Action {
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
 			p := player.FetchPlayerByName(username)
-			r := room.CRUD.Retrieve(p.Room).(entities.Room)
+			r := room.CRUD.Retrieve(p.Room).(room.ExpandedRoom)
 
 			if p.RoomX < r.Width-1 {
 				p.RoomX++
@@ -89,7 +88,7 @@ func CreateMoveDownAction(conn net.Conn) definitions.Action {
 		Handler: func() parsing.CommandResponse {
 			username := player.GetConnUsername(conn)
 			p := player.FetchPlayerByName(username)
-			r := room.CRUD.Retrieve(p.Room).(entities.Room)
+			r := room.CRUD.Retrieve(p.Room).(room.ExpandedRoom)
 
 			if p.RoomY < r.Height-1 {
 				p.RoomY++
