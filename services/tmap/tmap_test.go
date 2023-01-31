@@ -327,3 +327,38 @@ func TestRegion(t *testing.T) {
 		assert.True(t, rt.Y <= by && rt.Y >= ty, "Y should be within the region")
 	}
 }
+
+func TestSurrounding(t *testing.T) {
+	rid := rand.Int()
+	x := rand.Intn(255) + 1
+	y := rand.Intn(255) + 1
+	tile := mtesting.GenerateRandomAsciiString(rand.Intn(64))
+
+	for tx := x - 1; tx <= x+1; tx++ {
+		for ty := y - 1; ty <= y+1; ty++ {
+			CRUD.Create([]interface{}{
+				rid,
+				tile,
+				tx,
+				ty,
+			}...)
+		}
+	}
+
+	regtiles := GetSurroundingTiles(rid, x, y)
+
+	assert.Equal(t, 4, len(regtiles), "Should return the correct number of tiles")
+	for _, rt := range regtiles {
+		assert.Equal(t, rid, rt.Room, "Tiles should be in the correct room")
+		if rt.X == x {
+			assert.True(t, rt.Y != y && (rt.Y == y-1 || rt.Y == y+1),
+				"The coords should be surrounding but not on")
+		} else if rt.Y == y {
+			assert.True(t, rt.X != x && (rt.X == x-1 || rt.X == x+1),
+				"The coords should be surrounding but not on")
+		} else {
+			assert.True(t, rt.X == x-1 || rt.X == x+1, "X should be surrounding")
+			assert.True(t, rt.Y == y-1 || rt.Y == y+1, "Y should be surrounding")
+		}
+	}
+}

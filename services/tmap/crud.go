@@ -176,3 +176,19 @@ func GetTilesForRegion(room, tlX, tlY, brX, brY int) []entities.Map {
 
 	return regionTiles
 }
+
+func GetSurroundingTiles(room, x, y int) []entities.Map {
+	table := CRUD.FetchTable()
+	roomTiles := table.QueryData(
+		fmt.Sprintf("Room=%d and X between %d and %d and Y between %d and %d and X != %d and Y != %d order by Z desc",
+			room, x-1, x+1, y-1, y+1, x, y),
+		mapScanner,
+	)
+
+	var regionTiles []entities.Map
+	for _, tile := range roomTiles {
+		regionTiles = append(regionTiles, tile.(entities.Map))
+	}
+
+	return regionTiles
+}
