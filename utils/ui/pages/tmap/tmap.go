@@ -116,23 +116,27 @@ func GetMapWindow(p entities.Player) string {
 		}
 	}
 
-	rent := room.CRUD.Retrieve(p.Room).(room.ExpandedRoom)
-	defHasBG := rent.BackgroundTile.BG > 0
+	rent := room.CRUD.Retrieve(p.Room)
+	if rent != nil {
+		rentst := rent.(room.ExpandedRoom)
 
-	for trow := 0; trow < bry-tly; trow++ {
-		yindex := trow - tly + yoffset
-		for tcol := 0; tcol < brx-tlx; tcol++ {
-			xindex := tcol - tlx + xoffset
-			currentPort[yindex][xindex] = TileInfo{
-				Icon:  rent.BackgroundTile.Icon,
-				FG:    rent.BackgroundTile.FG,
-				BG:    utils.DEFAULT_MAP_BACKGROUND_BG_COLOR,
-				IconZ: -1,
-				BGZ:   -1,
-			}
+		defHasBG := rentst.BackgroundTile.BG > 0
 
-			if defHasBG {
-				currentPort[yindex][xindex].BG = rent.BackgroundTile.BG
+		for trow := 0; trow < bry-tly; trow++ {
+			yindex := trow - tly + yoffset
+			for tcol := 0; tcol < brx-tlx; tcol++ {
+				xindex := tcol - tlx + xoffset
+				currentPort[yindex][xindex] = TileInfo{
+					Icon:  rentst.BackgroundTile.Icon,
+					FG:    rentst.BackgroundTile.FG,
+					BG:    utils.DEFAULT_MAP_BACKGROUND_BG_COLOR,
+					IconZ: -1,
+					BGZ:   -1,
+				}
+
+				if defHasBG {
+					currentPort[yindex][xindex].BG = rentst.BackgroundTile.BG
+				}
 			}
 		}
 	}
