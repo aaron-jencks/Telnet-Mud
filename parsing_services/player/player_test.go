@@ -126,7 +126,7 @@ func TestPartialCreate(t *testing.T) {
 			attNames[pi+2])
 	}
 
-	assert.Equal(t, 0, ps.Room, "Player should be initialized to initial room 0")
+	assert.Equal(t, 1, ps.Room, "Player should be initialized to initial room 1")
 	assert.Equal(t, 0, ps.RoomX, "Player should be initialized to coord 0")
 	assert.Equal(t, 0, ps.RoomY, "Player should be initialized to coord 0")
 	assert.Equal(t, utils.DEFAULT_PLAYER_ACTION_LIMIT, ps.ActionCapacity,

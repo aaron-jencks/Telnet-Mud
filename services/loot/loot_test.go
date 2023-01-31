@@ -5,6 +5,7 @@ import (
 	"mud/entities"
 	"mud/services/item"
 	"mud/services/room"
+	"mud/services/tile"
 	"mud/utils"
 	"mud/utils/io/db"
 	"os"
@@ -19,6 +20,10 @@ import (
 
 func resetTable() {
 	db.DeleteTable("loot")
+	db.DeleteTable("item")
+	db.DeleteTable("room")
+	db.DeleteTable("tile")
+	entities.SetupTileTable()
 	entities.SetupRoomTable()
 	entities.SetupItemTable()
 	entities.SetupLootTable()
@@ -87,21 +92,39 @@ func createRandomTestLoot() entities.Loot {
 	return nid.(entities.Loot)
 }
 
-func createRandomTestRoom() entities.Room {
+func createRandomTestTile() entities.Tile {
+	r1 := rand.Intn(10) + 1
+	pname := mtesting.GenerateRandomAlnumString(r1)
+	picontype := mtesting.GenerateRandomAsciiString(rand.Intn(64) + 1)
+	picon := mtesting.GenerateRandomAsciiString(rand.Intn(64) + 1)
+
+	args := []interface{}{
+		pname,
+		picontype,
+		picon,
+	}
+
+	tile.CRUD.Create(args...)
+	return tile.CRUD.Retrieve(pname).(entities.Tile)
+}
+
+func createRandomTestRoom() room.ExpandedRoom {
 	r1 := rand.Intn(10) + 1
 	pname := mtesting.GenerateRandomAlnumString(r1)
 	pdescription := mtesting.GenerateRandomAsciiString(rand.Intn(64) + 1)
 	width := rand.Int()
 	height := rand.Int()
+	tt := createRandomTestTile()
 
 	args := []interface{}{
 		pname,
 		pdescription,
 		height,
 		width,
+		tt.Name,
 	}
 
-	return room.CRUD.Create(args...).(entities.Room)
+	return room.CRUD.Create(args...).(room.ExpandedRoom)
 }
 
 func createRandomTestItem() entities.Item {
@@ -181,7 +204,7 @@ func TestGetLootForRoom(t *testing.T) {
 
 	CRUD.Create(args...)
 
-	rloot := GetLootForRoom(room.CRUD.Retrieve(rid).(entities.Room))
+	rloot := GetLootForRoom(room.CRUD.Retrieve(rid).(room.ExpandedRoom))
 
 	assert.Equal(t, 10, len(rloot), "Should have the right number of loot entities")
 	for _, rl := range rloot {
@@ -232,7 +255,7 @@ func TestLootForPosition(t *testing.T) {
 
 	CRUD.Create(args...)
 
-	rloot := GetLootForPosition(room.CRUD.Retrieve(rid).(entities.Room), x, y)
+	rloot := GetLootForPosition(room.CRUD.Retrieve(rid).(room.ExpandedRoom), x, y)
 
 	assert.Equal(t, 10, len(rloot), "Should have the right number of loot entities")
 	for _, rl := range rloot {

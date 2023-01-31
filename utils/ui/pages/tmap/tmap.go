@@ -15,7 +15,7 @@ import (
 func GetMapPortCoords(roomId, roomX, roomY int) (int, int, int, int) {
 	rint := room.CRUD.Retrieve(roomId)
 	if rint != nil {
-		r := rint.(entities.Room)
+		r := rint.(room.ExpandedRoom)
 
 		// The view distance of the player
 		portRangeX := (utils.MAP_W - 2) >> 1

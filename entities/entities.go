@@ -82,11 +82,12 @@ type Inventory struct {
 }
 
 type Room struct {
-	Id          int
-	Name        string
-	Description string
-	Height      int
-	Width       int
+	Id             int
+	Name           string
+	Description    string
+	Height         int
+	Width          int
+	BackgroundTile string
 }
 
 func SetupPlayerTable() {
@@ -164,12 +165,14 @@ func SetupRoomTable() {
 		"Description",
 		"Height",
 		"Width",
+		"BackgroundTile",
 	}, []string{
 		"Id integer primary key autoincrement",
 		"Name text not null",
 		"Description text not null",
 		"Height integer not null",
 		"Width integer not null",
+		"BackgroundTile text not null references tiles (Name) on delete cascade on update cascade",
 	}, true)
 }
 

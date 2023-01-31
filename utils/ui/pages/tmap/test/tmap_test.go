@@ -33,7 +33,10 @@ func resetTables() {
 	db.DeleteTable("players")
 	db.DeleteTable("rooms")
 	db.DeleteTable("map")
-	entities.SetupTables()
+	entities.SetupTileTable()
+	entities.SetupRoomTable()
+	entities.SetupPlayerTable()
+	entities.SetupMapTable()
 	for _, tt := range testTiles {
 		tile.CRUD.Create(tt.Name, tt.IconType, tt.Icon, tt.BG, tt.FG)
 	}
@@ -207,7 +210,8 @@ func TestGetMapWindow(t *testing.T) {
 			mtesting.GenerateRandomAlnumString(10),
 			tc.RoomH,
 			tc.RoomW,
-		).(entities.Room)
+			testTiles[0].Name,
+		).(room.ExpandedRoom)
 
 		// Populates the room's tiles
 		if tc.FillBackground {

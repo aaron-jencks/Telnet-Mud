@@ -80,7 +80,7 @@ func TestMain(m *testing.M) {
 func getTestSelectorFormatter(t *testing.T) SelectorFormatter {
 	return func(args []interface{}) string {
 		assert.Equal(t, 1, len(args), "selector formatter should be called with a single argument")
-		return fmt.Sprintf("RID=%d", args[0].(int64))
+		return fmt.Sprintf("RID=%d", args[0].(int))
 	}
 }
 
@@ -158,9 +158,9 @@ func getTestCrud(t *testing.T) Crud {
 func TestCreateRetrieve(t *testing.T) {
 	resetTable()
 	crud := getTestCrud(t)
-	nid := crud.Create("TestValue", "Something, else", 1234)
-	assert.Equal(t, int64(1), nid, "Should create the correct id")
-	nv := crud.Retrieve(nid)
+	nid := crud.Create("TestValue", "Something, else", 1234).(testStruct)
+	assert.Equal(t, 1, nid.RId, "Should create the correct id")
+	nv := crud.Retrieve(nid.RId)
 	assert.Equal(t, testStruct{
 		1,
 		"TestValue",
@@ -172,16 +172,16 @@ func TestCreateRetrieve(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	TestCreateRetrieve(t)
 	crud := getTestCrud(t)
-	ov := crud.Retrieve(int64(1)).(testStruct)
+	ov := crud.Retrieve(1).(testStruct)
 	ov.Column2 = "Hello Aaron"
-	nv := crud.Update(ov, int64(1))
+	nv := crud.Update(ov, 1)
 	assert.Equal(t, ov, nv, "Updated value should be returned by update")
 }
 
 func TestDelete(t *testing.T) {
 	TestCreateRetrieve(t)
 	crud := getTestCrud(t)
-	crud.Delete(int64(1))
-	missingValue := crud.Retrieve(int64(1))
+	crud.Delete(1)
+	missingValue := crud.Retrieve(1)
 	assert.Nil(t, missingValue, "Should delete data from the table")
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mud/entities"
 	"mud/services/item"
+	"mud/services/room"
 	"mud/utils/crud"
 	"mud/utils/io/db"
 )
@@ -99,7 +100,7 @@ var CRUD crud.Crud = crud.CreateCrud("loot", lootSelector, lootToArr, lootScanne
 
 type ExpandedLoot struct {
 	Id       int
-	Room     entities.Room
+	Room     room.ExpandedRoom
 	Item     entities.Item
 	Quantity int
 	X        int
@@ -107,7 +108,7 @@ type ExpandedLoot struct {
 	Z        int
 }
 
-func GetLootForRoom(r entities.Room) []ExpandedLoot {
+func GetLootForRoom(r room.ExpandedRoom) []ExpandedLoot {
 	table := CRUD.FetchTable()
 	rows := table.QueryData(fmt.Sprintf("Room=%d", r.Id), lootScanner)
 
@@ -128,7 +129,7 @@ func GetLootForRoom(r entities.Room) []ExpandedLoot {
 	return loots
 }
 
-func GetLootForPosition(r entities.Room, x, y int) []ExpandedLoot {
+func GetLootForPosition(r room.ExpandedRoom, x, y int) []ExpandedLoot {
 	table := CRUD.FetchTable()
 	rows := table.QueryData(fmt.Sprintf("Room=%d and X=%d and Y=%d order by Z desc", r.Id, x, y), lootScanner)
 

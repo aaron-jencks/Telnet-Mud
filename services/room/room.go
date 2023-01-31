@@ -4,9 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"mud/entities"
+	"mud/services/tile"
 	"mud/utils/crud"
 	"mud/utils/io/db"
 )
+
+type ExpandedRoom struct {
+	Id             int
+	Name           string
+	Description    string
+	Height         int
+	Width          int
+	BackgroundTile entities.Tile
+}
 
 func roomToArr(rs interface{}) []interface{} {
 	re := rs.(entities.Room)
@@ -16,21 +26,23 @@ func roomToArr(rs interface{}) []interface{} {
 		re.Description,
 		re.Height,
 		re.Width,
+		re.BackgroundTile,
 	}
 }
 
 func roomFromArr(arr []interface{}) interface{} {
 	return entities.Room{
-		Id:          arr[1].(int),
-		Name:        arr[2].(string),
-		Description: arr[3].(string),
-		Height:      arr[4].(int),
-		Width:       arr[5].(int),
+		Id:             arr[1].(int),
+		Name:           arr[2].(string),
+		Description:    arr[3].(string),
+		Height:         arr[4].(int),
+		Width:          arr[5].(int),
+		BackgroundTile: arr[6].(string),
 	}
 }
 
 func createRoomFunc(table db.TableDefinition, args ...interface{}) []interface{} {
-	return []interface{}{args[0], args[1], args[2], args[3]}
+	return args
 }
 
 func roomSelector(args []interface{}) string {
@@ -38,17 +50,20 @@ func roomSelector(args []interface{}) string {
 }
 
 func roomScanner(row *sql.Rows) (interface{}, error) {
-	result := entities.Room{}
-	err := row.Scan(&result.Id, &result.Name, &result.Description, &result.Height, &result.Width)
+	result := ExpandedRoom{}
+	var backgroundTile string
+	err := row.Scan(&result.Id, &result.Name, &result.Description, &result.Height, &result.Width, &backgroundTile)
 	if err != nil {
 		return nil, err
 	}
+	tile := tile.CRUD.Retrieve(backgroundTile)
+	result.BackgroundTile = tile.(entities.Tile)
 	return result, nil
 }
 
 func roomUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
-	ois := oldValue.(entities.Room)
-	nis := newValue.(entities.Room)
+	ois := oldValue.(ExpandedRoom)
+	nis := newValue.(ExpandedRoom)
 
 	var result []crud.RowModStruct
 
@@ -74,6 +89,12 @@ func roomUpdateFunc(oldValue, newValue interface{}) []crud.RowModStruct {
 		result = append(result, crud.RowModStruct{
 			Column:   "Width",
 			NewValue: nis.Width,
+		})
+	}
+	if ois.BackgroundTile.Name != nis.BackgroundTile.Name {
+		result = append(result, crud.RowModStruct{
+			Column:   "BackgroundTile",
+			NewValue: fmt.Sprintf("\"%s\"", nis.BackgroundTile.Name),
 		})
 	}
 
